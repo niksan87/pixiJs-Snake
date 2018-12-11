@@ -1,0 +1,1 @@
+11.12.2018 - Set up project, initial structure, gulp-webpack-typescript-pipeline -> 2h 
