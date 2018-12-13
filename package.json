@@ -22,7 +22,11 @@
   },
   "homepage": "https://github.com/niksan87/pixiJs-Snake#readme",
   "devDependencies": {
+    "@types/pixi.js": "^4.8.4",
     "gulp": "^3.9.1",
     "gulp-webpack-typescript-pipeline": "^12.0.0"
+  },
+  "dependencies": {
+    "pixi.js": "^4.7.3"
   }
 }
