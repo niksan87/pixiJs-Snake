@@ -1,2 +1,3 @@
 11.12.2018 - Set up project, initial structure, gulp-webpack-typescript-pipeline -> 2h
 13.12.2018 - Added new gulp task, created BaseModule and GameModule to test MVC binding -> 3h
+15.12.2018 - Started building modules, events, managers, etc -> 10h
