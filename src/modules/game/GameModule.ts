@@ -9,9 +9,9 @@ export class GameModule extends BaseModule {
 
     public addBindings(): void {
         this
-        .asController(GameController)
         .asModel(GameModel)
         .asView(GameView)
+        .asController(GameController)
         .bind();
     }
 

@@ -2,6 +2,7 @@ import {
     BaseModel
 } from '../../imports';
 
-export class GameModel extends BaseModel {
+
+export class BoardModel extends BaseModel {
 
 }

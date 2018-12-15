@@ -3,13 +3,15 @@ import {
     BaseView
 } from '../../imports';
 
-export class BaseController {
+export abstract class BaseController {
     private _model: BaseModel;
     private _view: BaseView;
 
     constructor() {
-
+        this.addListeners();
     }
+
+    protected abstract addListeners(): void;
 
     get model(): BaseModel {
         return this._model;

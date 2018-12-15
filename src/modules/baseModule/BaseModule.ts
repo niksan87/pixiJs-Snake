@@ -6,9 +6,9 @@ import {
 } from '../imports';
 
 export abstract class BaseModule {
-    protected model: BaseModel;
-    protected view: BaseView;
-    protected controller: BaseController;
+    private _model: BaseModel;
+    private _view: BaseView;
+    private _controller: BaseController;
 
     constructor() {
         this.addBindings();
@@ -17,38 +17,50 @@ export abstract class BaseModule {
     public abstract addBindings(): void 
 
     public asModel(Model: IConstructable<BaseModel>): BaseModule {
-        if (!this.model) {
-            this.model = new Model();
+        if (!this._model) {
+            this._model = new Model();
         }
         return this;
     }
 
     public asView(View: IConstructable<BaseView>): BaseModule {
-        if (!this.view) {
-            this.view = new View();
+        if (!this._view) {
+            this._view = new View();
         }
         return this;
     }
 
     public asController(Controller: IConstructable<BaseController>): BaseModule {
-        if (!this.controller) {
-            this.controller = new Controller();
+        if (!this._controller) {
+            this._controller = new Controller();
         }
         return this;
     }
 
     public bind(): void {
-        if (this.model && this.view && !this.view.model) {
-            this.view.model = this.model;
+        if (this._model && this._view && !this._view.model) {
+            this._view.model = this._model;
         }
 
-        if (this.model && this.controller && !this.controller.model) {
-            this.controller.model = this.model;
+        if (this._model && this._controller && !this._controller.model) {
+            this._controller.model = this._model;
         }
 
-        if (this.view && this.controller && !this.controller.view) {
-            this.controller.view = this.view;
+        if (this._view && this._controller && !this._controller.view) {
+            this._controller.view = this._view;
         }
+    }
+
+    get model(): BaseModel {
+        return this._model;
+    }
+
+    get view(): BaseView {
+        return this._view;
+    }
+
+    get controller(): BaseController {
+        return this._controller;
     }
 
 }

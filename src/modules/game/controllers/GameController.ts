@@ -1,10 +1,22 @@
 import {
-    BaseController
+    BaseController,
+    EventsManager,
+    GameConstants,
+    GameView,
+    GameModel,
+    BoardConstants,
+    SnakeConstants
 } from '../../imports';
 
 export class GameController extends BaseController {
+    public view: GameView;
+    public model: GameModel;
 
-    constructor() {
-        super();
+    protected addListeners(): void {
+        EventsManager.addListener(GameConstants.EVENTS.CREATE_GAME, () => {
+            this.view.addTo(this.view.app.stage);
+            EventsManager.dispatch(BoardConstants.EVENTS.CREATE_BOARD);
+            EventsManager.dispatch(SnakeConstants.EVENTS.CREATE_SNAKE);
+        });   
     }
 }
