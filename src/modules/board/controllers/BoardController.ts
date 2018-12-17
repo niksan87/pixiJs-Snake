@@ -4,7 +4,9 @@ import {
     BoardModel,
     BoardConstants,
     EventsManager,
-    GameModule
+    GameModule,
+    GridConstants,
+    Utils
 } from '../../imports';
 
 export class BoardController extends BaseController {
@@ -13,7 +15,8 @@ export class BoardController extends BaseController {
 
     protected addListeners(): void {
         EventsManager.addListener(BoardConstants.EVENTS.CREATE_BOARD, () => {
-            this.view.addTo(this.view.app.modules[GameModule.name].view);
+            this.view.addTo(Utils.getModule(GameModule).view);
+            EventsManager.dispatch(GridConstants.EVENTS.CREATE_GRID);
         });
     }
 }

@@ -52764,6 +52764,8 @@ class PositionManager {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Utils", function() { return Utils; });
+/* harmony import */ var _modules_imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../modules/imports */ "./src/modules/imports.ts");
+
 class Utils {
     static convertToAssociativeArray(array) {
         let output = {};
@@ -52771,6 +52773,32 @@ class Utils {
         return output;
     }
     ;
+    static getModule(Module) {
+        return window[_modules_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].AppName].modules[Module.name];
+    }
+    static getApplication() {
+        return window[_modules_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].AppName];
+    }
+    static getObjectLenght(obj) {
+        let size = 0;
+        let key;
+        for (key in obj)
+            if (obj.hasOwnProperty(key))
+                size++;
+        return size;
+    }
+    static createTwoDImensionalArray(xLenght, yLenght, DefaultElement) {
+        let arrX;
+        const output = new Array();
+        for (var y = 0; y < yLenght; y++) {
+            arrX = new Array();
+            for (var x = 0; x < xLenght; x++) {
+                arrX.push(new DefaultElement());
+            }
+            output.push(arrX);
+        }
+        return output;
+    }
 }
 
 
@@ -52805,7 +52833,8 @@ class GameApplication extends PIXI.Application {
             _imports__WEBPACK_IMPORTED_MODULE_0__["LoaderModule"],
             _imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"],
             _imports__WEBPACK_IMPORTED_MODULE_0__["BoardModule"],
-            _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeModule"]
+            _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeModule"],
+            _imports__WEBPACK_IMPORTED_MODULE_0__["GridModule"]
         ];
         this.modules = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].convertToAssociativeArray(modules);
     }
@@ -52908,9 +52937,12 @@ class BaseAction {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BaseController", function() { return BaseController; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
 class BaseController {
     constructor() {
         this.addListeners();
+        this.app = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getApplication();
     }
     get model() {
         return this._model;
@@ -52939,8 +52971,11 @@ class BaseController {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BaseModel", function() { return BaseModel; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
 class BaseModel {
     constructor() {
+        this.app = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getApplication();
     }
 }
 
@@ -52963,7 +52998,7 @@ class BaseView extends PIXI.Container {
     constructor(model) {
         super();
         this.model = model;
-        this.app = window[_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].AppName];
+        this.app = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getApplication();
     }
     addTo(parent) {
         parent.addChild(this);
@@ -53020,6 +53055,12 @@ __webpack_require__.r(__webpack_exports__);
 const BoardConstants = {
     EVENTS: {
         CREATE_BOARD: 'CREATE_BOARD',
+    },
+    SETTINGS: {
+        BORDER: {
+            COLOR: 0XFFF2CC,
+            SIZE: 20
+        }
     }
 };
 
@@ -53041,7 +53082,8 @@ __webpack_require__.r(__webpack_exports__);
 class BoardController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
     addListeners() {
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardConstants"].EVENTS.CREATE_BOARD, () => {
-            this.view.addTo(this.view.app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"].name].view);
+            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getModule(_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"]).view);
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GridConstants"].EVENTS.CREATE_GRID);
         });
     }
 }
@@ -53080,9 +53122,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
 
 class BoardView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
-    constructor() {
-        super();
-        // Todo
+    addTo(parent) {
+        super.addTo(parent);
+        //this.addBorder();
+        this.addBackground();
+    }
+    addBackground() {
+        const texture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.bg);
+        const tilingSprite = new PIXI.extras.TilingSprite(texture, this.app.screen.width, this.app.screen.height);
+        this.addChild(tilingSprite);
+    }
+    addBorder() {
+        const gt = new PIXI.Graphics();
+        gt.beginFill(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardConstants"].SETTINGS.BORDER.COLOR);
+        gt.drawRect(0, 0, this.app.screen.width, this.app.screen.height);
+        gt.endFill();
+        this.addChild(gt);
     }
 }
 
@@ -53109,16 +53164,13 @@ const Constants = {
         Duration: 1
     },
     Assets: {
-        Images: [
-            'img/1.jpg',
-            'img/2.jpg',
-            'img/3.jpg',
-            'img/4.jpg',
-            'img/5.jpg',
-            'img/6.jpg',
-            'img/7.jpg',
-            'img/8.jpg'
-        ]
+        Images: {
+            Url: 'img/',
+            Names: {
+                'bg': 'bg.jpg',
+                'grid': 'grid.png'
+            }
+        }
     },
     Texts: {
         Loading: "Loading",
@@ -53212,7 +53264,7 @@ __webpack_require__.r(__webpack_exports__);
 class GameController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
     addListeners() {
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.CREATE_GAME, () => {
-            this.view.addTo(this.view.app.stage);
+            this.view.addTo(this.app.stage);
             _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardConstants"].EVENTS.CREATE_BOARD);
             _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.CREATE_SNAKE);
         });
@@ -53253,13 +53305,147 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
 
 class GameView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
-    constructor() {
-        super();
-        // this.board = this.app.modules[BoardModule.name].view as BoardView;
-        // this.snake = this.app.modules[SnakeModule.name].view as SnakeView;
-        // this.board.addTo(this);
-        // this.snake.addTo(this);
+    addTo(parent) {
+        super.addTo(parent);
+        this.app.stage.swapChildren(this, _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getModule(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderModule"]).view);
     }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/grid/GridModule.ts":
+/*!****************************************!*\
+  !*** ./src/modules/grid/GridModule.ts ***!
+  \****************************************/
+/*! exports provided: GridModule */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridModule", function() { return GridModule; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
+
+class GridModule extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModule"] {
+    addBindings() {
+        this
+            .asModel(_imports__WEBPACK_IMPORTED_MODULE_0__["GridModel"])
+            .asView(_imports__WEBPACK_IMPORTED_MODULE_0__["GridView"])
+            .asController(_imports__WEBPACK_IMPORTED_MODULE_0__["GridController"])
+            .bind();
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/grid/constants/GridConstants.ts":
+/*!*****************************************************!*\
+  !*** ./src/modules/grid/constants/GridConstants.ts ***!
+  \*****************************************************/
+/*! exports provided: GridConstants */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridConstants", function() { return GridConstants; });
+const GridConstants = {
+    EVENTS: {
+        CREATE_GRID: 'CREATE_GRID'
+    }
+};
+
+
+/***/ }),
+
+/***/ "./src/modules/grid/controllers/GridController.ts":
+/*!********************************************************!*\
+  !*** ./src/modules/grid/controllers/GridController.ts ***!
+  \********************************************************/
+/*! exports provided: GridController */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridController", function() { return GridController; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class GridController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
+    addListeners() {
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GridConstants"].EVENTS.CREATE_GRID, () => {
+            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getModule(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardModule"]).view);
+        });
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/grid/models/GridModel.ts":
+/*!**********************************************!*\
+  !*** ./src/modules/grid/models/GridModel.ts ***!
+  \**********************************************/
+/*! exports provided: GridModel */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridModel", function() { return GridModel; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class GridModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/grid/views/GridView.ts":
+/*!********************************************!*\
+  !*** ./src/modules/grid/views/GridView.ts ***!
+  \********************************************/
+/*! exports provided: GridView, GridElement */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridView", function() { return GridView; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridElement", function() { return GridElement; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class GridView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
+    addTo(parent) {
+        super.addTo(parent);
+        this.createTilingSpriteBackground();
+        this.createGridMatrix();
+        console.warn(this.grid);
+    }
+    createTilingSpriteBackground() {
+        const texture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.grid);
+        this.boxSize = texture.width / 2;
+        const tilingSprite = new PIXI.extras.TilingSprite(texture, this.app.screen.width, this.app.screen.height);
+        this.addChild(tilingSprite);
+    }
+    createGridMatrix() {
+        const xNumOfBoxes = this.app.screen.width / this.boxSize;
+        const yNumOfBoxes = this.app.screen.height / this.boxSize;
+        let xPosition = 0;
+        let yPosition = 0;
+        this.grid = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].createTwoDImensionalArray(xNumOfBoxes, yNumOfBoxes, GridElement);
+        this.grid.forEach((line, lineIndex) => {
+            xPosition = 0;
+            line.forEach((element, rowIndex) => {
+                element.id = `grid_x${rowIndex}_y${lineIndex}`;
+                element.x = xPosition;
+                element.y = yPosition;
+                element.width = this.boxSize;
+                element.height = this.boxSize;
+                xPosition += this.boxSize;
+            });
+            yPosition += this.boxSize;
+        });
+    }
+}
+class GridElement {
 }
 
 
@@ -53269,7 +53455,7 @@ class GameView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
 /*!********************************!*\
   !*** ./src/modules/imports.ts ***!
   \********************************/
-/*! exports provided: GameApplication, Constants, Utils, ActionsManager, AnimationsManager, EventsManager, PositionManager, BaseModule, BaseModel, BaseView, BaseController, BaseAction, LoaderModule, LoaderModel, LoaderView, LoaderController, LoadAssetsAction, LoaderConstants, GameModule, GameModel, GameView, GameController, CreateGameAction, GameConstants, BoardModule, BoardModel, BoardView, BoardController, BoardConstants, SnakeModule, SnakeModel, SnakeView, SnakeController, SnakeConstants, RewardModule, RewardModel, RewardView, RewardController */
+/*! exports provided: GameApplication, Constants, Utils, ActionsManager, AnimationsManager, EventsManager, PositionManager, BaseModule, BaseModel, BaseView, BaseController, BaseAction, LoaderModule, LoaderModel, LoaderView, LoaderController, LoadAssetsAction, LoaderConstants, GameModule, GameModel, GameView, GameController, CreateGameAction, GameConstants, BoardModule, BoardModel, BoardView, BoardController, BoardConstants, GridModule, GridModel, GridView, GridElement, GridController, GridConstants, SnakeModule, SnakeModel, SnakeView, SnakeController, SnakeConstants, RewardModule, RewardModel, RewardView, RewardController */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -53363,32 +53549,49 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _board_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! ./board/constants/BoardConstants */ "./src/modules/board/constants/BoardConstants.ts");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardConstants", function() { return _board_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_29__["BoardConstants"]; });
 
-/* harmony import */ var _snake_SnakeModule__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! ./snake/SnakeModule */ "./src/modules/snake/SnakeModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModule", function() { return _snake_SnakeModule__WEBPACK_IMPORTED_MODULE_30__["SnakeModule"]; });
+/* harmony import */ var _grid_GridModule__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! ./grid/GridModule */ "./src/modules/grid/GridModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridModule", function() { return _grid_GridModule__WEBPACK_IMPORTED_MODULE_30__["GridModule"]; });
 
-/* harmony import */ var _snake_models_SnakeModel__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! ./snake/models/SnakeModel */ "./src/modules/snake/models/SnakeModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModel", function() { return _snake_models_SnakeModel__WEBPACK_IMPORTED_MODULE_31__["SnakeModel"]; });
+/* harmony import */ var _grid_models_GridModel__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! ./grid/models/GridModel */ "./src/modules/grid/models/GridModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridModel", function() { return _grid_models_GridModel__WEBPACK_IMPORTED_MODULE_31__["GridModel"]; });
 
-/* harmony import */ var _snake_views_SnakeView__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! ./snake/views/SnakeView */ "./src/modules/snake/views/SnakeView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeView", function() { return _snake_views_SnakeView__WEBPACK_IMPORTED_MODULE_32__["SnakeView"]; });
+/* harmony import */ var _grid_views_GridView__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! ./grid/views/GridView */ "./src/modules/grid/views/GridView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridView", function() { return _grid_views_GridView__WEBPACK_IMPORTED_MODULE_32__["GridView"]; });
 
-/* harmony import */ var _snake_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! ./snake/controllers/SnakeController */ "./src/modules/snake/controllers/SnakeController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeController", function() { return _snake_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_33__["SnakeController"]; });
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridElement", function() { return _grid_views_GridView__WEBPACK_IMPORTED_MODULE_32__["GridElement"]; });
 
-/* harmony import */ var _snake_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! ./snake/constants/SnakeConstants */ "./src/modules/snake/constants/SnakeConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeConstants", function() { return _snake_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_34__["SnakeConstants"]; });
+/* harmony import */ var _grid_controllers_GridController__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! ./grid/controllers/GridController */ "./src/modules/grid/controllers/GridController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridController", function() { return _grid_controllers_GridController__WEBPACK_IMPORTED_MODULE_33__["GridController"]; });
 
-/* harmony import */ var _reward_RewardModule__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! ./reward/RewardModule */ "./src/modules/reward/RewardModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModule", function() { return _reward_RewardModule__WEBPACK_IMPORTED_MODULE_35__["RewardModule"]; });
+/* harmony import */ var _grid_constants_GridConstants__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! ./grid/constants/GridConstants */ "./src/modules/grid/constants/GridConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridConstants", function() { return _grid_constants_GridConstants__WEBPACK_IMPORTED_MODULE_34__["GridConstants"]; });
 
-/* harmony import */ var _reward_models_RewardModel__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! ./reward/models/RewardModel */ "./src/modules/reward/models/RewardModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModel", function() { return _reward_models_RewardModel__WEBPACK_IMPORTED_MODULE_36__["RewardModel"]; });
+/* harmony import */ var _snake_SnakeModule__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! ./snake/SnakeModule */ "./src/modules/snake/SnakeModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModule", function() { return _snake_SnakeModule__WEBPACK_IMPORTED_MODULE_35__["SnakeModule"]; });
 
-/* harmony import */ var _reward_views_RewardView__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! ./reward/views/RewardView */ "./src/modules/reward/views/RewardView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardView", function() { return _reward_views_RewardView__WEBPACK_IMPORTED_MODULE_37__["RewardView"]; });
+/* harmony import */ var _snake_models_SnakeModel__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! ./snake/models/SnakeModel */ "./src/modules/snake/models/SnakeModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModel", function() { return _snake_models_SnakeModel__WEBPACK_IMPORTED_MODULE_36__["SnakeModel"]; });
 
-/* harmony import */ var _reward_controllers_RewardController__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! ./reward/controllers/RewardController */ "./src/modules/reward/controllers/RewardController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardController", function() { return _reward_controllers_RewardController__WEBPACK_IMPORTED_MODULE_38__["RewardController"]; });
+/* harmony import */ var _snake_views_SnakeView__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! ./snake/views/SnakeView */ "./src/modules/snake/views/SnakeView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeView", function() { return _snake_views_SnakeView__WEBPACK_IMPORTED_MODULE_37__["SnakeView"]; });
+
+/* harmony import */ var _snake_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! ./snake/controllers/SnakeController */ "./src/modules/snake/controllers/SnakeController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeController", function() { return _snake_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_38__["SnakeController"]; });
+
+/* harmony import */ var _snake_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! ./snake/constants/SnakeConstants */ "./src/modules/snake/constants/SnakeConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeConstants", function() { return _snake_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_39__["SnakeConstants"]; });
+
+/* harmony import */ var _reward_RewardModule__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! ./reward/RewardModule */ "./src/modules/reward/RewardModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModule", function() { return _reward_RewardModule__WEBPACK_IMPORTED_MODULE_40__["RewardModule"]; });
+
+/* harmony import */ var _reward_models_RewardModel__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! ./reward/models/RewardModel */ "./src/modules/reward/models/RewardModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModel", function() { return _reward_models_RewardModel__WEBPACK_IMPORTED_MODULE_41__["RewardModel"]; });
+
+/* harmony import */ var _reward_views_RewardView__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(/*! ./reward/views/RewardView */ "./src/modules/reward/views/RewardView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardView", function() { return _reward_views_RewardView__WEBPACK_IMPORTED_MODULE_42__["RewardView"]; });
+
+/* harmony import */ var _reward_controllers_RewardController__WEBPACK_IMPORTED_MODULE_43__ = __webpack_require__(/*! ./reward/controllers/RewardController */ "./src/modules/reward/controllers/RewardController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardController", function() { return _reward_controllers_RewardController__WEBPACK_IMPORTED_MODULE_43__["RewardController"]; });
 
 // Attach PIXI to window for accesibility
 
@@ -53422,6 +53625,12 @@ window.PIXI = pixi_js__WEBPACK_IMPORTED_MODULE_0__;
 
 
 // Board
+
+
+
+
+
+// Grid element
 
 
 
@@ -53527,12 +53736,13 @@ __webpack_require__.r(__webpack_exports__);
 class LoaderController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
     addListeners() {
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADING_STARTED, () => {
-            this.view.addTo(this.view.app.stage);
+            this.view.addTo(this.app.stage);
             this.model.loadAssets();
         });
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADING_COMPLETED, () => {
             setTimeout(() => {
-                this.view.loadComplete().then(() => _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.RESOLVE_LOADING_ACTION));
+                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.RESOLVE_LOADING_ACTION);
+                this.view.loadOutro().then(() => console.log('ready!'));
             }, _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Animations.Duration * 1000);
         });
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADING_IN_PROGRESS, (event) => {
@@ -53562,10 +53772,12 @@ class LoaderModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
     }
     loadAssets() {
         const loader = new PIXI.loaders.Loader();
-        const numOfAssets = _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.length;
+        const numOfAssets = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getObjectLenght(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names);
         const progressStep = 1 / numOfAssets;
         let progress = 0;
-        loader.add(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images);
+        for (var key in _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names) {
+            loader.add(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names[key]);
+        }
         loader.on('progress', () => {
             progress += progressStep;
             _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADING_IN_PROGRESS, { 'detail': progress });
@@ -53591,21 +53803,35 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
 
 class LoaderView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
-    constructor() {
-        super();
+    addTo(parent) {
+        super.addTo(parent);
         this.createLoaderBar();
         this.positionLoaderBar();
         this.addChild(this.loaderBar);
     }
-    loadComplete() {
+    loadOutro() {
         return new Promise((resolve) => {
-            _imports__WEBPACK_IMPORTED_MODULE_0__["AnimationsManager"].y(this.loaderBar, this.app.screen.y);
-            _imports__WEBPACK_IMPORTED_MODULE_0__["AnimationsManager"].height(this.loaderBar, this.app.screen.height, () => {
-                _imports__WEBPACK_IMPORTED_MODULE_0__["AnimationsManager"].hide(this, () => {
-                    this.remove();
-                    resolve();
-                });
-            });
+            this.upperOutro = new PIXI.Graphics();
+            this.upperOutro.beginFill(0X000000, 1);
+            this.upperOutro.drawRect(0, 0, this.width, this.app.screen.height / 2);
+            this.upperOutro.endFill();
+            this.addChild(this.upperOutro);
+            this.lowerOutro = new PIXI.Graphics();
+            this.lowerOutro.beginFill(0X000000, 1);
+            this.lowerOutro.drawRect(0, this.app.screen.height / 2 + 1, this.width, this.app.screen.height / 2 - 1);
+            this.lowerOutro.endFill();
+            this.addChild(this.lowerOutro);
+            this.loaderBar.alpha = 0;
+            _imports__WEBPACK_IMPORTED_MODULE_0__["AnimationsManager"].height(this.upperOutro, 0);
+            _imports__WEBPACK_IMPORTED_MODULE_0__["AnimationsManager"].y(this.lowerOutro, this.app.screen.height / 2);
+            Promise.resolve();
+            // AnimationsManager.y(this.loaderBar, this.app.screen.y);
+            // AnimationsManager.height(this.loaderBar, this.app.screen.height, () => {
+            //     AnimationsManager.hide(this, () => {
+            //         this.remove();
+            //         resolve();
+            //     });
+            // });
         });
     }
     animateLoaderBar(progress) {
@@ -53614,8 +53840,9 @@ class LoaderView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
     }
     createLoaderBar() {
         this.loaderBar = new PIXI.Graphics;
-        this.loaderBar.beginFill(0XFFF2CC, 1);
+        this.loaderBar.beginFill(0X78AB46, 1);
         this.loaderBar.drawRect(0, 0, 1, 1);
+        this.loaderBar.endFill();
     }
     positionLoaderBar() {
         const alignment = {
@@ -53775,7 +54002,7 @@ __webpack_require__.r(__webpack_exports__);
 class SnakeController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
     addListeners() {
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.CREATE_SNAKE, () => {
-            this.view.addTo(this.view.app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"].name].view);
+            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getModule(_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"]).view);
         });
     }
 }
@@ -53814,6 +54041,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
 
 class SnakeView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
+    addTo(parent) {
+        super.addTo(parent);
+        // const gt = new PIXI.Graphics();
+        // gt.beginFill(BoardConstants.SETTINGS.BORDER.COLOR);
+        // gt.drawRect(0, 0,  this.app.screen.width, this.app.screen.height);
+        // gt.endFill();
+        // this.addChild(gt);
+    }
 }
 
 

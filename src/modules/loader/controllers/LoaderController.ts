@@ -4,7 +4,9 @@ import {
     LoaderConstants,
     LoaderModel,
     LoaderView,
-    Constants
+    Constants,
+    Utils,
+    GameModule
 } from '../../imports';
 
 export class LoaderController extends BaseController {
@@ -13,13 +15,14 @@ export class LoaderController extends BaseController {
 
     protected addListeners(): void {
         EventsManager.addListener(LoaderConstants.EVENTS.LOADING_STARTED, () => {
-            this.view.addTo(this.view.app.stage);
+            this.view.addTo(this.app.stage);
             this.model.loadAssets();
         });
 
         EventsManager.addListener(LoaderConstants.EVENTS.LOADING_COMPLETED, () => {
             setTimeout(() => {
-                this.view.loadComplete().then(() => EventsManager.dispatch(LoaderConstants.EVENTS.RESOLVE_LOADING_ACTION));
+                EventsManager.dispatch(LoaderConstants.EVENTS.RESOLVE_LOADING_ACTION);
+                this.view.loadOutro().then(() => console.log('ready!'));   
             }, Constants.Animations.Duration * 1000);
         });
 

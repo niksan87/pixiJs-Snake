@@ -1,7 +1,8 @@
 import {
     GameApplication,
     BaseModel,
-    Constants
+    Constants,
+    Utils
 } from '../../imports';
 
 export class BaseView extends PIXI.Container {
@@ -11,7 +12,7 @@ export class BaseView extends PIXI.Container {
     constructor(model?: BaseModel) {
         super();
         this.model = model;
-        this.app = (window[Constants.AppName] as GameApplication);
+        this.app = Utils.getApplication();
 
     }
 

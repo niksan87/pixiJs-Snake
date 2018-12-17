@@ -14,7 +14,7 @@ export class GameController extends BaseController {
 
     protected addListeners(): void {
         EventsManager.addListener(GameConstants.EVENTS.CREATE_GAME, () => {
-            this.view.addTo(this.view.app.stage);
+            this.view.addTo(this.app.stage);
             EventsManager.dispatch(BoardConstants.EVENTS.CREATE_BOARD);
             EventsManager.dispatch(SnakeConstants.EVENTS.CREATE_SNAKE);
         });   

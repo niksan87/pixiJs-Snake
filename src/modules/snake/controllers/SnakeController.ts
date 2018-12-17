@@ -4,7 +4,8 @@ import {
     SnakeModel,
     EventsManager,
     GameModule,
-    SnakeConstants
+    SnakeConstants,
+    Utils
 } from '../../imports';
 
 export class SnakeController extends BaseController {
@@ -13,7 +14,8 @@ export class SnakeController extends BaseController {
 
     protected addListeners(): void {
         EventsManager.addListener(SnakeConstants.EVENTS.CREATE_SNAKE, () => {
-            this.view.addTo(this.view.app.modules[GameModule.name].view);
+            this.view.addTo(Utils.getModule(GameModule).view);
+            
         });
     }
 }

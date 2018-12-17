@@ -9,6 +9,8 @@ import {
     CreateGameAction,
     BoardModule,
     SnakeModule,
+    GridModule,
+    IAssociativeArray,
     Utils
 } from './imports';
 
@@ -17,7 +19,7 @@ export class GameApplication extends PIXI.Application {
 
     constructor() {
         super(Constants.AppSettings);
-        window[Constants.AppName] = this;
+        (window[Constants.AppName] as GameApplication) = this;
         this.createCanvas();
         this.addModules();
         this.init();
@@ -32,7 +34,8 @@ export class GameApplication extends PIXI.Application {
             LoaderModule,
             GameModule,
             BoardModule,
-            SnakeModule
+            SnakeModule,
+            GridModule
         ];
         this.modules = Utils.convertToAssociativeArray(modules);
     }
@@ -43,8 +46,4 @@ export class GameApplication extends PIXI.Application {
             new CreateGameAction()
         ]);
     }
-}
-
-export interface IAssociativeArray {
-    [key: string]: BaseModule;
 }

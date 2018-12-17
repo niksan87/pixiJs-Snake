@@ -10,7 +10,7 @@ const PATHS = {
     SRC: {
         CSS: 'src/*.css',
         HTML: 'src/*.html',
-        IMAGE: 'src/img/*.jpg'
+        IMAGE: 'src/img/*.{jpg,png}'
     }
 }
 

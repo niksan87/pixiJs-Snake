@@ -1,14 +1,17 @@
 import {
+    GameApplication,
     BaseModel,
-    BaseView
+    BaseView,
+    Utils
 } from '../../imports';
 
 export abstract class BaseController {
+    protected app: GameApplication;
     private _model: BaseModel;
     private _view: BaseView;
-
     constructor() {
         this.addListeners();
+        this.app = Utils.getApplication();
     }
 
     protected abstract addListeners(): void;

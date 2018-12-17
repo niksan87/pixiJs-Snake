@@ -42,6 +42,13 @@ export * from './board/views/BoardView';
 export * from './board/controllers/BoardController';
 export * from './board/constants/BoardConstants';
 
+// Grid element
+export * from './grid/GridModule';
+export * from './grid/models/GridModel';
+export * from './grid/views/GridView';
+export * from './grid/controllers/GridController';
+export * from './grid/constants/GridConstants';
+
 // Snake
 export * from './snake/SnakeModule';
 export * from './snake/models/SnakeModel';
