@@ -6,12 +6,12 @@ import {
     Constants,
     GameApplication,
     Utils,
-    //GridView,
+    GridView,
     BoardConstants
 } from '../../imports';
 
 export class BoardView extends BaseView {
-    //protected grid: GridView;
+    protected grid: GridView;
 
     public addTo(parent: BaseView): void {
         super.addTo(parent);

@@ -1,7 +1,6 @@
 import {
     IAssociativeArray,
     IConstructable,
-
     BaseModule,
     LoaderModule,
     ActionsManager,
@@ -9,9 +8,10 @@ import {
     Constants,
     CreateGameAction,
     BoardModule,
-    // SnakeModule,
-    // GridModule,
+    RewardModule,
+    GridModule,
     GameModule,
+    SnakeModule,
     Utils
 } from './imports';
 
@@ -41,8 +41,9 @@ export class GameApplication extends PIXI.Application {
             LoaderModule,
             GameModule,
             BoardModule,
-            // SnakeModule,
-            // GridModule
+            GridModule,
+            RewardModule,
+            SnakeModule            
         ];
         this.modules = {};
         modules.forEach((Module: IConstructable<BaseModule>) => this.modules[Module.name] = new Module());

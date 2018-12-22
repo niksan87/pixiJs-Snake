@@ -12,7 +12,11 @@ export const Constants = {
             Url: 'img/',
             Names: {
                 'bg': 'bg.jpg',
-                'grid': 'grid.png'
+                'grid': 'grid.png',
+                'apple': 'apple.png',
+                'snake_head': 'snake_head.png',
+                'snake_body': 'snake_body.png',
+                'snake_tail': 'snake_tail.png'
             }
         },
         Loader: {
@@ -21,8 +25,5 @@ export const Constants = {
 
         }
     },
-    Texts: {
-        Loading: "Loading",
-        Loaded: "Loaded"
-    }
+    Safe_margin: 4
 }

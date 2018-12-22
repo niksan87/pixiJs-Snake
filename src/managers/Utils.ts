@@ -7,13 +7,15 @@ import {
 } from '../modules/imports';
 
 export class Utils {
-    
-    public static getModule(Module: IConstructable<BaseModule>): BaseModule{
-        return window[Constants.AppName].modules[Module.name];
-    }
 
     public static getApplication(): GameApplication{
         return (window[Constants.AppName] as GameApplication);
+    }
+
+    public static getRandomInt(min: number, max: number): number {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
     public static getObjectLenght(obj: Object): number{

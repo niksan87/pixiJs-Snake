@@ -6,7 +6,8 @@ import {
     GameModel,
     GameApplication,
     BoardConstants,
-    // SnakeConstants
+    RewardConstants,
+    SnakeConstants
 } from '../../imports';
 
 export class GameController extends BaseController {
@@ -17,7 +18,12 @@ export class GameController extends BaseController {
         EventsManager.addListener(GameConstants.EVENTS.CREATE_GAME, () => {
             this.view.addTo(GameApplication.app.stage);
             EventsManager.dispatch(BoardConstants.EVENTS.CREATE_BOARD);
-            // EventsManager.dispatch(SnakeConstants.EVENTS.CREATE_SNAKE);
-        });   
+            EventsManager.dispatch(RewardConstants.EVENTS.CREATE_REWARDS_VIEW);
+            EventsManager.dispatch(RewardConstants.EVENTS.GET_REWARD_POSITION);
+            EventsManager.dispatch(SnakeConstants.EVENTS.CREATE_SNAKE_VIEW);
+        });
+        EventsManager.addListener(SnakeConstants.EVENTS.GET_SNAKE_DIRECTION, (event: CustomEvent) => {
+            EventsManager.dispatch(SnakeConstants.EVENTS.GET_SNAKE_POSITION, {detail: event.detail});
+        });
     }
 }

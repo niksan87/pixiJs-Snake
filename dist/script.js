@@ -52636,11 +52636,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../modules/imports */ "./src/modules/imports.ts");
 
 class Utils {
-    static getModule(Module) {
-        return window[_modules_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].AppName].modules[Module.name];
-    }
     static getApplication() {
         return window[_modules_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].AppName];
+    }
+    static getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
     static getObjectLenght(obj) {
         let size = 0;
@@ -52766,6 +52768,28 @@ class Graphics extends PIXI.Graphics {
 
 /***/ }),
 
+/***/ "./src/misc/GridElement.ts":
+/*!*********************************!*\
+  !*** ./src/misc/GridElement.ts ***!
+  \*********************************/
+/*! exports provided: GridElement, GridElementType */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridElement", function() { return GridElement; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridElementType", function() { return GridElementType; });
+class GridElement {
+}
+var GridElementType;
+(function (GridElementType) {
+    GridElementType["REWARD"] = "REWARD";
+    GridElementType["SNAKE"] = "SNAKE";
+})(GridElementType || (GridElementType = {}));
+
+
+/***/ }),
+
 /***/ "./src/modules/GameApplication.ts":
 /*!****************************************!*\
   !*** ./src/modules/GameApplication.ts ***!
@@ -52799,6 +52823,9 @@ class GameApplication extends PIXI.Application {
             _imports__WEBPACK_IMPORTED_MODULE_0__["LoaderModule"],
             _imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"],
             _imports__WEBPACK_IMPORTED_MODULE_0__["BoardModule"],
+            _imports__WEBPACK_IMPORTED_MODULE_0__["GridModule"],
+            _imports__WEBPACK_IMPORTED_MODULE_0__["RewardModule"],
+            _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeModule"]
         ];
         this.modules = {};
         modules.forEach((Module) => this.modules[Module.name] = new Module());
@@ -53018,7 +53045,7 @@ class BoardController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseControl
     addListeners() {
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardConstants"].EVENTS.CREATE_BOARD, () => {
             this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"].name].view);
-            //EventsManager.dispatch(GridConstants.EVENTS.CREATE_GRID);
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GridConstants"].EVENTS.CREATE_GRID);
         });
     }
 }
@@ -53057,7 +53084,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
 
 class BoardView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
-    //protected grid: GridView;
     addTo(parent) {
         super.addTo(parent);
         this.addBackground();
@@ -53096,7 +53122,11 @@ const Constants = {
             Url: 'img/',
             Names: {
                 'bg': 'bg.jpg',
-                'grid': 'grid.png'
+                'grid': 'grid.png',
+                'apple': 'apple.png',
+                'snake_head': 'snake_head.png',
+                'snake_body': 'snake_body.png',
+                'snake_tail': 'snake_tail.png'
             }
         },
         Loader: {
@@ -53104,10 +53134,7 @@ const Constants = {
             SecondaryColor: 0x000000
         }
     },
-    Texts: {
-        Loading: "Loading",
-        Loaded: "Loaded"
-    }
+    Safe_margin: 4
 };
 
 
@@ -53198,7 +53225,12 @@ class GameController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseControll
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.CREATE_GAME, () => {
             this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.stage);
             _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardConstants"].EVENTS.CREATE_BOARD);
-            // EventsManager.dispatch(SnakeConstants.EVENTS.CREATE_SNAKE);
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.CREATE_REWARDS_VIEW);
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.GET_REWARD_POSITION);
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.CREATE_SNAKE_VIEW);
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.GET_SNAKE_DIRECTION, (event) => {
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.GET_SNAKE_POSITION, { detail: event.detail });
         });
     }
 }
@@ -53246,11 +53278,218 @@ class GameView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
 
 /***/ }),
 
+/***/ "./src/modules/grid/GridModule.ts":
+/*!****************************************!*\
+  !*** ./src/modules/grid/GridModule.ts ***!
+  \****************************************/
+/*! exports provided: GridModule */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridModule", function() { return GridModule; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
+
+class GridModule extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModule"] {
+    addBindings() {
+        this
+            .asModel(_imports__WEBPACK_IMPORTED_MODULE_0__["GridModel"])
+            .asView(_imports__WEBPACK_IMPORTED_MODULE_0__["GridView"])
+            .asController(_imports__WEBPACK_IMPORTED_MODULE_0__["GridController"])
+            .bind();
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/grid/constants/GridConstants.ts":
+/*!*****************************************************!*\
+  !*** ./src/modules/grid/constants/GridConstants.ts ***!
+  \*****************************************************/
+/*! exports provided: GridConstants */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridConstants", function() { return GridConstants; });
+const GridConstants = {
+    EVENTS: {
+        CREATE_GRID: 'CREATE_GRID'
+    }
+};
+
+
+/***/ }),
+
+/***/ "./src/modules/grid/controllers/GridController.ts":
+/*!********************************************************!*\
+  !*** ./src/modules/grid/controllers/GridController.ts ***!
+  \********************************************************/
+/*! exports provided: GridController */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridController", function() { return GridController; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class GridController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
+    addListeners() {
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GridConstants"].EVENTS.CREATE_GRID, () => {
+            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["BoardModule"].name].view);
+            this.model.createGridMatrix();
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.GET_REWARD_POSITION, () => {
+            this.model.getRewardPosition();
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.GET_SNAKE_POSITION, (event) => {
+            this.model.getSnakePositions(event.detail);
+        });
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/grid/models/GridModel.ts":
+/*!**********************************************!*\
+  !*** ./src/modules/grid/models/GridModel.ts ***!
+  \**********************************************/
+/*! exports provided: GridModel */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridModel", function() { return GridModel; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class GridModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
+    createGridMatrix() {
+        const texture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.grid);
+        const boxSize = texture.width / 2;
+        const xNumOfBoxes = _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GridModule"].name].view.width / boxSize;
+        const yNumOfBoxes = _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GridModule"].name].view.height / boxSize;
+        let xPosition = 0;
+        let yPosition = 0;
+        this.gridMatrix = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].createTwoDImensionalArray(xNumOfBoxes, yNumOfBoxes, _imports__WEBPACK_IMPORTED_MODULE_0__["GridElement"]);
+        this.gridMatrix.forEach((line, lineIndex) => {
+            xPosition = 0;
+            line.forEach((element, rowIndex) => {
+                element.id = `grid_x${rowIndex}_y${lineIndex}`;
+                element.x = xPosition;
+                element.y = yPosition;
+                element.width = boxSize;
+                element.height = boxSize;
+                element.type = null;
+                xPosition += boxSize;
+            });
+            yPosition += boxSize;
+        });
+        console.warn(this.gridMatrix);
+    }
+    getRewardPosition() {
+        let gridElement = this.getRandomGridPosition();
+        if (this.isAlreadyTaken([gridElement])) {
+            this.getRewardPosition();
+            return;
+        }
+        gridElement.type = _imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].REWARD;
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.CREATE_REWARD, { detail: gridElement });
+    }
+    getSnakePositions(direction) {
+        const snakePositions = [];
+        snakePositions.push(this.getRandomGridPosition());
+        snakePositions.push(this.getPreviousGridElement(snakePositions[0], direction));
+        snakePositions.push(this.getPreviousGridElement(snakePositions[1], direction));
+        if (this.isAlreadyTaken(snakePositions)) {
+            this.getSnakePositions(direction);
+            return;
+        }
+        snakePositions.forEach((gridElement) => gridElement.type = _imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].SNAKE);
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.CREATE_SNAKE, { detail: snakePositions });
+    }
+    getPreviousGridElement(gridElement, direction) {
+        if (!gridElement) {
+            return null;
+        }
+        let outputElement;
+        let currGridElement;
+        for (var row = 0; row < this.gridMatrix.length; row++) {
+            for (var col = 0; col < this.gridMatrix[row].length; col++) {
+                currGridElement = this.gridMatrix[row][col];
+                if (currGridElement === gridElement) {
+                    switch (direction) {
+                        case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].UP:
+                            outputElement = this.gridMatrix[row + 1][col];
+                            break;
+                        case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].RIGHT:
+                            outputElement = this.gridMatrix[row][col - 1];
+                            break;
+                        case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].BOTTOM:
+                            outputElement = this.gridMatrix[row - 1][col];
+                            break;
+                        case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].LEFT:
+                            outputElement = this.gridMatrix[row][col + 1];
+                            break;
+                    }
+                }
+            }
+        }
+        return outputElement;
+    }
+    getRandomGridPosition() {
+        const row = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getRandomInt(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Safe_margin, this.gridMatrix.length - _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Safe_margin - 1);
+        const line = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getRandomInt(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Safe_margin, this.gridMatrix[row].length - _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Safe_margin - 1);
+        const gridElement = this.gridMatrix[row][line];
+        return gridElement;
+    }
+    isAlreadyTaken(gridElements) {
+        let output = false;
+        gridElements.forEach((gridElement) => {
+            if (!gridElement || gridElement.type !== null) {
+                output = true;
+            }
+        });
+        return output;
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/grid/views/GridView.ts":
+/*!********************************************!*\
+  !*** ./src/modules/grid/views/GridView.ts ***!
+  \********************************************/
+/*! exports provided: GridView */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridView", function() { return GridView; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class GridView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
+    addTo(parent) {
+        super.addTo(parent);
+        this.createTilingSpriteBackground();
+    }
+    createTilingSpriteBackground() {
+        const texture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.grid);
+        const tilingSprite = new PIXI.extras.TilingSprite(texture, this.parent.width, this.parent.height);
+        this.addChild(tilingSprite);
+    }
+}
+
+
+/***/ }),
+
 /***/ "./src/modules/imports.ts":
 /*!********************************!*\
   !*** ./src/modules/imports.ts ***!
   \********************************/
-/*! exports provided: GameApplication, Constants, Utils, ActionsManager, AnimationsManager, EventsManager, PositionManager, Graphics, Animate, BaseModule, BaseModel, BaseView, BaseController, BaseAction, LoaderModule, LoaderModel, LoaderView, LoaderController, LoadAssetsAction, LoaderConstants, GameModule, GameModel, GameView, GameController, CreateGameAction, GameConstants, BoardModule, BoardModel, BoardView, BoardController, BoardConstants */
+/*! exports provided: GameApplication, Constants, Utils, ActionsManager, AnimationsManager, EventsManager, PositionManager, Graphics, Animate, GridElement, GridElementType, BaseModule, BaseModel, BaseView, BaseController, BaseAction, LoaderModule, LoaderModel, LoaderView, LoaderController, LoadAssetsAction, LoaderConstants, GameModule, GameModel, GameView, GameController, CreateGameAction, GameConstants, BoardModule, BoardModel, BoardView, BoardController, BoardConstants, GridModule, GridModel, GridView, GridController, GridConstants, SnakeModule, SnakeModel, SnakeView, SnakeController, SnakeConstants, SnakeDirection, RewardModule, RewardModel, RewardView, RewardController, RewardConstants */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -53284,76 +53523,130 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _misc_Animate__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../misc/Animate */ "./src/misc/Animate.ts");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Animate", function() { return _misc_Animate__WEBPACK_IMPORTED_MODULE_9__["Animate"]; });
 
-/* harmony import */ var _baseModule_BaseModule__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./baseModule/BaseModule */ "./src/modules/baseModule/BaseModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseModule", function() { return _baseModule_BaseModule__WEBPACK_IMPORTED_MODULE_10__["BaseModule"]; });
+/* harmony import */ var _misc_GridElement__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../misc/GridElement */ "./src/misc/GridElement.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridElement", function() { return _misc_GridElement__WEBPACK_IMPORTED_MODULE_10__["GridElement"]; });
 
-/* harmony import */ var _baseModule_models_BaseModel__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./baseModule/models/BaseModel */ "./src/modules/baseModule/models/BaseModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseModel", function() { return _baseModule_models_BaseModel__WEBPACK_IMPORTED_MODULE_11__["BaseModel"]; });
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridElementType", function() { return _misc_GridElement__WEBPACK_IMPORTED_MODULE_10__["GridElementType"]; });
 
-/* harmony import */ var _baseModule_views_BaseView__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./baseModule/views/BaseView */ "./src/modules/baseModule/views/BaseView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseView", function() { return _baseModule_views_BaseView__WEBPACK_IMPORTED_MODULE_12__["BaseView"]; });
+/* harmony import */ var _baseModule_BaseModule__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./baseModule/BaseModule */ "./src/modules/baseModule/BaseModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseModule", function() { return _baseModule_BaseModule__WEBPACK_IMPORTED_MODULE_11__["BaseModule"]; });
 
-/* harmony import */ var _baseModule_controllers_BaseController__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./baseModule/controllers/BaseController */ "./src/modules/baseModule/controllers/BaseController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseController", function() { return _baseModule_controllers_BaseController__WEBPACK_IMPORTED_MODULE_13__["BaseController"]; });
+/* harmony import */ var _baseModule_models_BaseModel__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./baseModule/models/BaseModel */ "./src/modules/baseModule/models/BaseModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseModel", function() { return _baseModule_models_BaseModel__WEBPACK_IMPORTED_MODULE_12__["BaseModel"]; });
 
-/* harmony import */ var _baseModule_actions_BaseAction__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./baseModule/actions/BaseAction */ "./src/modules/baseModule/actions/BaseAction.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseAction", function() { return _baseModule_actions_BaseAction__WEBPACK_IMPORTED_MODULE_14__["BaseAction"]; });
+/* harmony import */ var _baseModule_views_BaseView__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./baseModule/views/BaseView */ "./src/modules/baseModule/views/BaseView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseView", function() { return _baseModule_views_BaseView__WEBPACK_IMPORTED_MODULE_13__["BaseView"]; });
 
-/* harmony import */ var _loader_LoaderModule__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./loader/LoaderModule */ "./src/modules/loader/LoaderModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderModule", function() { return _loader_LoaderModule__WEBPACK_IMPORTED_MODULE_15__["LoaderModule"]; });
+/* harmony import */ var _baseModule_controllers_BaseController__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./baseModule/controllers/BaseController */ "./src/modules/baseModule/controllers/BaseController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseController", function() { return _baseModule_controllers_BaseController__WEBPACK_IMPORTED_MODULE_14__["BaseController"]; });
 
-/* harmony import */ var _loader_models_LoaderModel__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./loader/models/LoaderModel */ "./src/modules/loader/models/LoaderModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderModel", function() { return _loader_models_LoaderModel__WEBPACK_IMPORTED_MODULE_16__["LoaderModel"]; });
+/* harmony import */ var _baseModule_actions_BaseAction__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./baseModule/actions/BaseAction */ "./src/modules/baseModule/actions/BaseAction.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseAction", function() { return _baseModule_actions_BaseAction__WEBPACK_IMPORTED_MODULE_15__["BaseAction"]; });
 
-/* harmony import */ var _loader_views_LoaderView__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./loader/views/LoaderView */ "./src/modules/loader/views/LoaderView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderView", function() { return _loader_views_LoaderView__WEBPACK_IMPORTED_MODULE_17__["LoaderView"]; });
+/* harmony import */ var _loader_LoaderModule__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./loader/LoaderModule */ "./src/modules/loader/LoaderModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderModule", function() { return _loader_LoaderModule__WEBPACK_IMPORTED_MODULE_16__["LoaderModule"]; });
 
-/* harmony import */ var _loader_controllers_LoaderController__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./loader/controllers/LoaderController */ "./src/modules/loader/controllers/LoaderController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderController", function() { return _loader_controllers_LoaderController__WEBPACK_IMPORTED_MODULE_18__["LoaderController"]; });
+/* harmony import */ var _loader_models_LoaderModel__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./loader/models/LoaderModel */ "./src/modules/loader/models/LoaderModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderModel", function() { return _loader_models_LoaderModel__WEBPACK_IMPORTED_MODULE_17__["LoaderModel"]; });
 
-/* harmony import */ var _loader_actions_LoadAssetsAction__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./loader/actions/LoadAssetsAction */ "./src/modules/loader/actions/LoadAssetsAction.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoadAssetsAction", function() { return _loader_actions_LoadAssetsAction__WEBPACK_IMPORTED_MODULE_19__["LoadAssetsAction"]; });
+/* harmony import */ var _loader_views_LoaderView__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./loader/views/LoaderView */ "./src/modules/loader/views/LoaderView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderView", function() { return _loader_views_LoaderView__WEBPACK_IMPORTED_MODULE_18__["LoaderView"]; });
 
-/* harmony import */ var _loader_constants_LoaderConstants__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./loader/constants/LoaderConstants */ "./src/modules/loader/constants/LoaderConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderConstants", function() { return _loader_constants_LoaderConstants__WEBPACK_IMPORTED_MODULE_20__["LoaderConstants"]; });
+/* harmony import */ var _loader_controllers_LoaderController__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./loader/controllers/LoaderController */ "./src/modules/loader/controllers/LoaderController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderController", function() { return _loader_controllers_LoaderController__WEBPACK_IMPORTED_MODULE_19__["LoaderController"]; });
 
-/* harmony import */ var _game_GameModule__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./game/GameModule */ "./src/modules/game/GameModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameModule", function() { return _game_GameModule__WEBPACK_IMPORTED_MODULE_21__["GameModule"]; });
+/* harmony import */ var _loader_actions_LoadAssetsAction__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./loader/actions/LoadAssetsAction */ "./src/modules/loader/actions/LoadAssetsAction.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoadAssetsAction", function() { return _loader_actions_LoadAssetsAction__WEBPACK_IMPORTED_MODULE_20__["LoadAssetsAction"]; });
 
-/* harmony import */ var _game_models_GameModel__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./game/models/GameModel */ "./src/modules/game/models/GameModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameModel", function() { return _game_models_GameModel__WEBPACK_IMPORTED_MODULE_22__["GameModel"]; });
+/* harmony import */ var _loader_constants_LoaderConstants__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./loader/constants/LoaderConstants */ "./src/modules/loader/constants/LoaderConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderConstants", function() { return _loader_constants_LoaderConstants__WEBPACK_IMPORTED_MODULE_21__["LoaderConstants"]; });
 
-/* harmony import */ var _game_views_GameView__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./game/views/GameView */ "./src/modules/game/views/GameView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameView", function() { return _game_views_GameView__WEBPACK_IMPORTED_MODULE_23__["GameView"]; });
+/* harmony import */ var _game_GameModule__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./game/GameModule */ "./src/modules/game/GameModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameModule", function() { return _game_GameModule__WEBPACK_IMPORTED_MODULE_22__["GameModule"]; });
 
-/* harmony import */ var _game_controllers_GameController__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./game/controllers/GameController */ "./src/modules/game/controllers/GameController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameController", function() { return _game_controllers_GameController__WEBPACK_IMPORTED_MODULE_24__["GameController"]; });
+/* harmony import */ var _game_models_GameModel__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./game/models/GameModel */ "./src/modules/game/models/GameModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameModel", function() { return _game_models_GameModel__WEBPACK_IMPORTED_MODULE_23__["GameModel"]; });
 
-/* harmony import */ var _game_actions_CreateGameAction__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ./game/actions/CreateGameAction */ "./src/modules/game/actions/CreateGameAction.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "CreateGameAction", function() { return _game_actions_CreateGameAction__WEBPACK_IMPORTED_MODULE_25__["CreateGameAction"]; });
+/* harmony import */ var _game_views_GameView__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./game/views/GameView */ "./src/modules/game/views/GameView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameView", function() { return _game_views_GameView__WEBPACK_IMPORTED_MODULE_24__["GameView"]; });
 
-/* harmony import */ var _game_constants_GameConstants__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ./game/constants/GameConstants */ "./src/modules/game/constants/GameConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameConstants", function() { return _game_constants_GameConstants__WEBPACK_IMPORTED_MODULE_26__["GameConstants"]; });
+/* harmony import */ var _game_controllers_GameController__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ./game/controllers/GameController */ "./src/modules/game/controllers/GameController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameController", function() { return _game_controllers_GameController__WEBPACK_IMPORTED_MODULE_25__["GameController"]; });
 
-/* harmony import */ var _board_BoardModule__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ./board/BoardModule */ "./src/modules/board/BoardModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModule", function() { return _board_BoardModule__WEBPACK_IMPORTED_MODULE_27__["BoardModule"]; });
+/* harmony import */ var _game_actions_CreateGameAction__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ./game/actions/CreateGameAction */ "./src/modules/game/actions/CreateGameAction.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "CreateGameAction", function() { return _game_actions_CreateGameAction__WEBPACK_IMPORTED_MODULE_26__["CreateGameAction"]; });
 
-/* harmony import */ var _board_models_BoardModel__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ./board/models/BoardModel */ "./src/modules/board/models/BoardModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModel", function() { return _board_models_BoardModel__WEBPACK_IMPORTED_MODULE_28__["BoardModel"]; });
+/* harmony import */ var _game_constants_GameConstants__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ./game/constants/GameConstants */ "./src/modules/game/constants/GameConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameConstants", function() { return _game_constants_GameConstants__WEBPACK_IMPORTED_MODULE_27__["GameConstants"]; });
 
-/* harmony import */ var _board_views_BoardView__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! ./board/views/BoardView */ "./src/modules/board/views/BoardView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardView", function() { return _board_views_BoardView__WEBPACK_IMPORTED_MODULE_29__["BoardView"]; });
+/* harmony import */ var _board_BoardModule__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ./board/BoardModule */ "./src/modules/board/BoardModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModule", function() { return _board_BoardModule__WEBPACK_IMPORTED_MODULE_28__["BoardModule"]; });
 
-/* harmony import */ var _board_controllers_BoardController__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! ./board/controllers/BoardController */ "./src/modules/board/controllers/BoardController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardController", function() { return _board_controllers_BoardController__WEBPACK_IMPORTED_MODULE_30__["BoardController"]; });
+/* harmony import */ var _board_models_BoardModel__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! ./board/models/BoardModel */ "./src/modules/board/models/BoardModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModel", function() { return _board_models_BoardModel__WEBPACK_IMPORTED_MODULE_29__["BoardModel"]; });
 
-/* harmony import */ var _board_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! ./board/constants/BoardConstants */ "./src/modules/board/constants/BoardConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardConstants", function() { return _board_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_31__["BoardConstants"]; });
+/* harmony import */ var _board_views_BoardView__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! ./board/views/BoardView */ "./src/modules/board/views/BoardView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardView", function() { return _board_views_BoardView__WEBPACK_IMPORTED_MODULE_30__["BoardView"]; });
+
+/* harmony import */ var _board_controllers_BoardController__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! ./board/controllers/BoardController */ "./src/modules/board/controllers/BoardController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardController", function() { return _board_controllers_BoardController__WEBPACK_IMPORTED_MODULE_31__["BoardController"]; });
+
+/* harmony import */ var _board_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! ./board/constants/BoardConstants */ "./src/modules/board/constants/BoardConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardConstants", function() { return _board_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_32__["BoardConstants"]; });
+
+/* harmony import */ var _grid_GridModule__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! ./grid/GridModule */ "./src/modules/grid/GridModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridModule", function() { return _grid_GridModule__WEBPACK_IMPORTED_MODULE_33__["GridModule"]; });
+
+/* harmony import */ var _grid_models_GridModel__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! ./grid/models/GridModel */ "./src/modules/grid/models/GridModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridModel", function() { return _grid_models_GridModel__WEBPACK_IMPORTED_MODULE_34__["GridModel"]; });
+
+/* harmony import */ var _grid_views_GridView__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! ./grid/views/GridView */ "./src/modules/grid/views/GridView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridView", function() { return _grid_views_GridView__WEBPACK_IMPORTED_MODULE_35__["GridView"]; });
+
+/* harmony import */ var _grid_controllers_GridController__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! ./grid/controllers/GridController */ "./src/modules/grid/controllers/GridController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridController", function() { return _grid_controllers_GridController__WEBPACK_IMPORTED_MODULE_36__["GridController"]; });
+
+/* harmony import */ var _grid_constants_GridConstants__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! ./grid/constants/GridConstants */ "./src/modules/grid/constants/GridConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridConstants", function() { return _grid_constants_GridConstants__WEBPACK_IMPORTED_MODULE_37__["GridConstants"]; });
+
+/* harmony import */ var _snake_SnakeModule__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! ./snake/SnakeModule */ "./src/modules/snake/SnakeModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModule", function() { return _snake_SnakeModule__WEBPACK_IMPORTED_MODULE_38__["SnakeModule"]; });
+
+/* harmony import */ var _snake_models_SnakeModel__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! ./snake/models/SnakeModel */ "./src/modules/snake/models/SnakeModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModel", function() { return _snake_models_SnakeModel__WEBPACK_IMPORTED_MODULE_39__["SnakeModel"]; });
+
+/* harmony import */ var _snake_views_SnakeView__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! ./snake/views/SnakeView */ "./src/modules/snake/views/SnakeView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeView", function() { return _snake_views_SnakeView__WEBPACK_IMPORTED_MODULE_40__["SnakeView"]; });
+
+/* harmony import */ var _snake_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! ./snake/controllers/SnakeController */ "./src/modules/snake/controllers/SnakeController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeController", function() { return _snake_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_41__["SnakeController"]; });
+
+/* harmony import */ var _snake_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(/*! ./snake/constants/SnakeConstants */ "./src/modules/snake/constants/SnakeConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeConstants", function() { return _snake_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_42__["SnakeConstants"]; });
+
+/* harmony import */ var _snake_constants_SnakeDirection__WEBPACK_IMPORTED_MODULE_43__ = __webpack_require__(/*! ./snake/constants/SnakeDirection */ "./src/modules/snake/constants/SnakeDirection.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeDirection", function() { return _snake_constants_SnakeDirection__WEBPACK_IMPORTED_MODULE_43__["SnakeDirection"]; });
+
+/* harmony import */ var _reward_RewardModule__WEBPACK_IMPORTED_MODULE_44__ = __webpack_require__(/*! ./reward/RewardModule */ "./src/modules/reward/RewardModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModule", function() { return _reward_RewardModule__WEBPACK_IMPORTED_MODULE_44__["RewardModule"]; });
+
+/* harmony import */ var _reward_models_RewardModel__WEBPACK_IMPORTED_MODULE_45__ = __webpack_require__(/*! ./reward/models/RewardModel */ "./src/modules/reward/models/RewardModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModel", function() { return _reward_models_RewardModel__WEBPACK_IMPORTED_MODULE_45__["RewardModel"]; });
+
+/* harmony import */ var _reward_views_RewardView__WEBPACK_IMPORTED_MODULE_46__ = __webpack_require__(/*! ./reward/views/RewardView */ "./src/modules/reward/views/RewardView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardView", function() { return _reward_views_RewardView__WEBPACK_IMPORTED_MODULE_46__["RewardView"]; });
+
+/* harmony import */ var _reward_controllers_RewardController__WEBPACK_IMPORTED_MODULE_47__ = __webpack_require__(/*! ./reward/controllers/RewardController */ "./src/modules/reward/controllers/RewardController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardController", function() { return _reward_controllers_RewardController__WEBPACK_IMPORTED_MODULE_47__["RewardController"]; });
+
+/* harmony import */ var _reward_constants_RewardConstants__WEBPACK_IMPORTED_MODULE_48__ = __webpack_require__(/*! ./reward/constants/RewardConstants */ "./src/modules/reward/constants/RewardConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardConstants", function() { return _reward_constants_RewardConstants__WEBPACK_IMPORTED_MODULE_48__["RewardConstants"]; });
 
 // Attach PIXI to window for accesibility
 
 window.PIXI = pixi_js__WEBPACK_IMPORTED_MODULE_0__;
 /** Internal exports */
+
 
 
 
@@ -53389,23 +53682,25 @@ window.PIXI = pixi_js__WEBPACK_IMPORTED_MODULE_0__;
 
 
 
-// // Grid element
-// export * from './grid/GridModule';
-// export * from './grid/models/GridModel';
-// export * from './grid/views/GridView';
-// export * from './grid/controllers/GridController';
-// export * from './grid/constants/GridConstants';
-// // Snake
-// export * from './snake/SnakeModule';
-// export * from './snake/models/SnakeModel';
-// export * from './snake/views/SnakeView';
-// export * from './snake/controllers/SnakeController';
-// export * from './snake/constants/SnakeConstants';
-// // Reward
-// export * from './reward/RewardModule';
-// export * from './reward/models/RewardModel';
-// export * from './reward/views/RewardView';
-// export * from './reward/controllers/RewardController';
+// Grid element
+
+
+
+
+
+// Snake
+
+
+
+
+
+
+// Reward
+
+
+
+
+
 
 
 /***/ }),
@@ -53449,7 +53744,7 @@ __webpack_require__.r(__webpack_exports__);
 
 class LoadAssetsAction extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseAction"] {
     execute() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_COMPLETE, () => this.actionResolve());
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_RESOLVE, () => this.actionResolve());
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_START);
         return super.execute();
     }
@@ -53470,10 +53765,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "LoaderConstants", function() { return LoaderConstants; });
 const LoaderConstants = {
     EVENTS: {
-        LOADER_ADD_TO_STAGE: 'LOADER_ADD_TO_STAGE',
         LOADER_START: 'LOADER_START',
         LOADER_IN_PROGRESS: 'LOADER_IN_PROGRESS',
-        LOADER_COMPLETE: 'LOADER_COMPLETE'
+        LOADER_COMPLETE: 'LOADER_COMPLETE',
+        LOADER_RESOLVE: 'LOADER_RESOLVE'
     }
 };
 
@@ -53502,7 +53797,10 @@ class LoaderController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseContro
             this.view.animateLoading(event.detail);
         });
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_COMPLETE, () => {
-            this.view.animateOutro().then(() => { }); //this.view.remove()
+            setTimeout(() => {
+                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_RESOLVE);
+                this.view.animateOutro().then(() => this.view.remove());
+            }, _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Animations.Duration * 1000);
         });
     }
 }
@@ -53571,13 +53869,11 @@ class LoaderView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
     }
     animateOutro() {
         return new Promise((resolve) => {
-            setTimeout(() => {
-                this.loaderBar.alpha = 0;
-                this.upperElementOutro.alpha = 1;
-                this.lowerElementOutro.alpha = 1;
-                this.upperElementOutro.animate.height(0);
-                this.lowerElementOutro.animate.height(0).then(resolve);
-            }, _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Animations.Duration * 1000);
+            this.loaderBar.alpha = 0;
+            this.upperElementOutro.alpha = 1;
+            this.lowerElementOutro.alpha = 1;
+            this.upperElementOutro.animate.height(0);
+            this.lowerElementOutro.animate.height(0).then(resolve);
         });
     }
     createLoaderBar() {
@@ -53606,6 +53902,279 @@ class LoaderView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
         element.drawRect(0, 0, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.screen.width, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.screen.height / 2);
         element.endFill();
         return element;
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/reward/RewardModule.ts":
+/*!********************************************!*\
+  !*** ./src/modules/reward/RewardModule.ts ***!
+  \********************************************/
+/*! exports provided: RewardModule */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RewardModule", function() { return RewardModule; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
+
+class RewardModule extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModule"] {
+    addBindings() {
+        this
+            .asModel(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardModel"])
+            .asView(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardView"])
+            .asController(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardController"])
+            .bind();
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/reward/constants/RewardConstants.ts":
+/*!*********************************************************!*\
+  !*** ./src/modules/reward/constants/RewardConstants.ts ***!
+  \*********************************************************/
+/*! exports provided: RewardConstants */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RewardConstants", function() { return RewardConstants; });
+const RewardConstants = {
+    EVENTS: {
+        GET_REWARD_POSITION: 'GET_REWARD_POSITION',
+        CREATE_REWARDS_VIEW: 'CREATE_REWARDS_VIEW',
+        CREATE_REWARD: 'CREATE_REWARD'
+    }
+};
+
+
+/***/ }),
+
+/***/ "./src/modules/reward/controllers/RewardController.ts":
+/*!************************************************************!*\
+  !*** ./src/modules/reward/controllers/RewardController.ts ***!
+  \************************************************************/
+/*! exports provided: RewardController */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RewardController", function() { return RewardController; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class RewardController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
+    addListeners() {
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.CREATE_REWARDS_VIEW, () => {
+            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"].name].view);
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.CREATE_REWARD, (event) => {
+            this.view.createReward(event.detail);
+        });
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/reward/models/RewardModel.ts":
+/*!**************************************************!*\
+  !*** ./src/modules/reward/models/RewardModel.ts ***!
+  \**************************************************/
+/*! exports provided: RewardModel */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RewardModel", function() { return RewardModel; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class RewardModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/reward/views/RewardView.ts":
+/*!************************************************!*\
+  !*** ./src/modules/reward/views/RewardView.ts ***!
+  \************************************************/
+/*! exports provided: RewardView */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RewardView", function() { return RewardView; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class RewardView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
+    createReward(gridElement) {
+        const reward = PIXI.Sprite.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.apple);
+        reward.x = gridElement.x;
+        reward.y = gridElement.y;
+        this.addChild(reward);
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/snake/SnakeModule.ts":
+/*!******************************************!*\
+  !*** ./src/modules/snake/SnakeModule.ts ***!
+  \******************************************/
+/*! exports provided: SnakeModule */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SnakeModule", function() { return SnakeModule; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
+
+class SnakeModule extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModule"] {
+    addBindings() {
+        this
+            .asModel(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeModel"])
+            .asView(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeView"])
+            .asController(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeController"])
+            .bind();
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/snake/constants/SnakeConstants.ts":
+/*!*******************************************************!*\
+  !*** ./src/modules/snake/constants/SnakeConstants.ts ***!
+  \*******************************************************/
+/*! exports provided: SnakeConstants */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SnakeConstants", function() { return SnakeConstants; });
+const SnakeConstants = {
+    EVENTS: {
+        GET_SNAKE_POSITION: 'GET_SNAKE_POSITION',
+        GET_SNAKE_DIRECTION: 'GET_SNAKE_DIRECTION',
+        CREATE_SNAKE_VIEW: 'CREATE_SNAKE_VIEW',
+        CREATE_SNAKE: 'CREATE_SNAKE',
+    }
+};
+
+
+/***/ }),
+
+/***/ "./src/modules/snake/constants/SnakeDirection.ts":
+/*!*******************************************************!*\
+  !*** ./src/modules/snake/constants/SnakeDirection.ts ***!
+  \*******************************************************/
+/*! exports provided: SnakeDirection */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SnakeDirection", function() { return SnakeDirection; });
+var SnakeDirection;
+(function (SnakeDirection) {
+    SnakeDirection[SnakeDirection["RIGHT"] = 0.25] = "RIGHT";
+    SnakeDirection[SnakeDirection["BOTTOM"] = 0.5] = "BOTTOM";
+    SnakeDirection[SnakeDirection["LEFT"] = 0.75] = "LEFT";
+    SnakeDirection[SnakeDirection["UP"] = 1] = "UP";
+})(SnakeDirection || (SnakeDirection = {}));
+
+
+/***/ }),
+
+/***/ "./src/modules/snake/controllers/SnakeController.ts":
+/*!**********************************************************!*\
+  !*** ./src/modules/snake/controllers/SnakeController.ts ***!
+  \**********************************************************/
+/*! exports provided: SnakeController */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SnakeController", function() { return SnakeController; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class SnakeController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
+    addListeners() {
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.CREATE_SNAKE_VIEW, () => {
+            this.model.setRandomDirection();
+            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"].name].view);
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.CREATE_SNAKE, (event) => {
+            this.view.createSnake(event.detail, this.model.direction);
+        });
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/snake/models/SnakeModel.ts":
+/*!************************************************!*\
+  !*** ./src/modules/snake/models/SnakeModel.ts ***!
+  \************************************************/
+/*! exports provided: SnakeModel */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SnakeModel", function() { return SnakeModel; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class SnakeModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
+    get direction() {
+        return this._direction;
+    }
+    setRandomDirection() {
+        const directions = [];
+        for (var direction in _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"]) {
+            if (Number(direction)) {
+                directions.push(Number(direction));
+            }
+        }
+        this._direction = directions[_imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getRandomInt(0, 3)];
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.GET_SNAKE_DIRECTION, { detail: this.direction });
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/snake/views/SnakeView.ts":
+/*!**********************************************!*\
+  !*** ./src/modules/snake/views/SnakeView.ts ***!
+  \**********************************************/
+/*! exports provided: SnakeView */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SnakeView", function() { return SnakeView; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class SnakeView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
+    createSnake(gridElements, direction) {
+        const snakeHead = PIXI.Sprite.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_head);
+        const snakeBody = PIXI.Sprite.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_body);
+        const snakeTail = PIXI.Sprite.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_tail);
+        this.createSnakePart(snakeHead, gridElements[0], direction);
+        this.createSnakePart(snakeBody, gridElements[1], direction);
+        this.createSnakePart(snakeTail, gridElements[2], direction);
+    }
+    createSnakePart(snakePart, gridElement, direction) {
+        snakePart.x = gridElement.x;
+        snakePart.y = gridElement.y;
+        const fullRotationInRadians = 6.28319;
+        snakePart.rotation = fullRotationInRadians * direction;
+        this.addChild(snakePart);
     }
 }
 

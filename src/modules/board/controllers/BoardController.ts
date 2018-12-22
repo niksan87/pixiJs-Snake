@@ -7,7 +7,7 @@ import {
     GameModule,
     GameView,
     GameApplication,
-    //GridConstants,
+    GridConstants,
     Utils
 } from '../../imports';
 
@@ -18,7 +18,7 @@ export class BoardController extends BaseController {
     protected addListeners(): void {
         EventsManager.addListener(BoardConstants.EVENTS.CREATE_BOARD, () => {
             this.view.addTo(GameApplication.app.modules[GameModule.name].view);
-            //EventsManager.dispatch(GridConstants.EVENTS.CREATE_GRID);
+            EventsManager.dispatch(GridConstants.EVENTS.CREATE_GRID);
         });
     }
 }

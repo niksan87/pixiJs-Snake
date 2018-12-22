@@ -2,3 +2,4 @@
 13.12.2018 - Added new gulp task, created BaseModule and GameModule to test MVC binding -> 3h
 15.12.2018 - Started building modules, events, managers, etc -> 10h
 17.12.2018 - Added grid matrix object and view, made transition from loade/intro to game -> 4h
+22.12.2018 - Refactored structure, added reward and snake, random positions respected to grid -> 10h

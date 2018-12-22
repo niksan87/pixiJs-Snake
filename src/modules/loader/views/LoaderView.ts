@@ -28,13 +28,11 @@ export class LoaderView extends BaseView {
 
     public animateOutro(): Promise<any> {
         return new Promise((resolve) => {
-            setTimeout(() => {
-                this.loaderBar.alpha = 0;
-                this.upperElementOutro.alpha = 1;
-                this.lowerElementOutro.alpha = 1;
-                this.upperElementOutro.animate.height(0);
-                this.lowerElementOutro.animate.height(0).then(resolve);
-            }, Constants.Animations.Duration * 1000);
+            this.loaderBar.alpha = 0;
+            this.upperElementOutro.alpha = 1;
+            this.lowerElementOutro.alpha = 1;
+            this.upperElementOutro.animate.height(0);
+            this.lowerElementOutro.animate.height(0).then(resolve);
         });
     }
 

@@ -25,7 +25,10 @@ export class LoaderController extends BaseController {
         });
 
         EventsManager.addListener(LoaderConstants.EVENTS.LOADER_COMPLETE, () => {
-            this.view.animateOutro().then(() => {}); //this.view.remove()
+            setTimeout(() => {
+                EventsManager.dispatch(LoaderConstants.EVENTS.LOADER_RESOLVE);
+                this.view.animateOutro().then(() => this.view.remove());
+            }, Constants.Animations.Duration * 1000);
         });
     }
 }
