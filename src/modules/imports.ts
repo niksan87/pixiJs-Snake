@@ -11,6 +11,10 @@ export * from '../managers/AnimationsManager';
 export * from '../managers/EventsManager';
 export * from '../managers/PositionManager';
 
+export * from '../misc/Graphics';
+export * from '../misc/Animate';
+
+
 // Base
 export * from './baseModule/BaseModule';
 export * from './baseModule/models/BaseModel';
@@ -42,22 +46,22 @@ export * from './board/views/BoardView';
 export * from './board/controllers/BoardController';
 export * from './board/constants/BoardConstants';
 
-// Grid element
-export * from './grid/GridModule';
-export * from './grid/models/GridModel';
-export * from './grid/views/GridView';
-export * from './grid/controllers/GridController';
-export * from './grid/constants/GridConstants';
+// // Grid element
+// export * from './grid/GridModule';
+// export * from './grid/models/GridModel';
+// export * from './grid/views/GridView';
+// export * from './grid/controllers/GridController';
+// export * from './grid/constants/GridConstants';
 
-// Snake
-export * from './snake/SnakeModule';
-export * from './snake/models/SnakeModel';
-export * from './snake/views/SnakeView';
-export * from './snake/controllers/SnakeController';
-export * from './snake/constants/SnakeConstants';
+// // Snake
+// export * from './snake/SnakeModule';
+// export * from './snake/models/SnakeModel';
+// export * from './snake/views/SnakeView';
+// export * from './snake/controllers/SnakeController';
+// export * from './snake/constants/SnakeConstants';
 
-// Reward
-export * from './reward/RewardModule';
-export * from './reward/models/RewardModel';
-export * from './reward/views/RewardView';
-export * from './reward/controllers/RewardController';
+// // Reward
+// export * from './reward/RewardModule';
+// export * from './reward/models/RewardModel';
+// export * from './reward/views/RewardView';
+// export * from './reward/controllers/RewardController';

@@ -1,9 +1,5 @@
 import {
-    GameApplication,
-    Constants
+    GameApplication
 } from './modules/imports';
 
-window.onload = () => {
-    new GameApplication();
-    console.log(window[Constants.AppName]);
-};
+window.onload = () => new GameApplication();

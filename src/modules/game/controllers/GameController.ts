@@ -4,8 +4,9 @@ import {
     GameConstants,
     GameView,
     GameModel,
+    GameApplication,
     BoardConstants,
-    SnakeConstants
+    // SnakeConstants
 } from '../../imports';
 
 export class GameController extends BaseController {
@@ -14,9 +15,9 @@ export class GameController extends BaseController {
 
     protected addListeners(): void {
         EventsManager.addListener(GameConstants.EVENTS.CREATE_GAME, () => {
-            this.view.addTo(this.app.stage);
+            this.view.addTo(GameApplication.app.stage);
             EventsManager.dispatch(BoardConstants.EVENTS.CREATE_BOARD);
-            EventsManager.dispatch(SnakeConstants.EVENTS.CREATE_SNAKE);
+            // EventsManager.dispatch(SnakeConstants.EVENTS.CREATE_SNAKE);
         });   
     }
 }

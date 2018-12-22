@@ -1,46 +1,54 @@
 import {
+    IAssociativeArray,
+    IConstructable,
+
     BaseModule,
     LoaderModule,
-    GameModule,
     ActionsManager,
     LoadAssetsAction,
     Constants,
-    IConstructable,
     CreateGameAction,
     BoardModule,
-    SnakeModule,
-    GridModule,
-    IAssociativeArray,
+    // SnakeModule,
+    // GridModule,
+    GameModule,
     Utils
 } from './imports';
 
 export class GameApplication extends PIXI.Application {
+    public static app: GameApplication;
     public modules: IAssociativeArray;
 
     constructor() {
         super(Constants.AppSettings);
-        (window[Constants.AppName] as GameApplication) = this;
+        this.setAppInstance();
         this.createCanvas();
-        this.addModules();
-        this.init();
+        this.initModules();
+        this.startActions();
+        console.warn(this);
+    }
+
+    private setAppInstance(): void {
+        GameApplication.app = this;
     }
 
     private createCanvas(): void {
         document.body.appendChild(this.view);
     };
 
-    public addModules(): void {
+    public initModules(): void {
         const modules: Array<IConstructable<BaseModule>> = [
             LoaderModule,
             GameModule,
             BoardModule,
-            SnakeModule,
-            GridModule
+            // SnakeModule,
+            // GridModule
         ];
-        this.modules = Utils.convertToAssociativeArray(modules);
+        this.modules = {};
+        modules.forEach((Module: IConstructable<BaseModule>) => this.modules[Module.name] = new Module());
     }
 
-    private init(): void {
+    private startActions(): void {
         ActionsManager.execute([
             new LoadAssetsAction(),
             new CreateGameAction()

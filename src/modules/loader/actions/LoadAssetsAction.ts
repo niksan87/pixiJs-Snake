@@ -6,8 +6,8 @@ import {
 
 export class LoadAssetsAction extends BaseAction {
     public execute(): Promise<any> {
-        EventsManager.addListener(LoaderConstants.EVENTS.RESOLVE_LOADING_ACTION, () => this.actionResolve());
-        EventsManager.dispatch(LoaderConstants.EVENTS.LOADING_STARTED);
+        EventsManager.addListener(LoaderConstants.EVENTS.LOADER_COMPLETE, () => this.actionResolve());
+        EventsManager.dispatch(LoaderConstants.EVENTS.LOADER_START);
         return super.execute();
     }
 }

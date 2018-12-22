@@ -14,8 +14,6 @@ export abstract class BaseModule {
         this.addBindings();
     }
 
-    public abstract addBindings(): void 
-
     public asModel(Model: IConstructable<BaseModel>): BaseModule {
         if (!this._model) {
             this._model = new Model();
@@ -38,29 +36,18 @@ export abstract class BaseModule {
     }
 
     public bind(): void {
-        if (this._model && this._view && !this._view.model) {
-            this._view.model = this._model;
-        }
-
-        if (this._model && this._controller && !this._controller.model) {
-            this._controller.model = this._model;
-        }
-
         if (this._view && this._controller && !this._controller.view) {
             this._controller.view = this._view;
         }
-    }
-
-    get model(): BaseModel {
-        return this._model;
+        if (this._model && this._controller && !this._controller.model) {
+            this._controller.model = this._model;
+        }
     }
 
     get view(): BaseView {
         return this._view;
     }
 
-    get controller(): BaseController {
-        return this._controller;
-    }
+    public abstract addBindings(): void 
 
 }

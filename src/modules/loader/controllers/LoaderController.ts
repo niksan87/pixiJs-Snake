@@ -6,28 +6,26 @@ import {
     LoaderView,
     Constants,
     Utils,
-    GameModule
+    GameApplication
 } from '../../imports';
 
 export class LoaderController extends BaseController {
-    public model: LoaderModel;
     public view: LoaderView;
+    public model: LoaderModel;
 
     protected addListeners(): void {
-        EventsManager.addListener(LoaderConstants.EVENTS.LOADING_STARTED, () => {
-            this.view.addTo(this.app.stage);
+
+        EventsManager.addListener(LoaderConstants.EVENTS.LOADER_START, () => {
+            this.view.addTo(GameApplication.app.stage);
             this.model.loadAssets();
         });
 
-        EventsManager.addListener(LoaderConstants.EVENTS.LOADING_COMPLETED, () => {
-            setTimeout(() => {
-                EventsManager.dispatch(LoaderConstants.EVENTS.RESOLVE_LOADING_ACTION);
-                this.view.loadOutro().then(() => console.log('ready!'));   
-            }, Constants.Animations.Duration * 1000);
+        EventsManager.addListener(LoaderConstants.EVENTS.LOADER_IN_PROGRESS, (event: CustomEvent) => {
+            this.view.animateLoading(event.detail);
         });
 
-        EventsManager.addListener(LoaderConstants.EVENTS.LOADING_IN_PROGRESS, (event: CustomEvent) => {
-            this.view.animateLoaderBar(event.detail);
+        EventsManager.addListener(LoaderConstants.EVENTS.LOADER_COMPLETE, () => {
+            this.view.animateOutro().then(() => {}); //this.view.remove()
         });
     }
 }

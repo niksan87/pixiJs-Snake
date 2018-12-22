@@ -14,6 +14,11 @@ export const Constants = {
                 'bg': 'bg.jpg',
                 'grid': 'grid.png'
             }
+        },
+        Loader: {
+            PrimaryColor: 0X78AB46,
+            SecondaryColor: 0x000000
+
         }
     },
     Texts: {

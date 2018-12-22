@@ -4,27 +4,33 @@ import {
     EventsManager,
     LoaderConstants,
     Utils,
+    GameApplication,
     LoaderModule
 } from '../../imports';
 
 export class LoaderModel extends BaseModel {
+    private loader: PIXI.loaders.Loader;
+
     constructor() {
         super();
+        this.loader = GameApplication.app.loader;
     }
 
     public loadAssets(): void {
-        const loader: PIXI.loaders.Loader = new PIXI.loaders.Loader();
         const numOfAssets: number = Utils.getObjectLenght(Constants.Assets.Images.Names);
         const progressStep: number = 1 / numOfAssets;
         let progress: number = 0;
+
         for (var key in Constants.Assets.Images.Names) {
-            loader.add(Constants.Assets.Images.Url + Constants.Assets.Images.Names[key]);
+            this.loader.add(Constants.Assets.Images.Url + Constants.Assets.Images.Names[key]);
         }
-        loader.on('progress', () => {
+        this.loader.on('progress', () => {
             progress += progressStep;
-            EventsManager.dispatch(LoaderConstants.EVENTS.LOADING_IN_PROGRESS, { 'detail': progress });            
+            EventsManager.dispatch(LoaderConstants.EVENTS.LOADER_IN_PROGRESS, { 'detail': progress });            
         });
-        loader.on('complete', () => EventsManager.dispatch(LoaderConstants.EVENTS.LOADING_COMPLETED));
-        loader.load();
+        this.loader.on('complete', () => {
+            EventsManager.dispatch(LoaderConstants.EVENTS.LOADER_COMPLETE);
+        });
+        this.loader.load();
     }
 }

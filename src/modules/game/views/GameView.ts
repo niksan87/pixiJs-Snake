@@ -1,21 +1,22 @@
 import {
     BaseView,
-    BoardModule,
-    BoardView,
-    SnakeModule,
-    SnakeView,
+    // BoardModule,
+    // BoardView,
+    // SnakeModule,
+    // SnakeView,
     Utils,
     LoaderModule,
-    GameModel
+    GameModule,
+    GameApplication
 } from '../../imports';
 
 export class GameView extends BaseView {
-    public model: GameModel;
-    protected board: BoardView;
-    protected snake: SnakeView;
 
     public addTo(parent: PIXI.Container): void {
         super.addTo(parent);
-        this.app.stage.swapChildren(this, Utils.getModule(LoaderModule).view)
+        GameApplication.app.stage.swapChildren(
+            GameApplication.app.modules[LoaderModule.name].view,
+            GameApplication.app.modules[GameModule.name].view
+            )
     }
 }

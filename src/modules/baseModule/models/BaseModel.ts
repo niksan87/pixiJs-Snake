@@ -1,11 +1,7 @@
 import {
-    GameApplication,
-    Utils
+    EventsManager
 } from '../../imports';
 
 export class BaseModel {
-    protected app: GameApplication;
-    constructor() {
-        this.app = Utils.getApplication();
-    }
+
 }

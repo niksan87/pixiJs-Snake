@@ -18,17 +18,17 @@ export interface ITweenSettings {
 
 export interface IAnimationInfo {
     element: any;
+    pivot?: {
+        x: number;
+        y: number;
+    },
     tweenSettings: ITweenSettings;
 }
 
 export class AnimationsManager {
-    private static animAlpha: TweenLite;
-    private static animX: TweenLite;
-    private static animY: TweenLite;
-    private static animWidth: TweenLite;
-    private static animHeight: TweenLite;
+    private animations: any[] = [];
 
-    public static show(element: BaseView, callBack?: Function): void {
+    public show(element: BaseView, callBack?: Function): void {
         const animationInfo: IAnimationInfo = {
             element: element,
             tweenSettings: {
@@ -37,14 +37,10 @@ export class AnimationsManager {
             },
         }
 
-        if (this.animAlpha) {
-            this.animAlpha.kill()
-        };
-
-        this.animAlpha = this.animate(animationInfo);
+        this.animations.push(this.animate(animationInfo));
     };
 
-    public static hide(element: BaseView, callBack?: Function): void {
+    public hide(element: BaseView, callBack?: Function): void {
         const animationInfo: IAnimationInfo = {
             element: element,
             tweenSettings: {
@@ -53,14 +49,10 @@ export class AnimationsManager {
             }
         }
 
-        if (this.animAlpha) {
-            this.animAlpha.kill()
-        };
-
-        this.animAlpha = this.animate(animationInfo);
+        this.animations.push(this.animate(animationInfo));
     };
 
-    public static x(element: any, x: number, callBack?: Function): void {
+    public x(element: any, x: number, callBack?: Function): void {
         const animationInfo: IAnimationInfo = {
             element: element,
             tweenSettings: {
@@ -68,15 +60,10 @@ export class AnimationsManager {
                 onComplete: callBack
             }
         }
-
-        if (this.animX) {
-            this.animX.kill()
-        };
-
-        this.animX = this.animate(animationInfo);
+        this.animations.push(this.animate(animationInfo));
     }
 
-    public static y(element: any, y: number, callBack?: Function): void {
+    public y(element: any, y: number, callBack?: Function): void {
         const animationInfo: IAnimationInfo = {
             element: element,
             tweenSettings: {
@@ -84,15 +71,10 @@ export class AnimationsManager {
                 onComplete: callBack
             }
         }
-
-        if (this.animY) {
-            this.animY.kill()
-        };
-
-        this.animY = this.animate(animationInfo);
+        this.animations.push(this.animate(animationInfo));
     }
 
-    public static width(element: any, width: number, callBack?: Function): void {
+    public width(element: any, width: number, callBack?: Function): void {
         const animationInfo: IAnimationInfo = {
             element: element,
             tweenSettings: {
@@ -100,15 +82,10 @@ export class AnimationsManager {
                 onComplete: callBack
             }
         }
-
-        if (this.animWidth) {
-            this.animWidth.kill()
-        };
-        
-        this.animWidth = this.animate(animationInfo);
+        this.animations.push(this.animate(animationInfo));
     };
 
-    public static height(element: any, height: number, callBack?: Function): void {
+    public height(element: any, height: number, callBack?: Function): void {
         const animationInfo: IAnimationInfo = {
             element: element,
             tweenSettings: {
@@ -116,14 +93,11 @@ export class AnimationsManager {
                 onComplete: callBack
             }
         }
-
-        if (this.animHeight) {
-            this.animHeight.kill()
-        };
-        this.animHeight = this.animate(animationInfo);
+        this.animations.push(this.animate(animationInfo));
     };
 
-    private static animate(animationInfo: IAnimationInfo): TweenLite {
+    private animate(animationInfo: IAnimationInfo): TweenLite {
+
         return TweenLite.to(animationInfo.element, Constants.Animations.Duration, animationInfo.tweenSettings);
     }
 

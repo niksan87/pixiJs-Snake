@@ -9744,152 +9744,17 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./node_modules/ismobilejs/isMobile.js":
-/*!*********************************************!*\
-  !*** ./node_modules/ismobilejs/isMobile.js ***!
-  \*********************************************/
+/***/ "./node_modules/ismobilejs/dist/isMobile.min.js":
+/*!******************************************************!*\
+  !*** ./node_modules/ismobilejs/dist/isMobile.min.js ***!
+  \******************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
- * isMobile.js v0.4.1
- *
- * A simple library to detect Apple phones and tablets,
- * Android phones and tablets, other mobile devices (like blackberry, mini-opera and windows phone),
- * and any kind of seven inch device, via user agent sniffing.
- *
- * @author: Kai Mallea (kmallea@gmail.com)
- *
- * @license: http://creativecommons.org/publicdomain/zero/1.0/
- */
-(function (global) {
-
-    var apple_phone         = /iPhone/i,
-        apple_ipod          = /iPod/i,
-        apple_tablet        = /iPad/i,
-        android_phone       = /(?=.*\bAndroid\b)(?=.*\bMobile\b)/i, // Match 'Android' AND 'Mobile'
-        android_tablet      = /Android/i,
-        amazon_phone        = /(?=.*\bAndroid\b)(?=.*\bSD4930UR\b)/i,
-        amazon_tablet       = /(?=.*\bAndroid\b)(?=.*\b(?:KFOT|KFTT|KFJWI|KFJWA|KFSOWI|KFTHWI|KFTHWA|KFAPWI|KFAPWA|KFARWI|KFASWI|KFSAWI|KFSAWA)\b)/i,
-        windows_phone       = /Windows Phone/i,
-        windows_tablet      = /(?=.*\bWindows\b)(?=.*\bARM\b)/i, // Match 'Windows' AND 'ARM'
-        other_blackberry    = /BlackBerry/i,
-        other_blackberry_10 = /BB10/i,
-        other_opera         = /Opera Mini/i,
-        other_chrome        = /(CriOS|Chrome)(?=.*\bMobile\b)/i,
-        other_firefox       = /(?=.*\bFirefox\b)(?=.*\bMobile\b)/i, // Match 'Firefox' AND 'Mobile'
-        seven_inch = new RegExp(
-            '(?:' +         // Non-capturing group
-
-            'Nexus 7' +     // Nexus 7
-
-            '|' +           // OR
-
-            'BNTV250' +     // B&N Nook Tablet 7 inch
-
-            '|' +           // OR
-
-            'Kindle Fire' + // Kindle Fire
-
-            '|' +           // OR
-
-            'Silk' +        // Kindle Fire, Silk Accelerated
-
-            '|' +           // OR
-
-            'GT-P1000' +    // Galaxy Tab 7 inch
-
-            ')',            // End non-capturing group
-
-            'i');           // Case-insensitive matching
-
-    var match = function(regex, userAgent) {
-        return regex.test(userAgent);
-    };
-
-    var IsMobileClass = function(userAgent) {
-        var ua = userAgent || navigator.userAgent;
-
-        // Facebook mobile app's integrated browser adds a bunch of strings that
-        // match everything. Strip it out if it exists.
-        var tmp = ua.split('[FBAN');
-        if (typeof tmp[1] !== 'undefined') {
-            ua = tmp[0];
-        }
-
-        // Twitter mobile app's integrated browser on iPad adds a "Twitter for
-        // iPhone" string. Same probable happens on other tablet platforms.
-        // This will confuse detection so strip it out if it exists.
-        tmp = ua.split('Twitter');
-        if (typeof tmp[1] !== 'undefined') {
-            ua = tmp[0];
-        }
-
-        this.apple = {
-            phone:  match(apple_phone, ua),
-            ipod:   match(apple_ipod, ua),
-            tablet: !match(apple_phone, ua) && match(apple_tablet, ua),
-            device: match(apple_phone, ua) || match(apple_ipod, ua) || match(apple_tablet, ua)
-        };
-        this.amazon = {
-            phone:  match(amazon_phone, ua),
-            tablet: !match(amazon_phone, ua) && match(amazon_tablet, ua),
-            device: match(amazon_phone, ua) || match(amazon_tablet, ua)
-        };
-        this.android = {
-            phone:  match(amazon_phone, ua) || match(android_phone, ua),
-            tablet: !match(amazon_phone, ua) && !match(android_phone, ua) && (match(amazon_tablet, ua) || match(android_tablet, ua)),
-            device: match(amazon_phone, ua) || match(amazon_tablet, ua) || match(android_phone, ua) || match(android_tablet, ua)
-        };
-        this.windows = {
-            phone:  match(windows_phone, ua),
-            tablet: match(windows_tablet, ua),
-            device: match(windows_phone, ua) || match(windows_tablet, ua)
-        };
-        this.other = {
-            blackberry:   match(other_blackberry, ua),
-            blackberry10: match(other_blackberry_10, ua),
-            opera:        match(other_opera, ua),
-            firefox:      match(other_firefox, ua),
-            chrome:       match(other_chrome, ua),
-            device:       match(other_blackberry, ua) || match(other_blackberry_10, ua) || match(other_opera, ua) || match(other_firefox, ua) || match(other_chrome, ua)
-        };
-        this.seven_inch = match(seven_inch, ua);
-        this.any = this.apple.device || this.android.device || this.windows.device || this.other.device || this.seven_inch;
-
-        // excludes 'other' devices and ipods, targeting touchscreen phones
-        this.phone = this.apple.phone || this.android.phone || this.windows.phone;
-
-        // excludes 7 inch devices, classifying as phone or tablet is left to the user
-        this.tablet = this.apple.tablet || this.android.tablet || this.windows.tablet;
-
-        if (typeof window === 'undefined') {
-            return this;
-        }
-    };
-
-    var instantiate = function() {
-        var IM = new IsMobileClass();
-        IM.Class = IsMobileClass;
-        return IM;
-    };
-
-    if ( true && module.exports && typeof window === 'undefined') {
-        //node
-        module.exports = IsMobileClass;
-    } else if ( true && module.exports && typeof window !== 'undefined') {
-        //browserify
-        module.exports = instantiate();
-    } else if (true) {
-        //AMD
-        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (global.isMobile = instantiate()),
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!function(e){var n=/iPhone/i,t=/iPod/i,r=/iPad/i,a=/\bAndroid(?:.+)Mobile\b/i,p=/Android/i,l=/\bAndroid(?:.+)SD4930UR\b/i,b=/\bAndroid(?:.+)(?:KF[A-Z]{2,4})\b/i,f=/Windows Phone/i,u=/\bWindows(?:.+)ARM\b/i,c=/BlackBerry/i,s=/BB10/i,v=/Opera Mini/i,h=/\b(CriOS|Chrome)(?:.+)Mobile/i,w=/\Mobile(?:.+)Firefox\b/i;function m(e,i){return e.test(i)}function i(e){var i=e||("undefined"!=typeof navigator?navigator.userAgent:""),o=i.split("[FBAN");void 0!==o[1]&&(i=o[0]),void 0!==(o=i.split("Twitter"))[1]&&(i=o[0]);var d={apple:{phone:m(n,i)&&!m(f,i),ipod:m(t,i),tablet:!m(n,i)&&m(r,i)&&!m(f,i),device:(m(n,i)||m(t,i)||m(r,i))&&!m(f,i)},amazon:{phone:m(l,i),tablet:!m(l,i)&&m(b,i),device:m(l,i)||m(b,i)},android:{phone:!m(f,i)&&m(l,i)||!m(f,i)&&m(a,i),tablet:!m(f,i)&&!m(l,i)&&!m(a,i)&&(m(b,i)||m(p,i)),device:!m(f,i)&&(m(l,i)||m(b,i)||m(a,i)||m(p,i))},windows:{phone:m(f,i),tablet:m(u,i),device:m(f,i)||m(u,i)},other:{blackberry:m(c,i),blackberry10:m(s,i),opera:m(v,i),firefox:m(w,i),chrome:m(h,i),device:m(c,i)||m(s,i)||m(v,i)||m(w,i)||m(h,i)}};return d.any=d.apple.device||d.android.device||d.windows.device||d.other.device,d.phone=d.apple.phone||d.android.phone||d.windows.phone,d.tablet=d.apple.tablet||d.android.tablet||d.windows.tablet,d} true&&module.exports&&"undefined"==typeof window?module.exports=i: true&&module.exports&&"undefined"!=typeof window?module.exports=i(): true?!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (e.isMobile=i()),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-    } else {}
-
-})(this);
-
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)):undefined}(this);
 
 /***/ }),
 
@@ -10598,6 +10463,108 @@ module.exports = exports['default'];
 }(this));
 
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../webpack/buildin/module.js */ "./node_modules/webpack/buildin/module.js")(module), __webpack_require__(/*! ./../../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/object-assign/index.js":
+/*!*********************************************!*\
+  !*** ./node_modules/object-assign/index.js ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
+
+
+/* eslint-disable no-unused-vars */
+var getOwnPropertySymbols = Object.getOwnPropertySymbols;
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+
+function toObject(val) {
+	if (val === null || val === undefined) {
+		throw new TypeError('Object.assign cannot be called with null or undefined');
+	}
+
+	return Object(val);
+}
+
+function shouldUseNative() {
+	try {
+		if (!Object.assign) {
+			return false;
+		}
+
+		// Detect buggy property enumeration order in older V8 versions.
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
+		var test1 = new String('abc');  // eslint-disable-line no-new-wrappers
+		test1[5] = 'de';
+		if (Object.getOwnPropertyNames(test1)[0] === '5') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test2 = {};
+		for (var i = 0; i < 10; i++) {
+			test2['_' + String.fromCharCode(i)] = i;
+		}
+		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+			return test2[n];
+		});
+		if (order2.join('') !== '0123456789') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test3 = {};
+		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+			test3[letter] = letter;
+		});
+		if (Object.keys(Object.assign({}, test3)).join('') !==
+				'abcdefghijklmnopqrst') {
+			return false;
+		}
+
+		return true;
+	} catch (err) {
+		// We don't expect any of the above to throw, but better to be safe.
+		return false;
+	}
+}
+
+module.exports = shouldUseNative() ? Object.assign : function (target, source) {
+	var from;
+	var to = toObject(target);
+	var symbols;
+
+	for (var s = 1; s < arguments.length; s++) {
+		from = Object(arguments[s]);
+
+		for (var key in from) {
+			if (hasOwnProperty.call(from, key)) {
+				to[key] = from[key];
+			}
+		}
+
+		if (getOwnPropertySymbols) {
+			symbols = getOwnPropertySymbols(from);
+			for (var i = 0; i < symbols.length; i++) {
+				if (propIsEnumerable.call(from, symbols[i])) {
+					to[symbols[i]] = from[symbols[i]];
+				}
+			}
+		}
+	}
+
+	return to;
+};
+
 
 /***/ }),
 
@@ -12690,7 +12657,7 @@ var _core = __webpack_require__(/*! ../core */ "./node_modules/pixi.js/lib/core/
 
 var core = _interopRequireWildcard(_core);
 
-var _ismobilejs = __webpack_require__(/*! ismobilejs */ "./node_modules/ismobilejs/isMobile.js");
+var _ismobilejs = __webpack_require__(/*! ismobilejs */ "./node_modules/ismobilejs/dist/isMobile.min.js");
 
 var _ismobilejs2 = _interopRequireDefault(_ismobilejs);
 
@@ -13734,7 +13701,7 @@ exports.__esModule = true;
  * @name VERSION
  * @type {string}
  */
-var VERSION = exports.VERSION = '4.8.3';
+var VERSION = exports.VERSION = '4.8.4';
 
 /**
  * Two Pi.
@@ -21049,16 +21016,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  */
 var Ellipse = function () {
   /**
-   * @param {number} [x=0] - The X coordinate of the center of this circle
-   * @param {number} [y=0] - The Y coordinate of the center of this circle
-   * @param {number} [width=0] - The half width of this ellipse
-   * @param {number} [height=0] - The half height of this ellipse
+   * @param {number} [x=0] - The X coordinate of the center of this ellipse
+   * @param {number} [y=0] - The Y coordinate of the center of this ellipse
+   * @param {number} [halfWidth=0] - The half width of this ellipse
+   * @param {number} [halfHeight=0] - The half height of this ellipse
    */
   function Ellipse() {
     var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
     var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-    var width = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-    var height = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+    var halfWidth = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+    var halfHeight = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
 
     _classCallCheck(this, Ellipse);
 
@@ -21078,13 +21045,13 @@ var Ellipse = function () {
      * @member {number}
      * @default 0
      */
-    this.width = width;
+    this.width = halfWidth;
 
     /**
      * @member {number}
      * @default 0
      */
-    this.height = height;
+    this.height = halfHeight;
 
     /**
      * The type of the object, mainly used to avoid `instanceof` checks
@@ -34958,11 +34925,11 @@ var _mixin = __webpack_require__(/*! ./mixin */ "./node_modules/pixi.js/lib/core
 
 var mixins = _interopRequireWildcard(_mixin);
 
-var _ismobilejs = __webpack_require__(/*! ismobilejs */ "./node_modules/ismobilejs/isMobile.js");
+var _ismobilejs = __webpack_require__(/*! ismobilejs */ "./node_modules/ismobilejs/dist/isMobile.min.js");
 
 var isMobile = _interopRequireWildcard(_ismobilejs);
 
-var _removeArrayItems = __webpack_require__(/*! remove-array-items */ "./node_modules/remove-array-items/dist/remove-array-items.esm.js");
+var _removeArrayItems = __webpack_require__(/*! remove-array-items */ "./node_modules/remove-array-items/index.js");
 
 var _removeArrayItems2 = _interopRequireDefault(_removeArrayItems);
 
@@ -35468,7 +35435,7 @@ function mapPremultipliedBlendModes() {
 exports.__esModule = true;
 exports.default = maxRecommendedTextures;
 
-var _ismobilejs = __webpack_require__(/*! ismobilejs */ "./node_modules/ismobilejs/isMobile.js");
+var _ismobilejs = __webpack_require__(/*! ismobilejs */ "./node_modules/ismobilejs/dist/isMobile.min.js");
 
 var _ismobilejs2 = _interopRequireDefault(_ismobilejs);
 
@@ -47605,7 +47572,7 @@ if (!Number.isInteger) {
 "use strict";
 
 
-var _objectAssign = __webpack_require__(/*! object-assign */ "./node_modules/pixi.js/node_modules/object-assign/index.js");
+var _objectAssign = __webpack_require__(/*! object-assign */ "./node_modules/object-assign/index.js");
 
 var _objectAssign2 = _interopRequireDefault(_objectAssign);
 
@@ -48701,108 +48668,6 @@ core.WebGLRenderer.registerPlugin('prepare', WebGLPrepare);
 
 /***/ }),
 
-/***/ "./node_modules/pixi.js/node_modules/object-assign/index.js":
-/*!******************************************************************!*\
-  !*** ./node_modules/pixi.js/node_modules/object-assign/index.js ***!
-  \******************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*
-object-assign
-(c) Sindre Sorhus
-@license MIT
-*/
-
-
-/* eslint-disable no-unused-vars */
-var getOwnPropertySymbols = Object.getOwnPropertySymbols;
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-var propIsEnumerable = Object.prototype.propertyIsEnumerable;
-
-function toObject(val) {
-	if (val === null || val === undefined) {
-		throw new TypeError('Object.assign cannot be called with null or undefined');
-	}
-
-	return Object(val);
-}
-
-function shouldUseNative() {
-	try {
-		if (!Object.assign) {
-			return false;
-		}
-
-		// Detect buggy property enumeration order in older V8 versions.
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
-		var test1 = new String('abc');  // eslint-disable-line no-new-wrappers
-		test1[5] = 'de';
-		if (Object.getOwnPropertyNames(test1)[0] === '5') {
-			return false;
-		}
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test2 = {};
-		for (var i = 0; i < 10; i++) {
-			test2['_' + String.fromCharCode(i)] = i;
-		}
-		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
-			return test2[n];
-		});
-		if (order2.join('') !== '0123456789') {
-			return false;
-		}
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test3 = {};
-		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
-			test3[letter] = letter;
-		});
-		if (Object.keys(Object.assign({}, test3)).join('') !==
-				'abcdefghijklmnopqrst') {
-			return false;
-		}
-
-		return true;
-	} catch (err) {
-		// We don't expect any of the above to throw, but better to be safe.
-		return false;
-	}
-}
-
-module.exports = shouldUseNative() ? Object.assign : function (target, source) {
-	var from;
-	var to = toObject(target);
-	var symbols;
-
-	for (var s = 1; s < arguments.length; s++) {
-		from = Object(arguments[s]);
-
-		for (var key in from) {
-			if (hasOwnProperty.call(from, key)) {
-				to[key] = from[key];
-			}
-		}
-
-		if (getOwnPropertySymbols) {
-			symbols = getOwnPropertySymbols(from);
-			for (var i = 0; i < symbols.length; i++) {
-				if (propIsEnumerable.call(from, symbols[i])) {
-					to[symbols[i]] = from[symbols[i]];
-				}
-			}
-		}
-	}
-
-	return to;
-};
-
-
-/***/ }),
-
 /***/ "./node_modules/process/browser.js":
 /*!*****************************************!*\
   !*** ./node_modules/process/browser.js ***!
@@ -49207,15 +49072,16 @@ exports.encode = exports.stringify = __webpack_require__(/*! ./encode */ "./node
 
 /***/ }),
 
-/***/ "./node_modules/remove-array-items/dist/remove-array-items.esm.js":
-/*!************************************************************************!*\
-  !*** ./node_modules/remove-array-items/dist/remove-array-items.esm.js ***!
-  \************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ "./node_modules/remove-array-items/index.js":
+/*!**************************************************!*\
+  !*** ./node_modules/remove-array-items/index.js ***!
+  \**************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
+
+
 /**
  * Remove a range of items from an array
  *
@@ -49224,26 +49090,23 @@ __webpack_require__.r(__webpack_exports__);
  * @param {number} startIdx The index to begin removing from (inclusive)
  * @param {number} removeCount How many items to remove
  */
-function removeItems(arr, startIdx, removeCount)
-{
-  var i, length = arr.length;
+module.exports = function removeItems (arr, startIdx, removeCount) {
+  var i, length = arr.length
 
   if (startIdx >= length || removeCount === 0) {
     return
   }
 
-  removeCount = (startIdx + removeCount > length ? length - startIdx : removeCount);
+  removeCount = (startIdx + removeCount > length ? length - startIdx : removeCount)
 
-  var len = length - removeCount;
+  var len = length - removeCount
 
   for (i = startIdx; i < len; ++i) {
-    arr[i] = arr[i + removeCount];
+    arr[i] = arr[i + removeCount]
   }
 
-  arr.length = len;
+  arr.length = len
 }
-
-/* harmony default export */ __webpack_exports__["default"] = (removeItems);
 
 
 /***/ }),
@@ -49259,6 +49122,7 @@ function removeItems(arr, startIdx, removeCount)
 
 
 exports.__esModule = true;
+exports.Loader = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -49278,8 +49142,6 @@ var async = _interopRequireWildcard(_async);
 
 var _Resource = __webpack_require__(/*! ./Resource */ "./node_modules/resource-loader/lib/Resource.js");
 
-var _Resource2 = _interopRequireDefault(_Resource);
-
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -49296,7 +49158,7 @@ var rgxExtractUrlHash = /(#[\w-]+)?$/;
  * @class
  */
 
-var Loader = function () {
+var Loader = exports.Loader = function () {
     /**
      * @param {string} [baseUrl=''] - The base url for all resources loaded by this loader.
      * @param {number} [concurrency=10] - The number of resources to load concurrently.
@@ -49349,12 +49211,15 @@ var Loader = function () {
          *
          * // This will request 'image.png?v=1&user=me&password=secret'
          * loader.add('iamge.png?v=1').load();
+         *
+         * @member {string}
          */
         this.defaultQueryString = '';
 
         /**
          * The middleware to run before loading each resource.
          *
+         * @private
          * @member {function[]}
          */
         this._beforeMiddleware = [];
@@ -49362,6 +49227,7 @@ var Loader = function () {
         /**
          * The middleware to run after loading each resource.
          *
+         * @private
          * @member {function[]}
          */
         this._afterMiddleware = [];
@@ -49369,6 +49235,7 @@ var Loader = function () {
         /**
          * The tracks the resources we are currently completing parsing for.
          *
+         * @private
          * @member {Resource[]}
          */
         this._resourcesParsing = [];
@@ -49448,49 +49315,6 @@ var Loader = function () {
          */
         this.onComplete = new _miniSignals2.default();
 
-        /**
-         * When the progress changes the loader and resource are disaptched.
-         *
-         * @memberof Loader
-         * @callback OnProgressSignal
-         * @param {Loader} loader - The loader the progress is advancing on.
-         * @param {Resource} resource - The resource that has completed or failed to cause the progress to advance.
-         */
-
-        /**
-         * When an error occurrs the loader and resource are disaptched.
-         *
-         * @memberof Loader
-         * @callback OnErrorSignal
-         * @param {Loader} loader - The loader the error happened in.
-         * @param {Resource} resource - The resource that caused the error.
-         */
-
-        /**
-         * When a load completes the loader and resource are disaptched.
-         *
-         * @memberof Loader
-         * @callback OnLoadSignal
-         * @param {Loader} loader - The loader that laoded the resource.
-         * @param {Resource} resource - The resource that has completed loading.
-         */
-
-        /**
-         * When the loader starts loading resources it dispatches this callback.
-         *
-         * @memberof Loader
-         * @callback OnStartSignal
-         * @param {Loader} loader - The loader that has started loading resources.
-         */
-
-        /**
-         * When the loader completes loading resources it dispatches this callback.
-         *
-         * @memberof Loader
-         * @callback OnCompleteSignal
-         * @param {Loader} loader - The loader that has finished loading resources.
-         */
-
         // Add default before middleware
         for (var i = 0; i < Loader._defaultBeforeMiddleware.length; ++i) {
             this.pre(Loader._defaultBeforeMiddleware[i]);
@@ -49501,6 +49325,72 @@ var Loader = function () {
             this.use(Loader._defaultAfterMiddleware[_i]);
         }
     }
+
+    /**
+     * When the progress changes the loader and resource are disaptched.
+     *
+     * @memberof Loader
+     * @callback OnProgressSignal
+     * @param {Loader} loader - The loader the progress is advancing on.
+     * @param {Resource} resource - The resource that has completed or failed to cause the progress to advance.
+     */
+
+    /**
+     * When an error occurrs the loader and resource are disaptched.
+     *
+     * @memberof Loader
+     * @callback OnErrorSignal
+     * @param {Loader} loader - The loader the error happened in.
+     * @param {Resource} resource - The resource that caused the error.
+     */
+
+    /**
+     * When a load completes the loader and resource are disaptched.
+     *
+     * @memberof Loader
+     * @callback OnLoadSignal
+     * @param {Loader} loader - The loader that laoded the resource.
+     * @param {Resource} resource - The resource that has completed loading.
+     */
+
+    /**
+     * When the loader starts loading resources it dispatches this callback.
+     *
+     * @memberof Loader
+     * @callback OnStartSignal
+     * @param {Loader} loader - The loader that has started loading resources.
+     */
+
+    /**
+     * When the loader completes loading resources it dispatches this callback.
+     *
+     * @memberof Loader
+     * @callback OnCompleteSignal
+     * @param {Loader} loader - The loader that has finished loading resources.
+     */
+
+    /**
+     * Options for a call to `.add()`.
+     *
+     * @see Loader#add
+     *
+     * @typedef {object} IAddOptions
+     * @property {string} [name] - The name of the resource to load, if not passed the url is used.
+     * @property {string} [key] - Alias for `name`.
+     * @property {string} [url] - The url for this resource, relative to the baseUrl of this loader.
+     * @property {string|boolean} [crossOrigin] - Is this request cross-origin? Default is to
+     *      determine automatically.
+     * @property {number} [timeout=0] - A timeout in milliseconds for the load. If the load takes
+     *      longer than this time it is cancelled and the load is considered a failure. If this value is
+     *      set to `0` then there is no explicit timeout.
+     * @property {Resource.LOAD_TYPE} [loadType=Resource.LOAD_TYPE.XHR] - How should this resource
+     *      be loaded?
+     * @property {Resource.XHR_RESPONSE_TYPE} [xhrType=Resource.XHR_RESPONSE_TYPE.DEFAULT] - How
+     *      should the data being loaded be interpreted when using XHR?
+     * @property {Loader.OnCompleteSignal} [onComplete] - Callback to add an an onComplete signal istener.
+     * @property {Loader.OnCompleteSignal} [callback] - Alias for `onComplete`.
+     * @property {Resource.IMetadata} [metadata] - Extra configuration for middleware and the Resource object.
+     */
 
     /**
      * Adds a resource (or multiple resources) to the loader queue.
@@ -49546,28 +49436,11 @@ var Loader = function () {
      *     .add('http://...', { crossOrigin: true }, function () {});
      * ```
      *
-     * @param {string} [name] - The name of the resource to load, if not passed the url is used.
+     * @param {string|IAddOptions} [name] - The name of the resource to load, if not passed the url is used.
      * @param {string} [url] - The url for this resource, relative to the baseUrl of this loader.
-     * @param {object} [options] - The options for the load.
-     * @param {string|boolean} [options.crossOrigin] - Is this request cross-origin? Default is to
-     *      determine automatically.
-     * @param {number} [options.timeout=0] - A timeout in milliseconds for the load. If the load takes
-     *      longer than this time it is cancelled and the load is considered a failure. If this value is
-     *      set to `0` then there is no explicit timeout.
-     * @param {Resource.LOAD_TYPE} [options.loadType=Resource.LOAD_TYPE.XHR] - How should this resource
-     *      be loaded?
-     * @param {Resource.XHR_RESPONSE_TYPE} [options.xhrType=Resource.XHR_RESPONSE_TYPE.DEFAULT] - How
-     *      should the data being loaded be interpreted when using XHR?
-     * @param {object} [options.metadata] - Extra configuration for middleware and the Resource object.
-     * @param {HTMLImageElement|HTMLAudioElement|HTMLVideoElement} [options.metadata.loadElement=null] - The
-     *      element to use for loading, instead of creating one.
-     * @param {boolean} [options.metadata.skipSource=false] - Skips adding source(s) to the load element. This
-     *      is useful if you want to pass in a `loadElement` that you already added load sources to.
-     * @param {string|string[]} [options.metadata.mimeType] - The mime type to use for the source element
-     *      of a video/audio elment. If the urls are an array, you can pass this as an array as well
-     *      where each index is the mime type to use for the corresponding url index.
-     * @param {function} [cb] - Function to call when this specific resource completes loading.
-     * @return {Loader} Returns itself.
+     * @param {IAddOptions} [options] - The options for the load.
+     * @param {Loader.OnCompleteSignal} [cb] - Function to call when this specific resource completes loading.
+     * @return {this} Returns itself.
      */
 
 
@@ -49621,7 +49494,7 @@ var Loader = function () {
         url = this._prepareUrl(url);
 
         // create the store the resource
-        this.resources[name] = new _Resource2.default(name, url, options);
+        this.resources[name] = new _Resource.Resource(name, url, options);
 
         if (typeof cb === 'function') {
             this.resources[name].onAfterMiddleware.once(cb);
@@ -49661,9 +49534,8 @@ var Loader = function () {
      * Sets up a middleware function that will run *before* the
      * resource is loaded.
      *
-     * @method before
      * @param {function} fn - The middleware function to register.
-     * @return {Loader} Returns itself.
+     * @return {this} Returns itself.
      */
 
 
@@ -49677,10 +49549,8 @@ var Loader = function () {
      * Sets up a middleware function that will run *after* the
      * resource is loaded.
      *
-     * @alias use
-     * @method after
      * @param {function} fn - The middleware function to register.
-     * @return {Loader} Returns itself.
+     * @return {this} Returns itself.
      */
 
 
@@ -49693,7 +49563,7 @@ var Loader = function () {
     /**
      * Resets the queue of the loader to prepare for a new load.
      *
-     * @return {Loader} Returns itself.
+     * @return {this} Returns itself.
      */
 
 
@@ -49726,7 +49596,7 @@ var Loader = function () {
      * Starts loading the queued resources.
      *
      * @param {function} [cb] - Optional callback that will be bound to the `complete` event.
-     * @return {Loader} Returns itself.
+     * @return {this} Returns itself.
      */
 
 
@@ -49928,17 +49798,18 @@ var Loader = function () {
  * A default array of middleware to run before loading each resource.
  * Each of these middlewares are added to any new Loader instances when they are created.
  *
+ * @private
  * @member {function[]}
  */
 
 
-exports.default = Loader;
 Loader._defaultBeforeMiddleware = [];
 
 /**
  * A default array of middleware to run after loading each resource.
  * Each of these middlewares are added to any new Loader instances when they are created.
  *
+ * @private
  * @member {function[]}
  */
 Loader._defaultAfterMiddleware = [];
@@ -49947,7 +49818,7 @@ Loader._defaultAfterMiddleware = [];
  * Sets up a middleware function that will run *before* the
  * resource is loaded.
  *
- * @method before
+ * @static
  * @param {function} fn - The middleware function to register.
  * @return {Loader} Returns itself.
  */
@@ -49961,8 +49832,7 @@ Loader.pre = function LoaderPreStatic(fn) {
  * Sets up a middleware function that will run *after* the
  * resource is loaded.
  *
- * @alias use
- * @method after
+ * @static
  * @param {function} fn - The middleware function to register.
  * @return {Loader} Returns itself.
  */
@@ -49986,6 +49856,7 @@ Loader.use = function LoaderUseStatic(fn) {
 
 
 exports.__esModule = true;
+exports.Resource = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -50001,7 +49872,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-// tests is CORS is supported in XHR, if not we need to use XDR
+// tests if CORS is supported in XHR, if not we need to use XDR
 var useXdr = !!(window.XDomainRequest && !('withCredentials' in new XMLHttpRequest()));
 var tempAnchor = null;
 
@@ -50021,7 +49892,7 @@ function _noop() {} /* empty */
  * @class
  */
 
-var Resource = function () {
+var Resource = exports.Resource = function () {
     /**
      * Sets the load type to be used for a specific extension.
      *
@@ -50060,14 +49931,7 @@ var Resource = function () {
      *      be loaded?
      * @param {Resource.XHR_RESPONSE_TYPE} [options.xhrType=Resource.XHR_RESPONSE_TYPE.DEFAULT] - How
      *      should the data being loaded be interpreted when using XHR?
-     * @param {object} [options.metadata] - Extra configuration for middleware and the Resource object.
-     * @param {HTMLImageElement|HTMLAudioElement|HTMLVideoElement} [options.metadata.loadElement=null] - The
-     *      element to use for loading, instead of creating one.
-     * @param {boolean} [options.metadata.skipSource=false] - Skips adding source(s) to the load element. This
-     *      is useful if you want to pass in a `loadElement` that you already added load sources to.
-     * @param {string|string[]} [options.metadata.mimeType] - The mime type to use for the source element
-     *      of a video/audio elment. If the urls are an array, you can pass this as an array as well
-     *      where each index is the mime type to use for the corresponding url index.
+     * @param {Resource.IMetadata} [options.metadata] - Extra configuration for middleware and the Resource object.
      */
 
 
@@ -50083,6 +49947,7 @@ var Resource = function () {
         /**
          * The state flags of this resource.
          *
+         * @private
          * @member {number}
          */
         this._flags = 0;
@@ -50093,24 +49958,24 @@ var Resource = function () {
         /**
          * The name of this resource.
          *
-         * @member {string}
          * @readonly
+         * @member {string}
          */
         this.name = name;
 
         /**
          * The url used to load this resource.
          *
-         * @member {string}
          * @readonly
+         * @member {string}
          */
         this.url = url;
 
         /**
          * The extension used to load this resource.
          *
-         * @member {string}
          * @readonly
+         * @member {string}
          */
         this.extension = this._getExtension();
 
@@ -50157,20 +50022,15 @@ var Resource = function () {
          * Note that if you pass in a `loadElement`, the Resource class takes ownership of it.
          * Meaning it will modify it as it sees fit.
          *
-         * @member {object}
-         * @property {HTMLImageElement|HTMLAudioElement|HTMLVideoElement} [loadElement=null] - The
-         *  element to use for loading, instead of creating one.
-         * @property {boolean} [skipSource=false] - Skips adding source(s) to the load element. This
-         *  is useful if you want to pass in a `loadElement` that you already added load sources
-         *  to.
+         * @member {Resource.IMetadata}
          */
         this.metadata = options.metadata || {};
 
         /**
          * The error that occurred while loading (if any).
          *
-         * @member {Error}
          * @readonly
+         * @member {Error}
          */
         this.error = null;
 
@@ -50178,32 +50038,32 @@ var Resource = function () {
          * The XHR object that was used to load this resource. This is only set
          * when `loadType` is `Resource.LOAD_TYPE.XHR`.
          *
-         * @member {XMLHttpRequest}
          * @readonly
+         * @member {XMLHttpRequest}
          */
         this.xhr = null;
 
         /**
          * The child resources this resource owns.
          *
-         * @member {Resource[]}
          * @readonly
+         * @member {Resource[]}
          */
         this.children = [];
 
         /**
          * The resource type.
          *
-         * @member {Resource.TYPE}
          * @readonly
+         * @member {Resource.TYPE}
          */
         this.type = Resource.TYPE.UNKNOWN;
 
         /**
          * The progress chunk owned by this resource.
          *
-         * @member {number}
          * @readonly
+         * @member {number}
          */
         this.progressChunk = 0;
 
@@ -50310,38 +50170,50 @@ var Resource = function () {
          * @member {Signal}
          */
         this.onAfterMiddleware = new _miniSignals2.default();
-
-        /**
-         * When the resource starts to load.
-         *
-         * @memberof Resource
-         * @callback OnStartSignal
-         * @param {Resource} resource - The resource that the event happened on.
-         */
-
-        /**
-         * When the resource reports loading progress.
-         *
-         * @memberof Resource
-         * @callback OnProgressSignal
-         * @param {Resource} resource - The resource that the event happened on.
-         * @param {number} percentage - The progress of the load in the range [0, 1].
-         */
-
-        /**
-         * When the resource finishes loading.
-         *
-         * @memberof Resource
-         * @callback OnCompleteSignal
-         * @param {Resource} resource - The resource that the event happened on.
-         */
     }
+
+    /**
+     * When the resource starts to load.
+     *
+     * @memberof Resource
+     * @callback OnStartSignal
+     * @param {Resource} resource - The resource that the event happened on.
+     */
+
+    /**
+     * When the resource reports loading progress.
+     *
+     * @memberof Resource
+     * @callback OnProgressSignal
+     * @param {Resource} resource - The resource that the event happened on.
+     * @param {number} percentage - The progress of the load in the range [0, 1].
+     */
+
+    /**
+     * When the resource finishes loading.
+     *
+     * @memberof Resource
+     * @callback OnCompleteSignal
+     * @param {Resource} resource - The resource that the event happened on.
+     */
+
+    /**
+     * @memberof Resource
+     * @typedef {object} IMetadata
+     * @property {HTMLImageElement|HTMLAudioElement|HTMLVideoElement} [loadElement=null] - The
+     *      element to use for loading, instead of creating one.
+     * @property {boolean} [skipSource=false] - Skips adding source(s) to the load element. This
+     *      is useful if you want to pass in a `loadElement` that you already added load sources to.
+     * @property {string|string[]} [mimeType] - The mime type to use for the source element
+     *      of a video/audio elment. If the urls are an array, you can pass this as an array as well
+     *      where each index is the mime type to use for the corresponding url index.
+     */
 
     /**
      * Stores whether or not this url is a data url.
      *
-     * @member {boolean}
      * @readonly
+     * @member {boolean}
      */
 
 
@@ -50398,7 +50270,7 @@ var Resource = function () {
     /**
      * Kicks off loading of this resource. This method is asynchronous.
      *
-     * @param {function} [cb] - Optional callback to call once the resource is loaded.
+     * @param {Resource.OnCompleteSignal} [cb] - Optional callback to call once the resource is loaded.
      */
 
 
@@ -50642,10 +50514,10 @@ var Resource = function () {
 
         var xhr = this.xhr = new XMLHttpRequest();
 
-        xhr.timeout = this.timeout;
-
         // set the request type and url
         xhr.open('GET', this.url, true);
+
+        xhr.timeout = this.timeout;
 
         // load json as text and parse it ourselves. We do this because some browsers
         // *cough* safari *cough* can't deal with it.
@@ -50900,10 +50772,10 @@ var Resource = function () {
             return '';
         }
 
-        // A sandboxed iframe without the 'allow-same-origin' attribute will have
-        // an origin of null, and will always require crossOrigin requests
-        // regardless of whether the location matches.
-        if (window.origin === null) {
+        // A sandboxed iframe without the 'allow-same-origin' attribute will have a special
+        // origin designed not to match window.location.origin, and will always require
+        // crossOrigin requests regardless of whether the location matches.
+        if (window.origin !== window.location.origin) {
             return 'anonymous';
         }
 
@@ -51027,8 +50899,8 @@ var Resource = function () {
          * Describes if this resource has finished loading. Is true when the resource has completely
          * loaded.
          *
-         * @member {boolean}
          * @readonly
+         * @member {boolean}
          */
 
     }, {
@@ -51041,8 +50913,8 @@ var Resource = function () {
          * Describes if this resource is currently loading. Is true when the resource starts loading,
          * and is false again when complete.
          *
-         * @member {boolean}
          * @readonly
+         * @member {boolean}
          */
 
     }, {
@@ -51064,7 +50936,6 @@ var Resource = function () {
  */
 
 
-exports.default = Resource;
 Resource.STATUS_FLAGS = {
     NONE: 0,
     DATA_URL: 1 << 0,
@@ -51224,6 +51095,11 @@ function setExtMap(map, extname, val) {
 function reqType(xhr) {
     return xhr.toString().replace('object ', '');
 }
+
+// Backwards compat
+if (true) {
+    module.exports.default = Resource; // eslint-disable-line no-undef
+}
 //# sourceMappingURL=Resource.js.map
 
 /***/ }),
@@ -51244,12 +51120,22 @@ exports.queue = queue;
 /**
  * Smaller version of the async library constructs.
  *
+ * @namespace async
+ */
+
+/**
+ * Noop function
+ *
+ * @ignore
+ * @function
+ * @memberof async
  */
 function _noop() {} /* empty */
 
 /**
  * Iterates an array in series.
  *
+ * @memberof async
  * @param {Array.<*>} array - Array to iterate.
  * @param {function} iterator - Function to call for each element.
  * @param {function} callback - Function to call when done, or on error.
@@ -51281,6 +51167,8 @@ function eachSeries(array, iterator, callback, deferNext) {
 /**
  * Ensures a function is only called once.
  *
+ * @ignore
+ * @memberof async
  * @param {function} fn - The function to wrap.
  * @return {function} The wrapping function.
  */
@@ -51300,6 +51188,7 @@ function onlyOnce(fn) {
 /**
  * Async queue implementation,
  *
+ * @memberof async
  * @param {function} worker - The worker function to call for each task.
  * @param {number} concurrency - How many workers to run in parrallel.
  * @return {*} The async queue object.
@@ -51461,6 +51350,12 @@ exports.__esModule = true;
 exports.encodeBinary = encodeBinary;
 var _keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
 
+/**
+ * Encodes binary into base64.
+ *
+ * @param {string} input The input data to encode.
+ * @returns {string} The encoded base64 string
+ */
 function encodeBinary(input) {
     var output = '';
     var inx = 0;
@@ -51521,6 +51416,11 @@ function encodeBinary(input) {
 
     return output;
 }
+
+// Backwards compat
+if (true) {
+    module.exports.default = encodeBinary; // eslint-disable-line no-undef
+}
 //# sourceMappingURL=b64.js.map
 
 /***/ }),
@@ -51542,18 +51442,51 @@ function encodeBinary(input) {
 
 /* eslint-disable no-undef */
 
-var Loader = __webpack_require__(/*! ./Loader */ "./node_modules/resource-loader/lib/Loader.js").default;
-var Resource = __webpack_require__(/*! ./Resource */ "./node_modules/resource-loader/lib/Resource.js").default;
+var Loader = __webpack_require__(/*! ./Loader */ "./node_modules/resource-loader/lib/Loader.js").Loader;
+var Resource = __webpack_require__(/*! ./Resource */ "./node_modules/resource-loader/lib/Resource.js").Resource;
 var async = __webpack_require__(/*! ./async */ "./node_modules/resource-loader/lib/async.js");
 var b64 = __webpack_require__(/*! ./b64 */ "./node_modules/resource-loader/lib/b64.js");
 
+/**
+ *
+ * @static
+ * @memberof Loader
+ * @member {Class<Resource>}
+ */
 Loader.Resource = Resource;
+
+/**
+ *
+ * @static
+ * @memberof Loader
+ * @member {Class<async>}
+ */
 Loader.async = async;
+
+/**
+ *
+ * @static
+ * @memberof Loader
+ * @member {Class<encodeBinary>}
+ */
+Loader.encodeBinary = b64;
+
+/**
+ *
+ * @deprecated
+ * @see Loader.encodeBinary
+ *
+ * @static
+ * @memberof Loader
+ * @member {Class<encodeBinary>}
+ */
 Loader.base64 = b64;
 
 // export manually, and also as default
 module.exports = Loader;
-// export default Loader;
+
+// default & named export
+module.exports.Loader = Loader;
 module.exports.default = Loader;
 //# sourceMappingURL=index.js.map
 
@@ -51574,13 +51507,7 @@ exports.blobMiddlewareFactory = blobMiddlewareFactory;
 
 var _Resource = __webpack_require__(/*! ../../Resource */ "./node_modules/resource-loader/lib/Resource.js");
 
-var _Resource2 = _interopRequireDefault(_Resource);
-
 var _b = __webpack_require__(/*! ../../b64 */ "./node_modules/resource-loader/lib/b64.js");
-
-var _b2 = _interopRequireDefault(_b);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Url = window.URL || window.webkitURL;
 
@@ -51594,7 +51521,7 @@ function blobMiddlewareFactory() {
         }
 
         // if this was an XHR load of a blob
-        if (resource.xhr && resource.xhrType === _Resource2.default.XHR_RESPONSE_TYPE.BLOB) {
+        if (resource.xhr && resource.xhrType === _Resource.Resource.XHR_RESPONSE_TYPE.BLOB) {
             // if there is no blob support we probably got a binary string back
             if (!window.Blob || typeof resource.data === 'string') {
                 var type = resource.xhr.getResponseHeader('content-type');
@@ -51602,9 +51529,9 @@ function blobMiddlewareFactory() {
                 // this is an image, convert the binary string into a data url
                 if (type && type.indexOf('image') === 0) {
                     resource.data = new Image();
-                    resource.data.src = 'data:' + type + ';base64,' + _b2.default.encodeBinary(resource.xhr.responseText);
+                    resource.data.src = 'data:' + type + ';base64,' + (0, _b.encodeBinary)(resource.xhr.responseText);
 
-                    resource.type = _Resource2.default.TYPE.IMAGE;
+                    resource.type = _Resource.Resource.TYPE.IMAGE;
 
                     // wait until the image loads and then callback
                     resource.data.onload = function () {
@@ -51625,7 +51552,7 @@ function blobMiddlewareFactory() {
                     resource.data = new Image();
                     resource.data.src = src;
 
-                    resource.type = _Resource2.default.TYPE.IMAGE;
+                    resource.type = _Resource.Resource.TYPE.IMAGE;
 
                     // cleanup the no longer used blob after the image loads
                     // TODO: Is this correct? Will the image be invalid after revoking?
@@ -52530,10 +52457,7 @@ module.exports = function(module) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./modules/imports */ "./src/modules/imports.ts");
 
-window.onload = () => {
-    new _modules_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"]();
-    console.log(window[_modules_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].AppName]);
-};
+window.onload = () => new _modules_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"]();
 
 
 /***/ }),
@@ -52581,7 +52505,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class AnimationsManager {
-    static show(element, callBack) {
+    constructor() {
+        this.animations = [];
+    }
+    show(element, callBack) {
         const animationInfo = {
             element: element,
             tweenSettings: {
@@ -52589,14 +52516,10 @@ class AnimationsManager {
                 onComplete: callBack
             },
         };
-        if (this.animAlpha) {
-            this.animAlpha.kill();
-        }
-        ;
-        this.animAlpha = this.animate(animationInfo);
+        this.animations.push(this.animate(animationInfo));
     }
     ;
-    static hide(element, callBack) {
+    hide(element, callBack) {
         const animationInfo = {
             element: element,
             tweenSettings: {
@@ -52604,14 +52527,10 @@ class AnimationsManager {
                 onComplete: callBack
             }
         };
-        if (this.animAlpha) {
-            this.animAlpha.kill();
-        }
-        ;
-        this.animAlpha = this.animate(animationInfo);
+        this.animations.push(this.animate(animationInfo));
     }
     ;
-    static x(element, x, callBack) {
+    x(element, x, callBack) {
         const animationInfo = {
             element: element,
             tweenSettings: {
@@ -52619,13 +52538,9 @@ class AnimationsManager {
                 onComplete: callBack
             }
         };
-        if (this.animX) {
-            this.animX.kill();
-        }
-        ;
-        this.animX = this.animate(animationInfo);
+        this.animations.push(this.animate(animationInfo));
     }
-    static y(element, y, callBack) {
+    y(element, y, callBack) {
         const animationInfo = {
             element: element,
             tweenSettings: {
@@ -52633,13 +52548,9 @@ class AnimationsManager {
                 onComplete: callBack
             }
         };
-        if (this.animY) {
-            this.animY.kill();
-        }
-        ;
-        this.animY = this.animate(animationInfo);
+        this.animations.push(this.animate(animationInfo));
     }
-    static width(element, width, callBack) {
+    width(element, width, callBack) {
         const animationInfo = {
             element: element,
             tweenSettings: {
@@ -52647,14 +52558,10 @@ class AnimationsManager {
                 onComplete: callBack
             }
         };
-        if (this.animWidth) {
-            this.animWidth.kill();
-        }
-        ;
-        this.animWidth = this.animate(animationInfo);
+        this.animations.push(this.animate(animationInfo));
     }
     ;
-    static height(element, height, callBack) {
+    height(element, height, callBack) {
         const animationInfo = {
             element: element,
             tweenSettings: {
@@ -52662,14 +52569,10 @@ class AnimationsManager {
                 onComplete: callBack
             }
         };
-        if (this.animHeight) {
-            this.animHeight.kill();
-        }
-        ;
-        this.animHeight = this.animate(animationInfo);
+        this.animations.push(this.animate(animationInfo));
     }
     ;
-    static animate(animationInfo) {
+    animate(animationInfo) {
         return gsap__WEBPACK_IMPORTED_MODULE_0__["TweenLite"].to(animationInfo.element, _modules_imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].Animations.Duration, animationInfo.tweenSettings);
     }
 }
@@ -52715,40 +52618,6 @@ class EventsManager {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PositionManager", function() { return PositionManager; });
 class PositionManager {
-    static set(positionSettings) {
-        if (!positionSettings.alignment.x && !positionSettings.alignment.y) {
-            console.error(`Missing parameters to execute function.`);
-            return;
-        }
-        const elementToPosition = positionSettings.elementToPosition;
-        const elementToPositionTo = positionSettings.elementToPositionTo;
-        if (positionSettings.alignment.x) {
-            switch (positionSettings.alignment.x) {
-                case "left":
-                    elementToPosition.x = positionSettings.elementToPositionTo.x;
-                    break;
-                case "right":
-                    elementToPosition.x = elementToPositionTo.x + elementToPositionTo.width - elementToPosition.width;
-                    break;
-                case "center":
-                    elementToPosition.x = elementToPositionTo.x + elementToPositionTo.width / 2 - elementToPosition.width / 2;
-                    break;
-            }
-        }
-        if (positionSettings.alignment.y) {
-            switch (positionSettings.alignment.y) {
-                case "top":
-                    elementToPosition.y = positionSettings.elementToPositionTo.y;
-                    break;
-                case "bottom":
-                    elementToPosition.y = elementToPositionTo.y + elementToPositionTo.height - elementToPosition.height;
-                    break;
-                case "center":
-                    elementToPosition.y = elementToPositionTo.y + elementToPositionTo.height / 2 - elementToPosition.height / 2;
-                    break;
-            }
-        }
-    }
 }
 
 
@@ -52767,12 +52636,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../modules/imports */ "./src/modules/imports.ts");
 
 class Utils {
-    static convertToAssociativeArray(array) {
-        let output = {};
-        array.forEach((Element) => output[Element.name] = new Element());
-        return output;
-    }
-    ;
     static getModule(Module) {
         return window[_modules_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].AppName].modules[Module.name];
     }
@@ -52804,6 +52667,105 @@ class Utils {
 
 /***/ }),
 
+/***/ "./src/misc/Animate.ts":
+/*!*****************************!*\
+  !*** ./src/misc/Animate.ts ***!
+  \*****************************/
+/*! exports provided: Animate */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Animate", function() { return Animate; });
+/* harmony import */ var gsap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! gsap */ "./node_modules/gsap/index.js");
+/* harmony import */ var _modules_imports__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../modules/imports */ "./src/modules/imports.ts");
+
+
+class Animate {
+    constructor(element) {
+        this.animations = [];
+        this.element = element;
+    }
+    width(widthToAnimateTo, duration = _modules_imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].Animations.Duration) {
+        return new Promise((resolve) => {
+            this.animations.push(gsap__WEBPACK_IMPORTED_MODULE_0__["TweenLite"].to(this.element, duration, { width: widthToAnimateTo, onComplete: resolve }));
+        });
+    }
+    height(heightToAnimateTo, duration = _modules_imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].Animations.Duration) {
+        return new Promise((resolve) => {
+            this.animations.push(gsap__WEBPACK_IMPORTED_MODULE_0__["TweenLite"].to(this.element, duration, { height: heightToAnimateTo, onComplete: resolve }));
+        });
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/misc/Graphics.ts":
+/*!******************************!*\
+  !*** ./src/misc/Graphics.ts ***!
+  \******************************/
+/*! exports provided: Graphics */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Graphics", function() { return Graphics; });
+/* harmony import */ var _modules_imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../modules/imports */ "./src/modules/imports.ts");
+
+class Graphics extends PIXI.Graphics {
+    constructor() {
+        super();
+        this._animate = new _modules_imports__WEBPACK_IMPORTED_MODULE_0__["Animate"](this);
+    }
+    setAnchor(x, y) {
+        if (x < 0 || x > 1 || y < 0 || y > 1) {
+            console.error(`Invalid anchor value.`);
+            return;
+        }
+        this.pivot.x = this.width * x;
+        this.pivot.y = this.height * y;
+    }
+    alignTo(element, alignment) {
+        if (!alignment.x && !alignment.y) {
+            console.error(`Missing parameters to execute alignment.`);
+            return;
+        }
+        if (alignment.x) {
+            switch (alignment.x) {
+                case "left":
+                    this.x = element.x + this.pivot.x;
+                    break;
+                case "right":
+                    this.x = element.x + element.width - this.width + this.pivot.x;
+                    break;
+                case "center":
+                    this.x = element.x + element.width / 2 - this.width / 2 + this.pivot.x;
+                    break;
+            }
+        }
+        if (alignment.y) {
+            switch (alignment.y) {
+                case "top":
+                    this.y = element.y + this.pivot.y;
+                    break;
+                case "bottom":
+                    this.y = element.y + element.height - this.height + this.pivot.y;
+                    break;
+                case "center":
+                    this.y = element.y + element.height / 2 - this.height / 2 + this.pivot.y;
+                    break;
+            }
+        }
+    }
+    get animate() {
+        return this._animate;
+    }
+}
+
+
+/***/ }),
+
 /***/ "./src/modules/GameApplication.ts":
 /*!****************************************!*\
   !*** ./src/modules/GameApplication.ts ***!
@@ -52819,26 +52781,29 @@ __webpack_require__.r(__webpack_exports__);
 class GameApplication extends PIXI.Application {
     constructor() {
         super(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].AppSettings);
-        window[_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].AppName] = this;
+        this.setAppInstance();
         this.createCanvas();
-        this.addModules();
-        this.init();
+        this.initModules();
+        this.startActions();
+        console.warn(this);
+    }
+    setAppInstance() {
+        GameApplication.app = this;
     }
     createCanvas() {
         document.body.appendChild(this.view);
     }
     ;
-    addModules() {
+    initModules() {
         const modules = [
             _imports__WEBPACK_IMPORTED_MODULE_0__["LoaderModule"],
             _imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"],
             _imports__WEBPACK_IMPORTED_MODULE_0__["BoardModule"],
-            _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeModule"],
-            _imports__WEBPACK_IMPORTED_MODULE_0__["GridModule"]
         ];
-        this.modules = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].convertToAssociativeArray(modules);
+        this.modules = {};
+        modules.forEach((Module) => this.modules[Module.name] = new Module());
     }
-    init() {
+    startActions() {
         _imports__WEBPACK_IMPORTED_MODULE_0__["ActionsManager"].execute([
             new _imports__WEBPACK_IMPORTED_MODULE_0__["LoadAssetsAction"](),
             new _imports__WEBPACK_IMPORTED_MODULE_0__["CreateGameAction"]()
@@ -52882,24 +52847,15 @@ class BaseModule {
         return this;
     }
     bind() {
-        if (this._model && this._view && !this._view.model) {
-            this._view.model = this._model;
+        if (this._view && this._controller && !this._controller.view) {
+            this._controller.view = this._view;
         }
         if (this._model && this._controller && !this._controller.model) {
             this._controller.model = this._model;
         }
-        if (this._view && this._controller && !this._controller.view) {
-            this._controller.view = this._view;
-        }
-    }
-    get model() {
-        return this._model;
     }
     get view() {
         return this._view;
-    }
-    get controller() {
-        return this._controller;
     }
 }
 
@@ -52937,24 +52893,21 @@ class BaseAction {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BaseController", function() { return BaseController; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
 class BaseController {
     constructor() {
         this.addListeners();
-        this.app = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getApplication();
-    }
-    get model() {
-        return this._model;
-    }
-    set model(model) {
-        this._model = model;
     }
     get view() {
         return this._view;
     }
     set view(view) {
         this._view = view;
+    }
+    get model() {
+        return this._model;
+    }
+    set model(model) {
+        this._model = model;
     }
 }
 
@@ -52971,12 +52924,7 @@ class BaseController {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BaseModel", function() { return BaseModel; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
 class BaseModel {
-    constructor() {
-        this.app = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getApplication();
-    }
 }
 
 
@@ -52992,25 +52940,12 @@ class BaseModel {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BaseView", function() { return BaseView; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
 class BaseView extends PIXI.Container {
-    constructor(model) {
-        super();
-        this.model = model;
-        this.app = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getApplication();
-    }
     addTo(parent) {
         parent.addChild(this);
     }
     remove() {
         this.parent.removeChild(this);
-    }
-    get model() {
-        return this._model;
-    }
-    set model(model) {
-        this._model = model;
     }
 }
 
@@ -53082,8 +53017,8 @@ __webpack_require__.r(__webpack_exports__);
 class BoardController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
     addListeners() {
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardConstants"].EVENTS.CREATE_BOARD, () => {
-            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getModule(_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"]).view);
-            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GridConstants"].EVENTS.CREATE_GRID);
+            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"].name].view);
+            //EventsManager.dispatch(GridConstants.EVENTS.CREATE_GRID);
         });
     }
 }
@@ -53122,22 +53057,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
 
 class BoardView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
+    //protected grid: GridView;
     addTo(parent) {
         super.addTo(parent);
-        //this.addBorder();
         this.addBackground();
     }
     addBackground() {
         const texture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.bg);
-        const tilingSprite = new PIXI.extras.TilingSprite(texture, this.app.screen.width, this.app.screen.height);
+        const tilingSprite = new PIXI.extras.TilingSprite(texture, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.screen.width, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.screen.height);
         this.addChild(tilingSprite);
-    }
-    addBorder() {
-        const gt = new PIXI.Graphics();
-        gt.beginFill(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardConstants"].SETTINGS.BORDER.COLOR);
-        gt.drawRect(0, 0, this.app.screen.width, this.app.screen.height);
-        gt.endFill();
-        this.addChild(gt);
     }
 }
 
@@ -53170,6 +53098,10 @@ const Constants = {
                 'bg': 'bg.jpg',
                 'grid': 'grid.png'
             }
+        },
+        Loader: {
+            PrimaryColor: 0X78AB46,
+            SecondaryColor: 0x000000
         }
     },
     Texts: {
@@ -53264,9 +53196,9 @@ __webpack_require__.r(__webpack_exports__);
 class GameController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
     addListeners() {
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.CREATE_GAME, () => {
-            this.view.addTo(this.app.stage);
+            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.stage);
             _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardConstants"].EVENTS.CREATE_BOARD);
-            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.CREATE_SNAKE);
+            // EventsManager.dispatch(SnakeConstants.EVENTS.CREATE_SNAKE);
         });
     }
 }
@@ -53307,145 +53239,8 @@ __webpack_require__.r(__webpack_exports__);
 class GameView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
     addTo(parent) {
         super.addTo(parent);
-        this.app.stage.swapChildren(this, _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getModule(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderModule"]).view);
+        _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.stage.swapChildren(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderModule"].name].view, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"].name].view);
     }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/grid/GridModule.ts":
-/*!****************************************!*\
-  !*** ./src/modules/grid/GridModule.ts ***!
-  \****************************************/
-/*! exports provided: GridModule */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridModule", function() { return GridModule; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
-
-class GridModule extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModule"] {
-    addBindings() {
-        this
-            .asModel(_imports__WEBPACK_IMPORTED_MODULE_0__["GridModel"])
-            .asView(_imports__WEBPACK_IMPORTED_MODULE_0__["GridView"])
-            .asController(_imports__WEBPACK_IMPORTED_MODULE_0__["GridController"])
-            .bind();
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/grid/constants/GridConstants.ts":
-/*!*****************************************************!*\
-  !*** ./src/modules/grid/constants/GridConstants.ts ***!
-  \*****************************************************/
-/*! exports provided: GridConstants */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridConstants", function() { return GridConstants; });
-const GridConstants = {
-    EVENTS: {
-        CREATE_GRID: 'CREATE_GRID'
-    }
-};
-
-
-/***/ }),
-
-/***/ "./src/modules/grid/controllers/GridController.ts":
-/*!********************************************************!*\
-  !*** ./src/modules/grid/controllers/GridController.ts ***!
-  \********************************************************/
-/*! exports provided: GridController */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridController", function() { return GridController; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class GridController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
-    addListeners() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GridConstants"].EVENTS.CREATE_GRID, () => {
-            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getModule(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardModule"]).view);
-        });
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/grid/models/GridModel.ts":
-/*!**********************************************!*\
-  !*** ./src/modules/grid/models/GridModel.ts ***!
-  \**********************************************/
-/*! exports provided: GridModel */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridModel", function() { return GridModel; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class GridModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/grid/views/GridView.ts":
-/*!********************************************!*\
-  !*** ./src/modules/grid/views/GridView.ts ***!
-  \********************************************/
-/*! exports provided: GridView, GridElement */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridView", function() { return GridView; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridElement", function() { return GridElement; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class GridView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
-    addTo(parent) {
-        super.addTo(parent);
-        this.createTilingSpriteBackground();
-        this.createGridMatrix();
-        console.warn(this.grid);
-    }
-    createTilingSpriteBackground() {
-        const texture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.grid);
-        this.boxSize = texture.width / 2;
-        const tilingSprite = new PIXI.extras.TilingSprite(texture, this.app.screen.width, this.app.screen.height);
-        this.addChild(tilingSprite);
-    }
-    createGridMatrix() {
-        const xNumOfBoxes = this.app.screen.width / this.boxSize;
-        const yNumOfBoxes = this.app.screen.height / this.boxSize;
-        let xPosition = 0;
-        let yPosition = 0;
-        this.grid = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].createTwoDImensionalArray(xNumOfBoxes, yNumOfBoxes, GridElement);
-        this.grid.forEach((line, lineIndex) => {
-            xPosition = 0;
-            line.forEach((element, rowIndex) => {
-                element.id = `grid_x${rowIndex}_y${lineIndex}`;
-                element.x = xPosition;
-                element.y = yPosition;
-                element.width = this.boxSize;
-                element.height = this.boxSize;
-                xPosition += this.boxSize;
-            });
-            yPosition += this.boxSize;
-        });
-    }
-}
-class GridElement {
 }
 
 
@@ -53455,7 +53250,7 @@ class GridElement {
 /*!********************************!*\
   !*** ./src/modules/imports.ts ***!
   \********************************/
-/*! exports provided: GameApplication, Constants, Utils, ActionsManager, AnimationsManager, EventsManager, PositionManager, BaseModule, BaseModel, BaseView, BaseController, BaseAction, LoaderModule, LoaderModel, LoaderView, LoaderController, LoadAssetsAction, LoaderConstants, GameModule, GameModel, GameView, GameController, CreateGameAction, GameConstants, BoardModule, BoardModel, BoardView, BoardController, BoardConstants, GridModule, GridModel, GridView, GridElement, GridController, GridConstants, SnakeModule, SnakeModel, SnakeView, SnakeController, SnakeConstants, RewardModule, RewardModel, RewardView, RewardController */
+/*! exports provided: GameApplication, Constants, Utils, ActionsManager, AnimationsManager, EventsManager, PositionManager, Graphics, Animate, BaseModule, BaseModel, BaseView, BaseController, BaseAction, LoaderModule, LoaderModel, LoaderView, LoaderController, LoadAssetsAction, LoaderConstants, GameModule, GameModel, GameView, GameController, CreateGameAction, GameConstants, BoardModule, BoardModel, BoardView, BoardController, BoardConstants */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -53483,120 +53278,84 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _managers_PositionManager__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../managers/PositionManager */ "./src/managers/PositionManager.ts");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "PositionManager", function() { return _managers_PositionManager__WEBPACK_IMPORTED_MODULE_7__["PositionManager"]; });
 
-/* harmony import */ var _baseModule_BaseModule__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./baseModule/BaseModule */ "./src/modules/baseModule/BaseModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseModule", function() { return _baseModule_BaseModule__WEBPACK_IMPORTED_MODULE_8__["BaseModule"]; });
+/* harmony import */ var _misc_Graphics__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../misc/Graphics */ "./src/misc/Graphics.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Graphics", function() { return _misc_Graphics__WEBPACK_IMPORTED_MODULE_8__["Graphics"]; });
 
-/* harmony import */ var _baseModule_models_BaseModel__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./baseModule/models/BaseModel */ "./src/modules/baseModule/models/BaseModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseModel", function() { return _baseModule_models_BaseModel__WEBPACK_IMPORTED_MODULE_9__["BaseModel"]; });
+/* harmony import */ var _misc_Animate__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../misc/Animate */ "./src/misc/Animate.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Animate", function() { return _misc_Animate__WEBPACK_IMPORTED_MODULE_9__["Animate"]; });
 
-/* harmony import */ var _baseModule_views_BaseView__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./baseModule/views/BaseView */ "./src/modules/baseModule/views/BaseView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseView", function() { return _baseModule_views_BaseView__WEBPACK_IMPORTED_MODULE_10__["BaseView"]; });
+/* harmony import */ var _baseModule_BaseModule__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./baseModule/BaseModule */ "./src/modules/baseModule/BaseModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseModule", function() { return _baseModule_BaseModule__WEBPACK_IMPORTED_MODULE_10__["BaseModule"]; });
 
-/* harmony import */ var _baseModule_controllers_BaseController__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./baseModule/controllers/BaseController */ "./src/modules/baseModule/controllers/BaseController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseController", function() { return _baseModule_controllers_BaseController__WEBPACK_IMPORTED_MODULE_11__["BaseController"]; });
+/* harmony import */ var _baseModule_models_BaseModel__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./baseModule/models/BaseModel */ "./src/modules/baseModule/models/BaseModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseModel", function() { return _baseModule_models_BaseModel__WEBPACK_IMPORTED_MODULE_11__["BaseModel"]; });
 
-/* harmony import */ var _baseModule_actions_BaseAction__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./baseModule/actions/BaseAction */ "./src/modules/baseModule/actions/BaseAction.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseAction", function() { return _baseModule_actions_BaseAction__WEBPACK_IMPORTED_MODULE_12__["BaseAction"]; });
+/* harmony import */ var _baseModule_views_BaseView__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./baseModule/views/BaseView */ "./src/modules/baseModule/views/BaseView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseView", function() { return _baseModule_views_BaseView__WEBPACK_IMPORTED_MODULE_12__["BaseView"]; });
 
-/* harmony import */ var _loader_LoaderModule__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./loader/LoaderModule */ "./src/modules/loader/LoaderModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderModule", function() { return _loader_LoaderModule__WEBPACK_IMPORTED_MODULE_13__["LoaderModule"]; });
+/* harmony import */ var _baseModule_controllers_BaseController__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./baseModule/controllers/BaseController */ "./src/modules/baseModule/controllers/BaseController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseController", function() { return _baseModule_controllers_BaseController__WEBPACK_IMPORTED_MODULE_13__["BaseController"]; });
 
-/* harmony import */ var _loader_models_LoaderModel__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./loader/models/LoaderModel */ "./src/modules/loader/models/LoaderModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderModel", function() { return _loader_models_LoaderModel__WEBPACK_IMPORTED_MODULE_14__["LoaderModel"]; });
+/* harmony import */ var _baseModule_actions_BaseAction__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./baseModule/actions/BaseAction */ "./src/modules/baseModule/actions/BaseAction.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseAction", function() { return _baseModule_actions_BaseAction__WEBPACK_IMPORTED_MODULE_14__["BaseAction"]; });
 
-/* harmony import */ var _loader_views_LoaderView__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./loader/views/LoaderView */ "./src/modules/loader/views/LoaderView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderView", function() { return _loader_views_LoaderView__WEBPACK_IMPORTED_MODULE_15__["LoaderView"]; });
+/* harmony import */ var _loader_LoaderModule__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./loader/LoaderModule */ "./src/modules/loader/LoaderModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderModule", function() { return _loader_LoaderModule__WEBPACK_IMPORTED_MODULE_15__["LoaderModule"]; });
 
-/* harmony import */ var _loader_controllers_LoaderController__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./loader/controllers/LoaderController */ "./src/modules/loader/controllers/LoaderController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderController", function() { return _loader_controllers_LoaderController__WEBPACK_IMPORTED_MODULE_16__["LoaderController"]; });
+/* harmony import */ var _loader_models_LoaderModel__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./loader/models/LoaderModel */ "./src/modules/loader/models/LoaderModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderModel", function() { return _loader_models_LoaderModel__WEBPACK_IMPORTED_MODULE_16__["LoaderModel"]; });
 
-/* harmony import */ var _loader_actions_LoadAssetsAction__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./loader/actions/LoadAssetsAction */ "./src/modules/loader/actions/LoadAssetsAction.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoadAssetsAction", function() { return _loader_actions_LoadAssetsAction__WEBPACK_IMPORTED_MODULE_17__["LoadAssetsAction"]; });
+/* harmony import */ var _loader_views_LoaderView__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./loader/views/LoaderView */ "./src/modules/loader/views/LoaderView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderView", function() { return _loader_views_LoaderView__WEBPACK_IMPORTED_MODULE_17__["LoaderView"]; });
 
-/* harmony import */ var _loader_constants_LoaderConstants__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./loader/constants/LoaderConstants */ "./src/modules/loader/constants/LoaderConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderConstants", function() { return _loader_constants_LoaderConstants__WEBPACK_IMPORTED_MODULE_18__["LoaderConstants"]; });
+/* harmony import */ var _loader_controllers_LoaderController__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./loader/controllers/LoaderController */ "./src/modules/loader/controllers/LoaderController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderController", function() { return _loader_controllers_LoaderController__WEBPACK_IMPORTED_MODULE_18__["LoaderController"]; });
 
-/* harmony import */ var _game_GameModule__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./game/GameModule */ "./src/modules/game/GameModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameModule", function() { return _game_GameModule__WEBPACK_IMPORTED_MODULE_19__["GameModule"]; });
+/* harmony import */ var _loader_actions_LoadAssetsAction__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./loader/actions/LoadAssetsAction */ "./src/modules/loader/actions/LoadAssetsAction.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoadAssetsAction", function() { return _loader_actions_LoadAssetsAction__WEBPACK_IMPORTED_MODULE_19__["LoadAssetsAction"]; });
 
-/* harmony import */ var _game_models_GameModel__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./game/models/GameModel */ "./src/modules/game/models/GameModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameModel", function() { return _game_models_GameModel__WEBPACK_IMPORTED_MODULE_20__["GameModel"]; });
+/* harmony import */ var _loader_constants_LoaderConstants__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./loader/constants/LoaderConstants */ "./src/modules/loader/constants/LoaderConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderConstants", function() { return _loader_constants_LoaderConstants__WEBPACK_IMPORTED_MODULE_20__["LoaderConstants"]; });
 
-/* harmony import */ var _game_views_GameView__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./game/views/GameView */ "./src/modules/game/views/GameView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameView", function() { return _game_views_GameView__WEBPACK_IMPORTED_MODULE_21__["GameView"]; });
+/* harmony import */ var _game_GameModule__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./game/GameModule */ "./src/modules/game/GameModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameModule", function() { return _game_GameModule__WEBPACK_IMPORTED_MODULE_21__["GameModule"]; });
 
-/* harmony import */ var _game_controllers_GameController__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./game/controllers/GameController */ "./src/modules/game/controllers/GameController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameController", function() { return _game_controllers_GameController__WEBPACK_IMPORTED_MODULE_22__["GameController"]; });
+/* harmony import */ var _game_models_GameModel__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./game/models/GameModel */ "./src/modules/game/models/GameModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameModel", function() { return _game_models_GameModel__WEBPACK_IMPORTED_MODULE_22__["GameModel"]; });
 
-/* harmony import */ var _game_actions_CreateGameAction__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./game/actions/CreateGameAction */ "./src/modules/game/actions/CreateGameAction.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "CreateGameAction", function() { return _game_actions_CreateGameAction__WEBPACK_IMPORTED_MODULE_23__["CreateGameAction"]; });
+/* harmony import */ var _game_views_GameView__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./game/views/GameView */ "./src/modules/game/views/GameView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameView", function() { return _game_views_GameView__WEBPACK_IMPORTED_MODULE_23__["GameView"]; });
 
-/* harmony import */ var _game_constants_GameConstants__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./game/constants/GameConstants */ "./src/modules/game/constants/GameConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameConstants", function() { return _game_constants_GameConstants__WEBPACK_IMPORTED_MODULE_24__["GameConstants"]; });
+/* harmony import */ var _game_controllers_GameController__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./game/controllers/GameController */ "./src/modules/game/controllers/GameController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameController", function() { return _game_controllers_GameController__WEBPACK_IMPORTED_MODULE_24__["GameController"]; });
 
-/* harmony import */ var _board_BoardModule__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ./board/BoardModule */ "./src/modules/board/BoardModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModule", function() { return _board_BoardModule__WEBPACK_IMPORTED_MODULE_25__["BoardModule"]; });
+/* harmony import */ var _game_actions_CreateGameAction__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ./game/actions/CreateGameAction */ "./src/modules/game/actions/CreateGameAction.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "CreateGameAction", function() { return _game_actions_CreateGameAction__WEBPACK_IMPORTED_MODULE_25__["CreateGameAction"]; });
 
-/* harmony import */ var _board_models_BoardModel__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ./board/models/BoardModel */ "./src/modules/board/models/BoardModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModel", function() { return _board_models_BoardModel__WEBPACK_IMPORTED_MODULE_26__["BoardModel"]; });
+/* harmony import */ var _game_constants_GameConstants__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ./game/constants/GameConstants */ "./src/modules/game/constants/GameConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameConstants", function() { return _game_constants_GameConstants__WEBPACK_IMPORTED_MODULE_26__["GameConstants"]; });
 
-/* harmony import */ var _board_views_BoardView__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ./board/views/BoardView */ "./src/modules/board/views/BoardView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardView", function() { return _board_views_BoardView__WEBPACK_IMPORTED_MODULE_27__["BoardView"]; });
+/* harmony import */ var _board_BoardModule__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ./board/BoardModule */ "./src/modules/board/BoardModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModule", function() { return _board_BoardModule__WEBPACK_IMPORTED_MODULE_27__["BoardModule"]; });
 
-/* harmony import */ var _board_controllers_BoardController__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ./board/controllers/BoardController */ "./src/modules/board/controllers/BoardController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardController", function() { return _board_controllers_BoardController__WEBPACK_IMPORTED_MODULE_28__["BoardController"]; });
+/* harmony import */ var _board_models_BoardModel__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ./board/models/BoardModel */ "./src/modules/board/models/BoardModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModel", function() { return _board_models_BoardModel__WEBPACK_IMPORTED_MODULE_28__["BoardModel"]; });
 
-/* harmony import */ var _board_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! ./board/constants/BoardConstants */ "./src/modules/board/constants/BoardConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardConstants", function() { return _board_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_29__["BoardConstants"]; });
+/* harmony import */ var _board_views_BoardView__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! ./board/views/BoardView */ "./src/modules/board/views/BoardView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardView", function() { return _board_views_BoardView__WEBPACK_IMPORTED_MODULE_29__["BoardView"]; });
 
-/* harmony import */ var _grid_GridModule__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! ./grid/GridModule */ "./src/modules/grid/GridModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridModule", function() { return _grid_GridModule__WEBPACK_IMPORTED_MODULE_30__["GridModule"]; });
+/* harmony import */ var _board_controllers_BoardController__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! ./board/controllers/BoardController */ "./src/modules/board/controllers/BoardController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardController", function() { return _board_controllers_BoardController__WEBPACK_IMPORTED_MODULE_30__["BoardController"]; });
 
-/* harmony import */ var _grid_models_GridModel__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! ./grid/models/GridModel */ "./src/modules/grid/models/GridModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridModel", function() { return _grid_models_GridModel__WEBPACK_IMPORTED_MODULE_31__["GridModel"]; });
-
-/* harmony import */ var _grid_views_GridView__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! ./grid/views/GridView */ "./src/modules/grid/views/GridView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridView", function() { return _grid_views_GridView__WEBPACK_IMPORTED_MODULE_32__["GridView"]; });
-
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridElement", function() { return _grid_views_GridView__WEBPACK_IMPORTED_MODULE_32__["GridElement"]; });
-
-/* harmony import */ var _grid_controllers_GridController__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! ./grid/controllers/GridController */ "./src/modules/grid/controllers/GridController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridController", function() { return _grid_controllers_GridController__WEBPACK_IMPORTED_MODULE_33__["GridController"]; });
-
-/* harmony import */ var _grid_constants_GridConstants__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! ./grid/constants/GridConstants */ "./src/modules/grid/constants/GridConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridConstants", function() { return _grid_constants_GridConstants__WEBPACK_IMPORTED_MODULE_34__["GridConstants"]; });
-
-/* harmony import */ var _snake_SnakeModule__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! ./snake/SnakeModule */ "./src/modules/snake/SnakeModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModule", function() { return _snake_SnakeModule__WEBPACK_IMPORTED_MODULE_35__["SnakeModule"]; });
-
-/* harmony import */ var _snake_models_SnakeModel__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! ./snake/models/SnakeModel */ "./src/modules/snake/models/SnakeModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModel", function() { return _snake_models_SnakeModel__WEBPACK_IMPORTED_MODULE_36__["SnakeModel"]; });
-
-/* harmony import */ var _snake_views_SnakeView__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! ./snake/views/SnakeView */ "./src/modules/snake/views/SnakeView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeView", function() { return _snake_views_SnakeView__WEBPACK_IMPORTED_MODULE_37__["SnakeView"]; });
-
-/* harmony import */ var _snake_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! ./snake/controllers/SnakeController */ "./src/modules/snake/controllers/SnakeController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeController", function() { return _snake_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_38__["SnakeController"]; });
-
-/* harmony import */ var _snake_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! ./snake/constants/SnakeConstants */ "./src/modules/snake/constants/SnakeConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeConstants", function() { return _snake_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_39__["SnakeConstants"]; });
-
-/* harmony import */ var _reward_RewardModule__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! ./reward/RewardModule */ "./src/modules/reward/RewardModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModule", function() { return _reward_RewardModule__WEBPACK_IMPORTED_MODULE_40__["RewardModule"]; });
-
-/* harmony import */ var _reward_models_RewardModel__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! ./reward/models/RewardModel */ "./src/modules/reward/models/RewardModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModel", function() { return _reward_models_RewardModel__WEBPACK_IMPORTED_MODULE_41__["RewardModel"]; });
-
-/* harmony import */ var _reward_views_RewardView__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(/*! ./reward/views/RewardView */ "./src/modules/reward/views/RewardView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardView", function() { return _reward_views_RewardView__WEBPACK_IMPORTED_MODULE_42__["RewardView"]; });
-
-/* harmony import */ var _reward_controllers_RewardController__WEBPACK_IMPORTED_MODULE_43__ = __webpack_require__(/*! ./reward/controllers/RewardController */ "./src/modules/reward/controllers/RewardController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardController", function() { return _reward_controllers_RewardController__WEBPACK_IMPORTED_MODULE_43__["RewardController"]; });
+/* harmony import */ var _board_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! ./board/constants/BoardConstants */ "./src/modules/board/constants/BoardConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardConstants", function() { return _board_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_31__["BoardConstants"]; });
 
 // Attach PIXI to window for accesibility
 
 window.PIXI = pixi_js__WEBPACK_IMPORTED_MODULE_0__;
 /** Internal exports */
+
+
 
 
 
@@ -53630,23 +53389,23 @@ window.PIXI = pixi_js__WEBPACK_IMPORTED_MODULE_0__;
 
 
 
-// Grid element
-
-
-
-
-
-// Snake
-
-
-
-
-
-// Reward
-
-
-
-
+// // Grid element
+// export * from './grid/GridModule';
+// export * from './grid/models/GridModel';
+// export * from './grid/views/GridView';
+// export * from './grid/controllers/GridController';
+// export * from './grid/constants/GridConstants';
+// // Snake
+// export * from './snake/SnakeModule';
+// export * from './snake/models/SnakeModel';
+// export * from './snake/views/SnakeView';
+// export * from './snake/controllers/SnakeController';
+// export * from './snake/constants/SnakeConstants';
+// // Reward
+// export * from './reward/RewardModule';
+// export * from './reward/models/RewardModel';
+// export * from './reward/views/RewardView';
+// export * from './reward/controllers/RewardController';
 
 
 /***/ }),
@@ -53690,8 +53449,8 @@ __webpack_require__.r(__webpack_exports__);
 
 class LoadAssetsAction extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseAction"] {
     execute() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.RESOLVE_LOADING_ACTION, () => this.actionResolve());
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADING_STARTED);
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_COMPLETE, () => this.actionResolve());
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_START);
         return super.execute();
     }
 }
@@ -53711,10 +53470,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "LoaderConstants", function() { return LoaderConstants; });
 const LoaderConstants = {
     EVENTS: {
-        LOADING_STARTED: 'LOADING_STARTED',
-        LOADING_COMPLETED: 'LOADING_COMPLETED',
-        LOADING_IN_PROGRESS: 'LOADING_IN_PROGRESS',
-        RESOLVE_LOADING_ACTION: 'RESOLVE_LOADING_ACTION'
+        LOADER_ADD_TO_STAGE: 'LOADER_ADD_TO_STAGE',
+        LOADER_START: 'LOADER_START',
+        LOADER_IN_PROGRESS: 'LOADER_IN_PROGRESS',
+        LOADER_COMPLETE: 'LOADER_COMPLETE'
     }
 };
 
@@ -53735,18 +53494,15 @@ __webpack_require__.r(__webpack_exports__);
 
 class LoaderController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
     addListeners() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADING_STARTED, () => {
-            this.view.addTo(this.app.stage);
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_START, () => {
+            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.stage);
             this.model.loadAssets();
         });
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADING_COMPLETED, () => {
-            setTimeout(() => {
-                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.RESOLVE_LOADING_ACTION);
-                this.view.loadOutro().then(() => console.log('ready!'));
-            }, _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Animations.Duration * 1000);
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_IN_PROGRESS, (event) => {
+            this.view.animateLoading(event.detail);
         });
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADING_IN_PROGRESS, (event) => {
-            this.view.animateLoaderBar(event.detail);
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_COMPLETE, () => {
+            this.view.animateOutro().then(() => { }); //this.view.remove()
         });
     }
 }
@@ -53769,21 +53525,23 @@ __webpack_require__.r(__webpack_exports__);
 class LoaderModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
     constructor() {
         super();
+        this.loader = _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.loader;
     }
     loadAssets() {
-        const loader = new PIXI.loaders.Loader();
         const numOfAssets = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getObjectLenght(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names);
         const progressStep = 1 / numOfAssets;
         let progress = 0;
         for (var key in _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names) {
-            loader.add(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names[key]);
+            this.loader.add(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names[key]);
         }
-        loader.on('progress', () => {
+        this.loader.on('progress', () => {
             progress += progressStep;
-            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADING_IN_PROGRESS, { 'detail': progress });
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_IN_PROGRESS, { 'detail': progress });
         });
-        loader.on('complete', () => _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADING_COMPLETED));
-        loader.load();
+        this.loader.on('complete', () => {
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_COMPLETE);
+        });
+        this.loader.load();
     }
 }
 
@@ -53806,248 +53564,48 @@ class LoaderView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
     addTo(parent) {
         super.addTo(parent);
         this.createLoaderBar();
-        this.positionLoaderBar();
-        this.addChild(this.loaderBar);
+        this.createOutroElements();
     }
-    loadOutro() {
+    animateLoading(progress) {
+        this.loaderBar.animate.width(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.screen.width * progress);
+    }
+    animateOutro() {
         return new Promise((resolve) => {
-            this.upperOutro = new PIXI.Graphics();
-            this.upperOutro.beginFill(0X000000, 1);
-            this.upperOutro.drawRect(0, 0, this.width, this.app.screen.height / 2);
-            this.upperOutro.endFill();
-            this.addChild(this.upperOutro);
-            this.lowerOutro = new PIXI.Graphics();
-            this.lowerOutro.beginFill(0X000000, 1);
-            this.lowerOutro.drawRect(0, this.app.screen.height / 2 + 1, this.width, this.app.screen.height / 2 - 1);
-            this.lowerOutro.endFill();
-            this.addChild(this.lowerOutro);
-            this.loaderBar.alpha = 0;
-            _imports__WEBPACK_IMPORTED_MODULE_0__["AnimationsManager"].height(this.upperOutro, 0);
-            _imports__WEBPACK_IMPORTED_MODULE_0__["AnimationsManager"].y(this.lowerOutro, this.app.screen.height / 2);
-            Promise.resolve();
-            // AnimationsManager.y(this.loaderBar, this.app.screen.y);
-            // AnimationsManager.height(this.loaderBar, this.app.screen.height, () => {
-            //     AnimationsManager.hide(this, () => {
-            //         this.remove();
-            //         resolve();
-            //     });
-            // });
+            setTimeout(() => {
+                this.loaderBar.alpha = 0;
+                this.upperElementOutro.alpha = 1;
+                this.lowerElementOutro.alpha = 1;
+                this.upperElementOutro.animate.height(0);
+                this.lowerElementOutro.animate.height(0).then(resolve);
+            }, _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Animations.Duration * 1000);
         });
-    }
-    animateLoaderBar(progress) {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["AnimationsManager"].width(this.loaderBar, (this.app.screen.width * progress));
-        _imports__WEBPACK_IMPORTED_MODULE_0__["AnimationsManager"].x(this.loaderBar, this.app.screen.width / 2 * (1 - progress));
     }
     createLoaderBar() {
-        this.loaderBar = new PIXI.Graphics;
-        this.loaderBar.beginFill(0X78AB46, 1);
-        this.loaderBar.drawRect(0, 0, 1, 1);
+        this.loaderBar = new _imports__WEBPACK_IMPORTED_MODULE_0__["Graphics"]();
+        this.loaderBar.beginFill(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Loader.PrimaryColor, 1);
+        this.loaderBar.drawRect(0, 0, 2, 1);
         this.loaderBar.endFill();
+        this.loaderBar.setAnchor(0.5, 0.5);
+        this.loaderBar.alignTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.screen, { x: 'center', y: 'center' });
+        this.addChild(this.loaderBar);
     }
-    positionLoaderBar() {
-        const alignment = {
-            x: 'center',
-            y: 'center'
-        };
-        const positionSettings = {
-            elementToPosition: this.loaderBar,
-            elementToPositionTo: this.app.screen,
-            alignment: alignment
-        };
-        _imports__WEBPACK_IMPORTED_MODULE_0__["PositionManager"].set(positionSettings);
+    createOutroElements() {
+        this.upperElementOutro = this.createOutroElement();
+        this.upperElementOutro.setAnchor(0, 0);
+        this.upperElementOutro.alignTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.screen, { x: 'center', y: 'top' });
+        this.addChild(this.upperElementOutro);
+        this.lowerElementOutro = this.createOutroElement();
+        this.lowerElementOutro.setAnchor(0, 1);
+        this.lowerElementOutro.alignTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.screen, { x: 'center', y: 'bottom' });
+        this.addChild(this.lowerElementOutro);
     }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/reward/RewardModule.ts":
-/*!********************************************!*\
-  !*** ./src/modules/reward/RewardModule.ts ***!
-  \********************************************/
-/*! exports provided: RewardModule */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RewardModule", function() { return RewardModule; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
-
-class RewardModule extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModule"] {
-    addBindings() {
-        this
-            .asModel(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardModel"])
-            .asView(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardView"])
-            .asController(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardController"])
-            .bind();
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/reward/controllers/RewardController.ts":
-/*!************************************************************!*\
-  !*** ./src/modules/reward/controllers/RewardController.ts ***!
-  \************************************************************/
-/*! exports provided: RewardController */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RewardController", function() { return RewardController; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class RewardController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
-    addListeners() {
-        // Todo
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/reward/models/RewardModel.ts":
-/*!**************************************************!*\
-  !*** ./src/modules/reward/models/RewardModel.ts ***!
-  \**************************************************/
-/*! exports provided: RewardModel */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RewardModel", function() { return RewardModel; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class RewardModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/reward/views/RewardView.ts":
-/*!************************************************!*\
-  !*** ./src/modules/reward/views/RewardView.ts ***!
-  \************************************************/
-/*! exports provided: RewardView */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RewardView", function() { return RewardView; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class RewardView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/snake/SnakeModule.ts":
-/*!******************************************!*\
-  !*** ./src/modules/snake/SnakeModule.ts ***!
-  \******************************************/
-/*! exports provided: SnakeModule */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SnakeModule", function() { return SnakeModule; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
-
-class SnakeModule extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModule"] {
-    addBindings() {
-        this
-            .asModel(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeModel"])
-            .asView(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeView"])
-            .asController(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeController"])
-            .bind();
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/snake/constants/SnakeConstants.ts":
-/*!*******************************************************!*\
-  !*** ./src/modules/snake/constants/SnakeConstants.ts ***!
-  \*******************************************************/
-/*! exports provided: SnakeConstants */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SnakeConstants", function() { return SnakeConstants; });
-const SnakeConstants = {
-    EVENTS: {
-        CREATE_SNAKE: 'CREATE_SNAKE',
-    }
-};
-
-
-/***/ }),
-
-/***/ "./src/modules/snake/controllers/SnakeController.ts":
-/*!**********************************************************!*\
-  !*** ./src/modules/snake/controllers/SnakeController.ts ***!
-  \**********************************************************/
-/*! exports provided: SnakeController */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SnakeController", function() { return SnakeController; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class SnakeController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
-    addListeners() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.CREATE_SNAKE, () => {
-            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getModule(_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"]).view);
-        });
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/snake/models/SnakeModel.ts":
-/*!************************************************!*\
-  !*** ./src/modules/snake/models/SnakeModel.ts ***!
-  \************************************************/
-/*! exports provided: SnakeModel */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SnakeModel", function() { return SnakeModel; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class SnakeModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/snake/views/SnakeView.ts":
-/*!**********************************************!*\
-  !*** ./src/modules/snake/views/SnakeView.ts ***!
-  \**********************************************/
-/*! exports provided: SnakeView */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SnakeView", function() { return SnakeView; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class SnakeView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
-    addTo(parent) {
-        super.addTo(parent);
-        // const gt = new PIXI.Graphics();
-        // gt.beginFill(BoardConstants.SETTINGS.BORDER.COLOR);
-        // gt.drawRect(0, 0,  this.app.screen.width, this.app.screen.height);
-        // gt.endFill();
-        // this.addChild(gt);
+    createOutroElement() {
+        const element = new _imports__WEBPACK_IMPORTED_MODULE_0__["Graphics"]();
+        element.alpha = 0;
+        element.beginFill(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Loader.SecondaryColor, 1);
+        element.drawRect(0, 0, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.screen.width, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.screen.height / 2);
+        element.endFill();
+        return element;
     }
 }
 

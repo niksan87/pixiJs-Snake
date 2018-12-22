@@ -4,75 +4,67 @@ import {
     AnimationsManager,
     PositionManager,
     IAlignment,
-    IPositionSettings,
     LoaderModel,
-    GameModule,
-    Utils
+    Graphics,
+    //GameModule,
+    Utils,
+    GameApplication
 } from '../../imports';
 
 export class LoaderView extends BaseView {
-    public model: LoaderModel;
-    protected loaderBar: PIXI.Graphics;
-    protected upperOutro: PIXI.Graphics;
-    protected lowerOutro: PIXI.Graphics;
+    protected loaderBar: Graphics;
+    protected upperElementOutro: Graphics;
+    protected lowerElementOutro: Graphics;
 
     public addTo(parent: PIXI.Container): void {
         super.addTo(parent);
         this.createLoaderBar();
-        this.positionLoaderBar();
-        this.addChild(this.loaderBar);
+        this.createOutroElements();
     }
 
-    public loadOutro(): Promise<any> {
-        return new Promise((resolve) => {            
-            this.upperOutro = new PIXI.Graphics();
-            this.upperOutro.beginFill(0X000000, 1);
-            this.upperOutro.drawRect(0, 0, this.width, this.app.screen.height / 2);
-            this.upperOutro.endFill();
-            this.addChild(this.upperOutro);
-
-            this.lowerOutro = new PIXI.Graphics();
-            this.lowerOutro.beginFill(0X000000, 1);
-            this.lowerOutro.drawRect(0, this.app.screen.height / 2 + 1, this.width, this.app.screen.height / 2 - 1);
-            this.lowerOutro.endFill();
-            this.addChild(this.lowerOutro);
-            this.loaderBar.alpha = 0;
-            AnimationsManager.height(this.upperOutro, 0);
-            AnimationsManager.y(this.lowerOutro, this.app.screen.height / 2);
-            
-            Promise.resolve();
-            // AnimationsManager.y(this.loaderBar, this.app.screen.y);
-            // AnimationsManager.height(this.loaderBar, this.app.screen.height, () => {
-                //     AnimationsManager.hide(this, () => {
-                    //         this.remove();
-                    //         resolve();
-                    //     });
-                    // });
-                });
+    public animateLoading(progress: number): void {
+        this.loaderBar.animate.width(GameApplication.app.screen.width * progress);
     }
 
-    public animateLoaderBar(progress: number): void {
-        AnimationsManager.width(this.loaderBar, (this.app.screen.width * progress));
-        AnimationsManager.x(this.loaderBar, this.app.screen.width / 2 * (1 - progress));
+    public animateOutro(): Promise<any> {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                this.loaderBar.alpha = 0;
+                this.upperElementOutro.alpha = 1;
+                this.lowerElementOutro.alpha = 1;
+                this.upperElementOutro.animate.height(0);
+                this.lowerElementOutro.animate.height(0).then(resolve);
+            }, Constants.Animations.Duration * 1000);
+        });
     }
 
     private createLoaderBar(): void {
-        this.loaderBar = new PIXI.Graphics;
-        this.loaderBar.beginFill(0X78AB46, 1);
-        this.loaderBar.drawRect(0, 0, 1, 1);
+        this.loaderBar = new Graphics();
+        this.loaderBar.beginFill(Constants.Assets.Loader.PrimaryColor, 1);
+        this.loaderBar.drawRect(0, 0, 2, 1);
         this.loaderBar.endFill();
+        this.loaderBar.setAnchor(0.5, 0.5);
+        this.loaderBar.alignTo(GameApplication.app.screen, { x: 'center', y: 'center' });
+        this.addChild(this.loaderBar);
     }
 
-    private positionLoaderBar(): void {
-        const alignment: IAlignment = {
-            x: 'center',
-            y: 'center'
-        }
-        const positionSettings: IPositionSettings = {
-            elementToPosition: this.loaderBar,
-            elementToPositionTo: this.app.screen,
-            alignment: alignment
-        }
-        PositionManager.set(positionSettings);
+    private createOutroElements(): void {
+        this.upperElementOutro = this.createOutroElement();
+        this.upperElementOutro.setAnchor(0, 0);
+        this.upperElementOutro.alignTo(GameApplication.app.screen, { x: 'center', y: 'top' });
+        this.addChild(this.upperElementOutro);
+        this.lowerElementOutro = this.createOutroElement();
+        this.lowerElementOutro.setAnchor(0, 1);
+        this.lowerElementOutro.alignTo(GameApplication.app.screen, { x: 'center', y: 'bottom' });
+        this.addChild(this.lowerElementOutro);
+    }
+
+    private createOutroElement(): Graphics {
+        const element = new Graphics();
+        element.alpha = 0;
+        element.beginFill(Constants.Assets.Loader.SecondaryColor, 1);
+        element.drawRect(0, 0, GameApplication.app.screen.width, GameApplication.app.screen.height / 2);
+        element.endFill();
+        return element;
     }
 }
