@@ -52481,7 +52481,10 @@ class ActionsManager {
         if (!this.actions[index]) {
             return;
         }
+        const actionName = this.actions[index].constructor.name;
+        console.warn(`-> ${actionName} started.`);
         this.actions[index].execute().then(() => {
+            console.warn(`<- ${actionName} ended.`);
             this.executeAction(++index);
         });
     }
@@ -52833,7 +52836,8 @@ class GameApplication extends PIXI.Application {
     startActions() {
         _imports__WEBPACK_IMPORTED_MODULE_0__["ActionsManager"].execute([
             new _imports__WEBPACK_IMPORTED_MODULE_0__["LoadAssetsAction"](),
-            new _imports__WEBPACK_IMPORTED_MODULE_0__["CreateGameAction"]()
+            new _imports__WEBPACK_IMPORTED_MODULE_0__["CreateGameAction"](),
+            new _imports__WEBPACK_IMPORTED_MODULE_0__["StartGameAction"]()
         ]);
     }
 }
@@ -53134,7 +53138,8 @@ const Constants = {
             SecondaryColor: 0x000000
         }
     },
-    Safe_margin: 4
+    Safe_margin: 4,
+    Starting_speed: 1
 };
 
 
@@ -53179,8 +53184,31 @@ __webpack_require__.r(__webpack_exports__);
 
 class CreateGameAction extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseAction"] {
     execute() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_CREATED, this.actionResolve);
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_CREATED, () => this.actionResolve());
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.CREATE_GAME);
+        return super.execute();
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/game/actions/StartGameAction.ts":
+/*!*****************************************************!*\
+  !*** ./src/modules/game/actions/StartGameAction.ts ***!
+  \*****************************************************/
+/*! exports provided: StartGameAction */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "StartGameAction", function() { return StartGameAction; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class StartGameAction extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseAction"] {
+    execute() {
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.END_GAME, () => this.actionResolve());
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.START_GAME);
         return super.execute();
     }
 }
@@ -53201,7 +53229,9 @@ __webpack_require__.r(__webpack_exports__);
 const GameConstants = {
     EVENTS: {
         CREATE_GAME: 'CREATE_GAME',
-        GAME_CREATED: 'GAME_CREATED'
+        GAME_CREATED: 'GAME_CREATED',
+        START_GAME: 'START_GAME',
+        END_GAME: 'END_GAME'
     }
 };
 
@@ -53228,9 +53258,14 @@ class GameController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseControll
             _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.CREATE_REWARDS_VIEW);
             _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.GET_REWARD_POSITION);
             _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.CREATE_SNAKE_VIEW);
+            setTimeout(() => {
+                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_CREATED);
+            }, 5000);
         });
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.GET_SNAKE_DIRECTION, (event) => {
             _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.GET_SNAKE_POSITION, { detail: event.detail });
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.START_GAME, () => {
         });
     }
 }
@@ -53489,7 +53524,7 @@ class GridView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
 /*!********************************!*\
   !*** ./src/modules/imports.ts ***!
   \********************************/
-/*! exports provided: GameApplication, Constants, Utils, ActionsManager, AnimationsManager, EventsManager, PositionManager, Graphics, Animate, GridElement, GridElementType, BaseModule, BaseModel, BaseView, BaseController, BaseAction, LoaderModule, LoaderModel, LoaderView, LoaderController, LoadAssetsAction, LoaderConstants, GameModule, GameModel, GameView, GameController, CreateGameAction, GameConstants, BoardModule, BoardModel, BoardView, BoardController, BoardConstants, GridModule, GridModel, GridView, GridController, GridConstants, SnakeModule, SnakeModel, SnakeView, SnakeController, SnakeConstants, SnakeDirection, RewardModule, RewardModel, RewardView, RewardController, RewardConstants */
+/*! exports provided: GameApplication, Constants, Utils, ActionsManager, AnimationsManager, EventsManager, PositionManager, Graphics, Animate, GridElement, GridElementType, BaseModule, BaseModel, BaseView, BaseController, BaseAction, LoaderModule, LoaderModel, LoaderView, LoaderController, LoadAssetsAction, LoaderConstants, GameModule, GameModel, GameView, GameController, CreateGameAction, StartGameAction, GameConstants, BoardModule, BoardModel, BoardView, BoardController, BoardConstants, GridModule, GridModel, GridView, GridController, GridConstants, SnakeModule, SnakeModel, SnakeView, SnakeController, SnakeConstants, SnakeDirection, RewardModule, RewardModel, RewardView, RewardController, RewardConstants */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -53576,71 +53611,74 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _game_actions_CreateGameAction__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ./game/actions/CreateGameAction */ "./src/modules/game/actions/CreateGameAction.ts");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "CreateGameAction", function() { return _game_actions_CreateGameAction__WEBPACK_IMPORTED_MODULE_26__["CreateGameAction"]; });
 
-/* harmony import */ var _game_constants_GameConstants__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ./game/constants/GameConstants */ "./src/modules/game/constants/GameConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameConstants", function() { return _game_constants_GameConstants__WEBPACK_IMPORTED_MODULE_27__["GameConstants"]; });
+/* harmony import */ var _game_actions_StartGameAction__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ./game/actions/StartGameAction */ "./src/modules/game/actions/StartGameAction.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "StartGameAction", function() { return _game_actions_StartGameAction__WEBPACK_IMPORTED_MODULE_27__["StartGameAction"]; });
 
-/* harmony import */ var _board_BoardModule__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ./board/BoardModule */ "./src/modules/board/BoardModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModule", function() { return _board_BoardModule__WEBPACK_IMPORTED_MODULE_28__["BoardModule"]; });
+/* harmony import */ var _game_constants_GameConstants__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ./game/constants/GameConstants */ "./src/modules/game/constants/GameConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameConstants", function() { return _game_constants_GameConstants__WEBPACK_IMPORTED_MODULE_28__["GameConstants"]; });
 
-/* harmony import */ var _board_models_BoardModel__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! ./board/models/BoardModel */ "./src/modules/board/models/BoardModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModel", function() { return _board_models_BoardModel__WEBPACK_IMPORTED_MODULE_29__["BoardModel"]; });
+/* harmony import */ var _board_BoardModule__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! ./board/BoardModule */ "./src/modules/board/BoardModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModule", function() { return _board_BoardModule__WEBPACK_IMPORTED_MODULE_29__["BoardModule"]; });
 
-/* harmony import */ var _board_views_BoardView__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! ./board/views/BoardView */ "./src/modules/board/views/BoardView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardView", function() { return _board_views_BoardView__WEBPACK_IMPORTED_MODULE_30__["BoardView"]; });
+/* harmony import */ var _board_models_BoardModel__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! ./board/models/BoardModel */ "./src/modules/board/models/BoardModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModel", function() { return _board_models_BoardModel__WEBPACK_IMPORTED_MODULE_30__["BoardModel"]; });
 
-/* harmony import */ var _board_controllers_BoardController__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! ./board/controllers/BoardController */ "./src/modules/board/controllers/BoardController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardController", function() { return _board_controllers_BoardController__WEBPACK_IMPORTED_MODULE_31__["BoardController"]; });
+/* harmony import */ var _board_views_BoardView__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! ./board/views/BoardView */ "./src/modules/board/views/BoardView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardView", function() { return _board_views_BoardView__WEBPACK_IMPORTED_MODULE_31__["BoardView"]; });
 
-/* harmony import */ var _board_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! ./board/constants/BoardConstants */ "./src/modules/board/constants/BoardConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardConstants", function() { return _board_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_32__["BoardConstants"]; });
+/* harmony import */ var _board_controllers_BoardController__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! ./board/controllers/BoardController */ "./src/modules/board/controllers/BoardController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardController", function() { return _board_controllers_BoardController__WEBPACK_IMPORTED_MODULE_32__["BoardController"]; });
 
-/* harmony import */ var _grid_GridModule__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! ./grid/GridModule */ "./src/modules/grid/GridModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridModule", function() { return _grid_GridModule__WEBPACK_IMPORTED_MODULE_33__["GridModule"]; });
+/* harmony import */ var _board_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! ./board/constants/BoardConstants */ "./src/modules/board/constants/BoardConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardConstants", function() { return _board_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_33__["BoardConstants"]; });
 
-/* harmony import */ var _grid_models_GridModel__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! ./grid/models/GridModel */ "./src/modules/grid/models/GridModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridModel", function() { return _grid_models_GridModel__WEBPACK_IMPORTED_MODULE_34__["GridModel"]; });
+/* harmony import */ var _grid_GridModule__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! ./grid/GridModule */ "./src/modules/grid/GridModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridModule", function() { return _grid_GridModule__WEBPACK_IMPORTED_MODULE_34__["GridModule"]; });
 
-/* harmony import */ var _grid_views_GridView__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! ./grid/views/GridView */ "./src/modules/grid/views/GridView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridView", function() { return _grid_views_GridView__WEBPACK_IMPORTED_MODULE_35__["GridView"]; });
+/* harmony import */ var _grid_models_GridModel__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! ./grid/models/GridModel */ "./src/modules/grid/models/GridModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridModel", function() { return _grid_models_GridModel__WEBPACK_IMPORTED_MODULE_35__["GridModel"]; });
 
-/* harmony import */ var _grid_controllers_GridController__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! ./grid/controllers/GridController */ "./src/modules/grid/controllers/GridController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridController", function() { return _grid_controllers_GridController__WEBPACK_IMPORTED_MODULE_36__["GridController"]; });
+/* harmony import */ var _grid_views_GridView__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! ./grid/views/GridView */ "./src/modules/grid/views/GridView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridView", function() { return _grid_views_GridView__WEBPACK_IMPORTED_MODULE_36__["GridView"]; });
 
-/* harmony import */ var _grid_constants_GridConstants__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! ./grid/constants/GridConstants */ "./src/modules/grid/constants/GridConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridConstants", function() { return _grid_constants_GridConstants__WEBPACK_IMPORTED_MODULE_37__["GridConstants"]; });
+/* harmony import */ var _grid_controllers_GridController__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! ./grid/controllers/GridController */ "./src/modules/grid/controllers/GridController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridController", function() { return _grid_controllers_GridController__WEBPACK_IMPORTED_MODULE_37__["GridController"]; });
 
-/* harmony import */ var _snake_SnakeModule__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! ./snake/SnakeModule */ "./src/modules/snake/SnakeModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModule", function() { return _snake_SnakeModule__WEBPACK_IMPORTED_MODULE_38__["SnakeModule"]; });
+/* harmony import */ var _grid_constants_GridConstants__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! ./grid/constants/GridConstants */ "./src/modules/grid/constants/GridConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridConstants", function() { return _grid_constants_GridConstants__WEBPACK_IMPORTED_MODULE_38__["GridConstants"]; });
 
-/* harmony import */ var _snake_models_SnakeModel__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! ./snake/models/SnakeModel */ "./src/modules/snake/models/SnakeModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModel", function() { return _snake_models_SnakeModel__WEBPACK_IMPORTED_MODULE_39__["SnakeModel"]; });
+/* harmony import */ var _snake_SnakeModule__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! ./snake/SnakeModule */ "./src/modules/snake/SnakeModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModule", function() { return _snake_SnakeModule__WEBPACK_IMPORTED_MODULE_39__["SnakeModule"]; });
 
-/* harmony import */ var _snake_views_SnakeView__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! ./snake/views/SnakeView */ "./src/modules/snake/views/SnakeView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeView", function() { return _snake_views_SnakeView__WEBPACK_IMPORTED_MODULE_40__["SnakeView"]; });
+/* harmony import */ var _snake_models_SnakeModel__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! ./snake/models/SnakeModel */ "./src/modules/snake/models/SnakeModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModel", function() { return _snake_models_SnakeModel__WEBPACK_IMPORTED_MODULE_40__["SnakeModel"]; });
 
-/* harmony import */ var _snake_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! ./snake/controllers/SnakeController */ "./src/modules/snake/controllers/SnakeController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeController", function() { return _snake_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_41__["SnakeController"]; });
+/* harmony import */ var _snake_views_SnakeView__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! ./snake/views/SnakeView */ "./src/modules/snake/views/SnakeView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeView", function() { return _snake_views_SnakeView__WEBPACK_IMPORTED_MODULE_41__["SnakeView"]; });
 
-/* harmony import */ var _snake_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(/*! ./snake/constants/SnakeConstants */ "./src/modules/snake/constants/SnakeConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeConstants", function() { return _snake_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_42__["SnakeConstants"]; });
+/* harmony import */ var _snake_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(/*! ./snake/controllers/SnakeController */ "./src/modules/snake/controllers/SnakeController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeController", function() { return _snake_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_42__["SnakeController"]; });
 
-/* harmony import */ var _snake_constants_SnakeDirection__WEBPACK_IMPORTED_MODULE_43__ = __webpack_require__(/*! ./snake/constants/SnakeDirection */ "./src/modules/snake/constants/SnakeDirection.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeDirection", function() { return _snake_constants_SnakeDirection__WEBPACK_IMPORTED_MODULE_43__["SnakeDirection"]; });
+/* harmony import */ var _snake_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_43__ = __webpack_require__(/*! ./snake/constants/SnakeConstants */ "./src/modules/snake/constants/SnakeConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeConstants", function() { return _snake_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_43__["SnakeConstants"]; });
 
-/* harmony import */ var _reward_RewardModule__WEBPACK_IMPORTED_MODULE_44__ = __webpack_require__(/*! ./reward/RewardModule */ "./src/modules/reward/RewardModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModule", function() { return _reward_RewardModule__WEBPACK_IMPORTED_MODULE_44__["RewardModule"]; });
+/* harmony import */ var _snake_constants_SnakeDirection__WEBPACK_IMPORTED_MODULE_44__ = __webpack_require__(/*! ./snake/constants/SnakeDirection */ "./src/modules/snake/constants/SnakeDirection.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeDirection", function() { return _snake_constants_SnakeDirection__WEBPACK_IMPORTED_MODULE_44__["SnakeDirection"]; });
 
-/* harmony import */ var _reward_models_RewardModel__WEBPACK_IMPORTED_MODULE_45__ = __webpack_require__(/*! ./reward/models/RewardModel */ "./src/modules/reward/models/RewardModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModel", function() { return _reward_models_RewardModel__WEBPACK_IMPORTED_MODULE_45__["RewardModel"]; });
+/* harmony import */ var _reward_RewardModule__WEBPACK_IMPORTED_MODULE_45__ = __webpack_require__(/*! ./reward/RewardModule */ "./src/modules/reward/RewardModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModule", function() { return _reward_RewardModule__WEBPACK_IMPORTED_MODULE_45__["RewardModule"]; });
 
-/* harmony import */ var _reward_views_RewardView__WEBPACK_IMPORTED_MODULE_46__ = __webpack_require__(/*! ./reward/views/RewardView */ "./src/modules/reward/views/RewardView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardView", function() { return _reward_views_RewardView__WEBPACK_IMPORTED_MODULE_46__["RewardView"]; });
+/* harmony import */ var _reward_models_RewardModel__WEBPACK_IMPORTED_MODULE_46__ = __webpack_require__(/*! ./reward/models/RewardModel */ "./src/modules/reward/models/RewardModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModel", function() { return _reward_models_RewardModel__WEBPACK_IMPORTED_MODULE_46__["RewardModel"]; });
 
-/* harmony import */ var _reward_controllers_RewardController__WEBPACK_IMPORTED_MODULE_47__ = __webpack_require__(/*! ./reward/controllers/RewardController */ "./src/modules/reward/controllers/RewardController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardController", function() { return _reward_controllers_RewardController__WEBPACK_IMPORTED_MODULE_47__["RewardController"]; });
+/* harmony import */ var _reward_views_RewardView__WEBPACK_IMPORTED_MODULE_47__ = __webpack_require__(/*! ./reward/views/RewardView */ "./src/modules/reward/views/RewardView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardView", function() { return _reward_views_RewardView__WEBPACK_IMPORTED_MODULE_47__["RewardView"]; });
 
-/* harmony import */ var _reward_constants_RewardConstants__WEBPACK_IMPORTED_MODULE_48__ = __webpack_require__(/*! ./reward/constants/RewardConstants */ "./src/modules/reward/constants/RewardConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardConstants", function() { return _reward_constants_RewardConstants__WEBPACK_IMPORTED_MODULE_48__["RewardConstants"]; });
+/* harmony import */ var _reward_controllers_RewardController__WEBPACK_IMPORTED_MODULE_48__ = __webpack_require__(/*! ./reward/controllers/RewardController */ "./src/modules/reward/controllers/RewardController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardController", function() { return _reward_controllers_RewardController__WEBPACK_IMPORTED_MODULE_48__["RewardController"]; });
+
+/* harmony import */ var _reward_constants_RewardConstants__WEBPACK_IMPORTED_MODULE_49__ = __webpack_require__(/*! ./reward/constants/RewardConstants */ "./src/modules/reward/constants/RewardConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardConstants", function() { return _reward_constants_RewardConstants__WEBPACK_IMPORTED_MODULE_49__["RewardConstants"]; });
 
 // Attach PIXI to window for accesibility
 
@@ -53670,6 +53708,7 @@ window.PIXI = pixi_js__WEBPACK_IMPORTED_MODULE_0__;
 
 
 // Game
+
 
 
 
@@ -54111,6 +54150,11 @@ class SnakeController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseControl
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.CREATE_SNAKE, (event) => {
             this.view.createSnake(event.detail, this.model.direction);
         });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.START_GAME, () => {
+            _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.ticker.add((deltaTime) => {
+                this.view.move(deltaTime);
+            });
+        });
     }
 }
 
@@ -54162,19 +54206,47 @@ __webpack_require__.r(__webpack_exports__);
 
 class SnakeView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
     createSnake(gridElements, direction) {
-        const snakeHead = PIXI.Sprite.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_head);
-        const snakeBody = PIXI.Sprite.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_body);
-        const snakeTail = PIXI.Sprite.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_tail);
-        this.createSnakePart(snakeHead, gridElements[0], direction);
-        this.createSnakePart(snakeBody, gridElements[1], direction);
-        this.createSnakePart(snakeTail, gridElements[2], direction);
+        this.head = PIXI.Sprite.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_head);
+        this.body = PIXI.Sprite.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_body);
+        this.tail = PIXI.Sprite.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_tail);
+        this.direction = direction;
+        this.positionSnakePart(this.head, gridElements[0]);
+        this.positionSnakePart(this.body, gridElements[1]);
+        this.positionSnakePart(this.tail, gridElements[2]);
     }
-    createSnakePart(snakePart, gridElement, direction) {
+    positionSnakePart(snakePart, gridElement) {
         snakePart.x = gridElement.x;
         snakePart.y = gridElement.y;
         const fullRotationInRadians = 6.28319;
-        snakePart.rotation = fullRotationInRadians * direction;
+        snakePart.rotation = fullRotationInRadians * this.direction;
         this.addChild(snakePart);
+    }
+    move(deltaTime) {
+        switch (this.direction) {
+            case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].UP:
+                this.head.y -= _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
+                this.body.y -= _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
+                this.tail.y -= _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
+                break;
+            case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].RIGHT:
+                this.head.x += _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
+                this.body.x += _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
+                this.tail.x += _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
+                break;
+            case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].BOTTOM:
+                this.head.y += _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
+                this.body.y += _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
+                this.tail.y += _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
+                break;
+            case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].LEFT:
+                this.head.x -= _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
+                this.body.x -= _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
+                this.tail.x -= _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
+                break;
+            default:
+                // code...
+                break;
+        }
     }
 }
 

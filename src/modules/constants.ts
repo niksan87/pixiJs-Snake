@@ -25,5 +25,6 @@ export const Constants = {
 
         }
     },
-    Safe_margin: 4
+    Safe_margin: 4,
+    Starting_speed: 1
 }

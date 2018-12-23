@@ -37,6 +37,7 @@ export * from './game/models/GameModel';
 export * from './game/views/GameView';
 export * from './game/controllers/GameController';
 export * from './game/actions/CreateGameAction';
+export * from './game/actions/StartGameAction';
 export * from './game/constants/GameConstants';
 
 // Board

@@ -12,6 +12,7 @@ import {
     GridModule,
     GameModule,
     SnakeModule,
+    StartGameAction,
     Utils
 } from './imports';
 
@@ -52,7 +53,8 @@ export class GameApplication extends PIXI.Application {
     private startActions(): void {
         ActionsManager.execute([
             new LoadAssetsAction(),
-            new CreateGameAction()
+            new CreateGameAction(),
+            new StartGameAction()
         ]);
     }
 }

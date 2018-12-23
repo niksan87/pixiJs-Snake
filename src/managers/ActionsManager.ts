@@ -14,7 +14,10 @@ export class ActionsManager {
         if (!this.actions[index]) {
             return;
         }
+        const actionName: string = this.actions[index].constructor.name;
+        console.warn(`-> ${actionName} started.`);
         this.actions[index].execute().then(() => {
+            console.warn(`<- ${actionName} ended.`);
             this.executeAction(++index);
         });
     }
