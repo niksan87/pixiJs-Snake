@@ -1,0 +1,8 @@
+export const LoaderConstants = {
+    EVENTS: {
+        LOADER_START: 'LOADER_START',
+        LOADER_IN_PROGRESS: 'LOADER_IN_PROGRESS',
+        LOADER_COMPLETE: 'LOADER_COMPLETE',
+        LOADER_FINISH: 'LOADER_FINISH'
+    }
+}

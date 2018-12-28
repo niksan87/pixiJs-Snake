@@ -1,8 +1,0 @@
-export const SnakeConstants = {
-    EVENTS: {
-        GET_SNAKE_POSITION: 'GET_SNAKE_POSITION',
-        GET_SNAKE_DIRECTION: 'GET_SNAKE_DIRECTION',
-        CREATE_SNAKE_VIEW: 'CREATE_SNAKE_VIEW',
-        CREATE_SNAKE: 'CREATE_SNAKE',
-    }
-}

@@ -52462,220 +52462,60 @@ window.onload = () => new _modules_imports__WEBPACK_IMPORTED_MODULE_0__["GameApp
 
 /***/ }),
 
-/***/ "./src/managers/ActionsManager.ts":
+/***/ "./src/modules/GameApplication.ts":
 /*!****************************************!*\
-  !*** ./src/managers/ActionsManager.ts ***!
+  !*** ./src/modules/GameApplication.ts ***!
   \****************************************/
-/*! exports provided: ActionsManager */
+/*! exports provided: GameApplication */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ActionsManager", function() { return ActionsManager; });
-class ActionsManager {
-    static execute(actions) {
-        this.actions = actions;
-        this.executeAction(0);
-    }
-    static executeAction(index) {
-        if (!this.actions[index]) {
-            return;
-        }
-        const actionName = this.actions[index].constructor.name;
-        console.warn(`-> ${actionName} started.`);
-        this.actions[index].execute().then(() => {
-            console.warn(`<- ${actionName} ended.`);
-            this.executeAction(++index);
-        });
-    }
-}
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GameApplication", function() { return GameApplication; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./imports */ "./src/modules/imports.ts");
 
-
-/***/ }),
-
-/***/ "./src/managers/AnimationsManager.ts":
-/*!*******************************************!*\
-  !*** ./src/managers/AnimationsManager.ts ***!
-  \*******************************************/
-/*! exports provided: AnimationsManager */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AnimationsManager", function() { return AnimationsManager; });
-/* harmony import */ var gsap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! gsap */ "./node_modules/gsap/index.js");
-/* harmony import */ var _modules_imports__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../modules/imports */ "./src/modules/imports.ts");
-
-
-class AnimationsManager {
+class GameApplication extends PIXI.Application {
     constructor() {
-        this.animations = [];
+        super(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].AppSettings);
+        this.modules = {};
+        this.setAppInstance();
+        this.createCanvas();
+        this.initModules();
+        this.startActions();
     }
-    show(element, callBack) {
-        const animationInfo = {
-            element: element,
-            tweenSettings: {
-                alpha: 1,
-                onComplete: callBack
-            },
-        };
-        this.animations.push(this.animate(animationInfo));
+    setAppInstance() {
+        GameApplication.app = this;
     }
-    ;
-    hide(element, callBack) {
-        const animationInfo = {
-            element: element,
-            tweenSettings: {
-                alpha: 0,
-                onComplete: callBack
-            }
-        };
-        this.animations.push(this.animate(animationInfo));
+    createCanvas() {
+        document.body.appendChild(this.view);
     }
     ;
-    x(element, x, callBack) {
-        const animationInfo = {
-            element: element,
-            tweenSettings: {
-                x: x,
-                onComplete: callBack
-            }
-        };
-        this.animations.push(this.animate(animationInfo));
+    initModules() {
+        [
+            _imports__WEBPACK_IMPORTED_MODULE_0__["LoaderModule"],
+            _imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"],
+            _imports__WEBPACK_IMPORTED_MODULE_0__["BoardModule"],
+            _imports__WEBPACK_IMPORTED_MODULE_0__["GridModule"],
+            _imports__WEBPACK_IMPORTED_MODULE_0__["RewardModule"],
+            _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeModule"]
+        ].forEach((Module) => this.modules[Module.name] = new Module());
     }
-    y(element, y, callBack) {
-        const animationInfo = {
-            element: element,
-            tweenSettings: {
-                y: y,
-                onComplete: callBack
-            }
-        };
-        this.animations.push(this.animate(animationInfo));
-    }
-    width(element, width, callBack) {
-        const animationInfo = {
-            element: element,
-            tweenSettings: {
-                width: width,
-                onComplete: callBack
-            }
-        };
-        this.animations.push(this.animate(animationInfo));
-    }
-    ;
-    height(element, height, callBack) {
-        const animationInfo = {
-            element: element,
-            tweenSettings: {
-                height: height,
-                onComplete: callBack
-            }
-        };
-        this.animations.push(this.animate(animationInfo));
-    }
-    ;
-    animate(animationInfo) {
-        return gsap__WEBPACK_IMPORTED_MODULE_0__["TweenLite"].to(animationInfo.element, _modules_imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].Animations.Duration, animationInfo.tweenSettings);
+    startActions() {
+        _imports__WEBPACK_IMPORTED_MODULE_0__["ActionsManager"].execute([
+            _imports__WEBPACK_IMPORTED_MODULE_0__["LoadAssetsAction"],
+            _imports__WEBPACK_IMPORTED_MODULE_0__["CreateGameAction"],
+            _imports__WEBPACK_IMPORTED_MODULE_0__["StartGameAction"]
+        ]);
     }
 }
 
 
 /***/ }),
 
-/***/ "./src/managers/EventsManager.ts":
-/*!***************************************!*\
-  !*** ./src/managers/EventsManager.ts ***!
-  \***************************************/
-/*! exports provided: EventsManager */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "EventsManager", function() { return EventsManager; });
-class EventsManager {
-    static dispatch(eventName, detail) {
-        EventsManager.createEvent(eventName, detail);
-        document.body.dispatchEvent(EventsManager.event);
-    }
-    static addListener(eventName, callback) {
-        document.body.addEventListener(eventName, callback);
-    }
-    ;
-    static createEvent(eventName, detail) {
-        EventsManager.event = new CustomEvent(eventName, detail);
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/managers/PositionManager.ts":
+/***/ "./src/modules/_00_misc/Animate.ts":
 /*!*****************************************!*\
-  !*** ./src/managers/PositionManager.ts ***!
+  !*** ./src/modules/_00_misc/Animate.ts ***!
   \*****************************************/
-/*! exports provided: PositionManager */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PositionManager", function() { return PositionManager; });
-class PositionManager {
-}
-
-
-/***/ }),
-
-/***/ "./src/managers/Utils.ts":
-/*!*******************************!*\
-  !*** ./src/managers/Utils.ts ***!
-  \*******************************/
-/*! exports provided: Utils */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Utils", function() { return Utils; });
-/* harmony import */ var _modules_imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../modules/imports */ "./src/modules/imports.ts");
-
-class Utils {
-    static getApplication() {
-        return window[_modules_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].AppName];
-    }
-    static getRandomInt(min, max) {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-    static getObjectLenght(obj) {
-        let size = 0;
-        let key;
-        for (key in obj)
-            if (obj.hasOwnProperty(key))
-                size++;
-        return size;
-    }
-    static createTwoDImensionalArray(xLenght, yLenght, DefaultElement) {
-        let arrX;
-        const output = new Array();
-        for (var y = 0; y < yLenght; y++) {
-            arrX = new Array();
-            for (var x = 0; x < xLenght; x++) {
-                arrX.push(new DefaultElement());
-            }
-            output.push(arrX);
-        }
-        return output;
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/misc/Animate.ts":
-/*!*****************************!*\
-  !*** ./src/misc/Animate.ts ***!
-  \*****************************/
 /*! exports provided: Animate */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -52683,7 +52523,7 @@ class Utils {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Animate", function() { return Animate; });
 /* harmony import */ var gsap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! gsap */ "./node_modules/gsap/index.js");
-/* harmony import */ var _modules_imports__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../modules/imports */ "./src/modules/imports.ts");
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
 
 
 class Animate {
@@ -52691,12 +52531,12 @@ class Animate {
         this.animations = [];
         this.element = element;
     }
-    width(widthToAnimateTo, duration = _modules_imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].Animations.Duration) {
+    width(widthToAnimateTo, duration = _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].Animations.Duration) {
         return new Promise((resolve) => {
             this.animations.push(gsap__WEBPACK_IMPORTED_MODULE_0__["TweenLite"].to(this.element, duration, { width: widthToAnimateTo, onComplete: resolve }));
         });
     }
-    height(heightToAnimateTo, duration = _modules_imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].Animations.Duration) {
+    height(heightToAnimateTo, duration = _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].Animations.Duration) {
         return new Promise((resolve) => {
             this.animations.push(gsap__WEBPACK_IMPORTED_MODULE_0__["TweenLite"].to(this.element, duration, { height: heightToAnimateTo, onComplete: resolve }));
         });
@@ -52706,26 +52546,26 @@ class Animate {
 
 /***/ }),
 
-/***/ "./src/misc/Graphics.ts":
-/*!******************************!*\
-  !*** ./src/misc/Graphics.ts ***!
-  \******************************/
+/***/ "./src/modules/_00_misc/Graphics.ts":
+/*!******************************************!*\
+  !*** ./src/modules/_00_misc/Graphics.ts ***!
+  \******************************************/
 /*! exports provided: Graphics */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Graphics", function() { return Graphics; });
-/* harmony import */ var _modules_imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../modules/imports */ "./src/modules/imports.ts");
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
 
 class Graphics extends PIXI.Graphics {
     constructor() {
         super();
-        this._animate = new _modules_imports__WEBPACK_IMPORTED_MODULE_0__["Animate"](this);
+        this._animate = new _imports__WEBPACK_IMPORTED_MODULE_0__["Animate"](this);
     }
     setAnchor(x, y) {
         if (x < 0 || x > 1 || y < 0 || y > 1) {
-            console.error(`Invalid anchor value.`);
+            _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].error(`Invalid anchor value.`);
             return;
         }
         this.pivot.x = this.width * x;
@@ -52733,7 +52573,7 @@ class Graphics extends PIXI.Graphics {
     }
     alignTo(element, alignment) {
         if (!alignment.x && !alignment.y) {
-            console.error(`Missing parameters to execute alignment.`);
+            _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].error(`Missing parameters to execute alignment.`);
             return;
         }
         if (alignment.x) {
@@ -52771,84 +52611,228 @@ class Graphics extends PIXI.Graphics {
 
 /***/ }),
 
-/***/ "./src/misc/GridElement.ts":
-/*!*********************************!*\
-  !*** ./src/misc/GridElement.ts ***!
-  \*********************************/
-/*! exports provided: GridElement, GridElementType */
+/***/ "./src/modules/_00_misc/Utils.ts":
+/*!***************************************!*\
+  !*** ./src/modules/_00_misc/Utils.ts ***!
+  \***************************************/
+/*! exports provided: Utils */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridElement", function() { return GridElement; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridElementType", function() { return GridElementType; });
-class GridElement {
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Utils", function() { return Utils; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
+
+class Utils {
+    static getApplication() {
+        return window[_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].AppName];
+    }
+    static getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    static getObjectLenght(obj) {
+        let size = 0;
+        let key;
+        for (key in obj)
+            if (obj.hasOwnProperty(key))
+                size++;
+        return size;
+    }
+    static createTwoDImensionalArray(xLenght, yLenght, DefaultElement) {
+        let arrX;
+        const output = new Array();
+        for (var y = 0; y < yLenght; y++) {
+            arrX = new Array();
+            for (var x = 0; x < xLenght; x++) {
+                arrX.push(new DefaultElement());
+            }
+            output.push(arrX);
+        }
+        return output;
+    }
+    static warn(msg) {
+        if (_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].DebugMode) {
+            console.warn(msg);
+        }
+    }
+    static error(error) {
+        if (_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].DebugMode) {
+            console.error(error);
+        }
+    }
 }
-var GridElementType;
-(function (GridElementType) {
-    GridElementType["REWARD"] = "REWARD";
-    GridElementType["SNAKE"] = "SNAKE";
-})(GridElementType || (GridElementType = {}));
 
 
 /***/ }),
 
-/***/ "./src/modules/GameApplication.ts":
-/*!****************************************!*\
-  !*** ./src/modules/GameApplication.ts ***!
-  \****************************************/
-/*! exports provided: GameApplication */
+/***/ "./src/modules/_01_managers/ActionsManager.ts":
+/*!****************************************************!*\
+  !*** ./src/modules/_01_managers/ActionsManager.ts ***!
+  \****************************************************/
+/*! exports provided: ActionsManager */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GameApplication", function() { return GameApplication; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./imports */ "./src/modules/imports.ts");
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ActionsManager", function() { return ActionsManager; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
 
-class GameApplication extends PIXI.Application {
+class ActionsManager {
+    static execute(actions) {
+        this.actions = [];
+        actions.forEach((Action) => this.actions.push(new Action()));
+        this.executeAction(0);
+    }
+    static executeAction(index) {
+        if (!this.actions[index]) {
+            ActionsManager.actions = null;
+            return;
+        }
+        const actionName = this.actions[index].constructor.name;
+        _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].warn(`---${actionName} start---`);
+        this.actions[index].execute().then(() => {
+            _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].warn(`---${actionName} end---\n\n`);
+            this.executeAction(++index);
+        });
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_01_managers/AnimationsManager.ts":
+/*!*******************************************************!*\
+  !*** ./src/modules/_01_managers/AnimationsManager.ts ***!
+  \*******************************************************/
+/*! exports provided: AnimationsManager */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AnimationsManager", function() { return AnimationsManager; });
+/* harmony import */ var gsap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! gsap */ "./node_modules/gsap/index.js");
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
+
+
+class AnimationsManager {
     constructor() {
-        super(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].AppSettings);
-        this.setAppInstance();
-        this.createCanvas();
-        this.initModules();
-        this.startActions();
-        console.warn(this);
+        this.animations = [];
     }
-    setAppInstance() {
-        GameApplication.app = this;
-    }
-    createCanvas() {
-        document.body.appendChild(this.view);
+    show(element, callBack) {
+        const animationInfo = {
+            element: element,
+            tweenSettings: {
+                alpha: 1,
+                onComplete: callBack
+            },
+        };
+        this.animations.push(this.animate(animationInfo));
     }
     ;
-    initModules() {
-        const modules = [
-            _imports__WEBPACK_IMPORTED_MODULE_0__["LoaderModule"],
-            _imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"],
-            _imports__WEBPACK_IMPORTED_MODULE_0__["BoardModule"],
-            _imports__WEBPACK_IMPORTED_MODULE_0__["GridModule"],
-            _imports__WEBPACK_IMPORTED_MODULE_0__["RewardModule"],
-            _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeModule"]
-        ];
-        this.modules = {};
-        modules.forEach((Module) => this.modules[Module.name] = new Module());
+    hide(element, callBack) {
+        const animationInfo = {
+            element: element,
+            tweenSettings: {
+                alpha: 0,
+                onComplete: callBack
+            }
+        };
+        this.animations.push(this.animate(animationInfo));
     }
-    startActions() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["ActionsManager"].execute([
-            new _imports__WEBPACK_IMPORTED_MODULE_0__["LoadAssetsAction"](),
-            new _imports__WEBPACK_IMPORTED_MODULE_0__["CreateGameAction"](),
-            new _imports__WEBPACK_IMPORTED_MODULE_0__["StartGameAction"]()
-        ]);
+    ;
+    width(element, width, callBack) {
+        const animationInfo = {
+            element: element,
+            tweenSettings: {
+                width: width,
+                onComplete: callBack
+            }
+        };
+        this.animations.push(this.animate(animationInfo));
+    }
+    ;
+    height(element, height, callBack) {
+        const animationInfo = {
+            element: element,
+            tweenSettings: {
+                height: height,
+                onComplete: callBack
+            }
+        };
+        this.animations.push(this.animate(animationInfo));
+    }
+    ;
+    animate(animationInfo) {
+        return gsap__WEBPACK_IMPORTED_MODULE_0__["TweenLite"].to(animationInfo.element, _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].Animations.Duration, animationInfo.tweenSettings);
     }
 }
 
 
 /***/ }),
 
-/***/ "./src/modules/baseModule/BaseModule.ts":
-/*!**********************************************!*\
-  !*** ./src/modules/baseModule/BaseModule.ts ***!
-  \**********************************************/
+/***/ "./src/modules/_01_managers/EventsManager.ts":
+/*!***************************************************!*\
+  !*** ./src/modules/_01_managers/EventsManager.ts ***!
+  \***************************************************/
+/*! exports provided: EventsManager */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "EventsManager", function() { return EventsManager; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
+
+class EventsManager {
+    static dispatch(eventName, value) {
+        EventsManager.warnEventInfo(eventName, value);
+        document.body.dispatchEvent(new CustomEvent(eventName, { detail: value }));
+    }
+    static addListener(eventName, callback) {
+        document.body.addEventListener(eventName, callback);
+    }
+    ;
+    static warnEventInfo(eventName, value) {
+        let extraText = '';
+        if (value) {
+            if (eventName === _imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_IN_PROGRESS) {
+                extraText = `(${(value * 100).toFixed(2)}%)`;
+            }
+            else if (eventName === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.SNAKE_SET_NEW_DIRECTION) {
+                switch (value) {
+                    case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].UP:
+                        extraText = '(UP)';
+                        break;
+                    case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].RIGHT:
+                        extraText = '(RIGHT)';
+                        break;
+                    case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].BOTTOM:
+                        extraText = '(DOWN)';
+                        break;
+                    case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].LEFT:
+                        extraText = '(LEFT)';
+                        break;
+                }
+            }
+            else if (eventName === _imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.REWARD_GET_POSITION || eventName === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.SNAKE_GET_POSITION) {
+                extraText = `(${value === 'true' ? 'WITH' : 'WITHOUT'} SAFE MARGIN)`;
+            }
+            else if (value) {
+                extraText = `(${value.matrixXPosition}x${value.matrixYPosition})`;
+            }
+        }
+        _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].warn(`   Event ${eventName}${extraText} dispatched.`);
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_03_baseModule/BaseModule.ts":
+/*!**************************************************!*\
+  !*** ./src/modules/_03_baseModule/BaseModule.ts ***!
+  \**************************************************/
 /*! exports provided: BaseModule */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -52893,10 +52877,10 @@ class BaseModule {
 
 /***/ }),
 
-/***/ "./src/modules/baseModule/actions/BaseAction.ts":
-/*!******************************************************!*\
-  !*** ./src/modules/baseModule/actions/BaseAction.ts ***!
-  \******************************************************/
+/***/ "./src/modules/_03_baseModule/actions/BaseAction.ts":
+/*!**********************************************************!*\
+  !*** ./src/modules/_03_baseModule/actions/BaseAction.ts ***!
+  \**********************************************************/
 /*! exports provided: BaseAction */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -52914,10 +52898,10 @@ class BaseAction {
 
 /***/ }),
 
-/***/ "./src/modules/baseModule/controllers/BaseController.ts":
-/*!**************************************************************!*\
-  !*** ./src/modules/baseModule/controllers/BaseController.ts ***!
-  \**************************************************************/
+/***/ "./src/modules/_03_baseModule/controllers/BaseController.ts":
+/*!******************************************************************!*\
+  !*** ./src/modules/_03_baseModule/controllers/BaseController.ts ***!
+  \******************************************************************/
 /*! exports provided: BaseController */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -52945,10 +52929,10 @@ class BaseController {
 
 /***/ }),
 
-/***/ "./src/modules/baseModule/models/BaseModel.ts":
-/*!****************************************************!*\
-  !*** ./src/modules/baseModule/models/BaseModel.ts ***!
-  \****************************************************/
+/***/ "./src/modules/_03_baseModule/models/BaseModel.ts":
+/*!********************************************************!*\
+  !*** ./src/modules/_03_baseModule/models/BaseModel.ts ***!
+  \********************************************************/
 /*! exports provided: BaseModel */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -52961,10 +52945,10 @@ class BaseModel {
 
 /***/ }),
 
-/***/ "./src/modules/baseModule/views/BaseView.ts":
-/*!**************************************************!*\
-  !*** ./src/modules/baseModule/views/BaseView.ts ***!
-  \**************************************************/
+/***/ "./src/modules/_03_baseModule/views/BaseView.ts":
+/*!******************************************************!*\
+  !*** ./src/modules/_03_baseModule/views/BaseView.ts ***!
+  \******************************************************/
 /*! exports provided: BaseView */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -52983,771 +52967,10 @@ class BaseView extends PIXI.Container {
 
 /***/ }),
 
-/***/ "./src/modules/board/BoardModule.ts":
-/*!******************************************!*\
-  !*** ./src/modules/board/BoardModule.ts ***!
-  \******************************************/
-/*! exports provided: BoardModule */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BoardModule", function() { return BoardModule; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
-
-class BoardModule extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModule"] {
-    addBindings() {
-        this
-            .asModel(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardModel"])
-            .asView(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardView"])
-            .asController(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardController"])
-            .bind();
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/board/constants/BoardConstants.ts":
-/*!*******************************************************!*\
-  !*** ./src/modules/board/constants/BoardConstants.ts ***!
-  \*******************************************************/
-/*! exports provided: BoardConstants */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BoardConstants", function() { return BoardConstants; });
-const BoardConstants = {
-    EVENTS: {
-        CREATE_BOARD: 'CREATE_BOARD',
-    },
-    SETTINGS: {
-        BORDER: {
-            COLOR: 0XFFF2CC,
-            SIZE: 20
-        }
-    }
-};
-
-
-/***/ }),
-
-/***/ "./src/modules/board/controllers/BoardController.ts":
-/*!**********************************************************!*\
-  !*** ./src/modules/board/controllers/BoardController.ts ***!
-  \**********************************************************/
-/*! exports provided: BoardController */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BoardController", function() { return BoardController; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class BoardController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
-    addListeners() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardConstants"].EVENTS.CREATE_BOARD, () => {
-            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"].name].view);
-            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GridConstants"].EVENTS.CREATE_GRID);
-        });
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/board/models/BoardModel.ts":
-/*!************************************************!*\
-  !*** ./src/modules/board/models/BoardModel.ts ***!
-  \************************************************/
-/*! exports provided: BoardModel */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BoardModel", function() { return BoardModel; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class BoardModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/board/views/BoardView.ts":
-/*!**********************************************!*\
-  !*** ./src/modules/board/views/BoardView.ts ***!
-  \**********************************************/
-/*! exports provided: BoardView */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BoardView", function() { return BoardView; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class BoardView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
-    addTo(parent) {
-        super.addTo(parent);
-        this.addBackground();
-    }
-    addBackground() {
-        const texture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.bg);
-        const tilingSprite = new PIXI.extras.TilingSprite(texture, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.screen.width, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.screen.height);
-        this.addChild(tilingSprite);
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/constants.ts":
-/*!**********************************!*\
-  !*** ./src/modules/constants.ts ***!
-  \**********************************/
-/*! exports provided: Constants */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Constants", function() { return Constants; });
-const Constants = {
-    AppName: 'gameApplication',
-    AppSettings: {
-        width: window.innerWidth,
-        height: window.innerHeight
-    },
-    Animations: {
-        Duration: 1
-    },
-    Assets: {
-        Images: {
-            Url: 'img/',
-            Names: {
-                'bg': 'bg.jpg',
-                'grid': 'grid.png',
-                'apple': 'apple.png',
-                'snake_head': 'snake_head.png',
-                'snake_body': 'snake_body.png',
-                'snake_tail': 'snake_tail.png'
-            }
-        },
-        Loader: {
-            PrimaryColor: 0X78AB46,
-            SecondaryColor: 0x000000
-        }
-    },
-    Safe_margin: 4,
-    Starting_speed: 1
-};
-
-
-/***/ }),
-
-/***/ "./src/modules/game/GameModule.ts":
-/*!****************************************!*\
-  !*** ./src/modules/game/GameModule.ts ***!
-  \****************************************/
-/*! exports provided: GameModule */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GameModule", function() { return GameModule; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
-
-class GameModule extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModule"] {
-    addBindings() {
-        this
-            .asModel(_imports__WEBPACK_IMPORTED_MODULE_0__["GameModel"])
-            .asView(_imports__WEBPACK_IMPORTED_MODULE_0__["GameView"])
-            .asController(_imports__WEBPACK_IMPORTED_MODULE_0__["GameController"])
-            .bind();
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/game/actions/CreateGameAction.ts":
+/***/ "./src/modules/_04_loaderModule/LoaderModule.ts":
 /*!******************************************************!*\
-  !*** ./src/modules/game/actions/CreateGameAction.ts ***!
+  !*** ./src/modules/_04_loaderModule/LoaderModule.ts ***!
   \******************************************************/
-/*! exports provided: CreateGameAction */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CreateGameAction", function() { return CreateGameAction; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class CreateGameAction extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseAction"] {
-    execute() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_CREATED, () => this.actionResolve());
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.CREATE_GAME);
-        return super.execute();
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/game/actions/StartGameAction.ts":
-/*!*****************************************************!*\
-  !*** ./src/modules/game/actions/StartGameAction.ts ***!
-  \*****************************************************/
-/*! exports provided: StartGameAction */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "StartGameAction", function() { return StartGameAction; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class StartGameAction extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseAction"] {
-    execute() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.END_GAME, () => this.actionResolve());
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.START_GAME);
-        return super.execute();
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/game/constants/GameConstants.ts":
-/*!*****************************************************!*\
-  !*** ./src/modules/game/constants/GameConstants.ts ***!
-  \*****************************************************/
-/*! exports provided: GameConstants */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GameConstants", function() { return GameConstants; });
-const GameConstants = {
-    EVENTS: {
-        CREATE_GAME: 'CREATE_GAME',
-        GAME_CREATED: 'GAME_CREATED',
-        START_GAME: 'START_GAME',
-        END_GAME: 'END_GAME'
-    }
-};
-
-
-/***/ }),
-
-/***/ "./src/modules/game/controllers/GameController.ts":
-/*!********************************************************!*\
-  !*** ./src/modules/game/controllers/GameController.ts ***!
-  \********************************************************/
-/*! exports provided: GameController */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GameController", function() { return GameController; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class GameController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
-    addListeners() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.CREATE_GAME, () => {
-            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.stage);
-            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardConstants"].EVENTS.CREATE_BOARD);
-            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.CREATE_REWARDS_VIEW);
-            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.GET_REWARD_POSITION);
-            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.CREATE_SNAKE_VIEW);
-            setTimeout(() => {
-                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_CREATED);
-            }, 5000);
-        });
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.GET_SNAKE_DIRECTION, (event) => {
-            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.GET_SNAKE_POSITION, { detail: event.detail });
-        });
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.START_GAME, () => {
-        });
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/game/models/GameModel.ts":
-/*!**********************************************!*\
-  !*** ./src/modules/game/models/GameModel.ts ***!
-  \**********************************************/
-/*! exports provided: GameModel */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GameModel", function() { return GameModel; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class GameModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/game/views/GameView.ts":
-/*!********************************************!*\
-  !*** ./src/modules/game/views/GameView.ts ***!
-  \********************************************/
-/*! exports provided: GameView */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GameView", function() { return GameView; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class GameView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
-    addTo(parent) {
-        super.addTo(parent);
-        _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.stage.swapChildren(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderModule"].name].view, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"].name].view);
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/grid/GridModule.ts":
-/*!****************************************!*\
-  !*** ./src/modules/grid/GridModule.ts ***!
-  \****************************************/
-/*! exports provided: GridModule */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridModule", function() { return GridModule; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
-
-class GridModule extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModule"] {
-    addBindings() {
-        this
-            .asModel(_imports__WEBPACK_IMPORTED_MODULE_0__["GridModel"])
-            .asView(_imports__WEBPACK_IMPORTED_MODULE_0__["GridView"])
-            .asController(_imports__WEBPACK_IMPORTED_MODULE_0__["GridController"])
-            .bind();
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/grid/constants/GridConstants.ts":
-/*!*****************************************************!*\
-  !*** ./src/modules/grid/constants/GridConstants.ts ***!
-  \*****************************************************/
-/*! exports provided: GridConstants */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridConstants", function() { return GridConstants; });
-const GridConstants = {
-    EVENTS: {
-        CREATE_GRID: 'CREATE_GRID'
-    }
-};
-
-
-/***/ }),
-
-/***/ "./src/modules/grid/controllers/GridController.ts":
-/*!********************************************************!*\
-  !*** ./src/modules/grid/controllers/GridController.ts ***!
-  \********************************************************/
-/*! exports provided: GridController */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridController", function() { return GridController; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class GridController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
-    addListeners() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GridConstants"].EVENTS.CREATE_GRID, () => {
-            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["BoardModule"].name].view);
-            this.model.createGridMatrix();
-        });
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.GET_REWARD_POSITION, () => {
-            this.model.getRewardPosition();
-        });
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.GET_SNAKE_POSITION, (event) => {
-            this.model.getSnakePositions(event.detail);
-        });
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/grid/models/GridModel.ts":
-/*!**********************************************!*\
-  !*** ./src/modules/grid/models/GridModel.ts ***!
-  \**********************************************/
-/*! exports provided: GridModel */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridModel", function() { return GridModel; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class GridModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
-    createGridMatrix() {
-        const texture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.grid);
-        const boxSize = texture.width / 2;
-        const xNumOfBoxes = _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GridModule"].name].view.width / boxSize;
-        const yNumOfBoxes = _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GridModule"].name].view.height / boxSize;
-        let xPosition = 0;
-        let yPosition = 0;
-        this.gridMatrix = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].createTwoDImensionalArray(xNumOfBoxes, yNumOfBoxes, _imports__WEBPACK_IMPORTED_MODULE_0__["GridElement"]);
-        this.gridMatrix.forEach((line, lineIndex) => {
-            xPosition = 0;
-            line.forEach((element, rowIndex) => {
-                element.id = `grid_x${rowIndex}_y${lineIndex}`;
-                element.x = xPosition;
-                element.y = yPosition;
-                element.width = boxSize;
-                element.height = boxSize;
-                element.type = null;
-                xPosition += boxSize;
-            });
-            yPosition += boxSize;
-        });
-        console.warn(this.gridMatrix);
-    }
-    getRewardPosition() {
-        let gridElement = this.getRandomGridPosition();
-        if (this.isAlreadyTaken([gridElement])) {
-            this.getRewardPosition();
-            return;
-        }
-        gridElement.type = _imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].REWARD;
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.CREATE_REWARD, { detail: gridElement });
-    }
-    getSnakePositions(direction) {
-        const snakePositions = [];
-        snakePositions.push(this.getRandomGridPosition());
-        snakePositions.push(this.getPreviousGridElement(snakePositions[0], direction));
-        snakePositions.push(this.getPreviousGridElement(snakePositions[1], direction));
-        if (this.isAlreadyTaken(snakePositions)) {
-            this.getSnakePositions(direction);
-            return;
-        }
-        snakePositions.forEach((gridElement) => gridElement.type = _imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].SNAKE);
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.CREATE_SNAKE, { detail: snakePositions });
-    }
-    getPreviousGridElement(gridElement, direction) {
-        if (!gridElement) {
-            return null;
-        }
-        let outputElement;
-        let currGridElement;
-        for (var row = 0; row < this.gridMatrix.length; row++) {
-            for (var col = 0; col < this.gridMatrix[row].length; col++) {
-                currGridElement = this.gridMatrix[row][col];
-                if (currGridElement === gridElement) {
-                    switch (direction) {
-                        case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].UP:
-                            outputElement = this.gridMatrix[row + 1][col];
-                            break;
-                        case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].RIGHT:
-                            outputElement = this.gridMatrix[row][col - 1];
-                            break;
-                        case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].BOTTOM:
-                            outputElement = this.gridMatrix[row - 1][col];
-                            break;
-                        case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].LEFT:
-                            outputElement = this.gridMatrix[row][col + 1];
-                            break;
-                    }
-                }
-            }
-        }
-        return outputElement;
-    }
-    getRandomGridPosition() {
-        const row = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getRandomInt(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Safe_margin, this.gridMatrix.length - _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Safe_margin - 1);
-        const line = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getRandomInt(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Safe_margin, this.gridMatrix[row].length - _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Safe_margin - 1);
-        const gridElement = this.gridMatrix[row][line];
-        return gridElement;
-    }
-    isAlreadyTaken(gridElements) {
-        let output = false;
-        gridElements.forEach((gridElement) => {
-            if (!gridElement || gridElement.type !== null) {
-                output = true;
-            }
-        });
-        return output;
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/grid/views/GridView.ts":
-/*!********************************************!*\
-  !*** ./src/modules/grid/views/GridView.ts ***!
-  \********************************************/
-/*! exports provided: GridView */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridView", function() { return GridView; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
-
-class GridView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
-    addTo(parent) {
-        super.addTo(parent);
-        this.createTilingSpriteBackground();
-    }
-    createTilingSpriteBackground() {
-        const texture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.grid);
-        const tilingSprite = new PIXI.extras.TilingSprite(texture, this.parent.width, this.parent.height);
-        this.addChild(tilingSprite);
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/modules/imports.ts":
-/*!********************************!*\
-  !*** ./src/modules/imports.ts ***!
-  \********************************/
-/*! exports provided: GameApplication, Constants, Utils, ActionsManager, AnimationsManager, EventsManager, PositionManager, Graphics, Animate, GridElement, GridElementType, BaseModule, BaseModel, BaseView, BaseController, BaseAction, LoaderModule, LoaderModel, LoaderView, LoaderController, LoadAssetsAction, LoaderConstants, GameModule, GameModel, GameView, GameController, CreateGameAction, StartGameAction, GameConstants, BoardModule, BoardModel, BoardView, BoardController, BoardConstants, GridModule, GridModel, GridView, GridController, GridConstants, SnakeModule, SnakeModel, SnakeView, SnakeController, SnakeConstants, SnakeDirection, RewardModule, RewardModel, RewardView, RewardController, RewardConstants */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var pixi_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! pixi.js */ "./node_modules/pixi.js/lib/index.js");
-/* harmony import */ var pixi_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(pixi_js__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _GameApplication__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./GameApplication */ "./src/modules/GameApplication.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameApplication", function() { return _GameApplication__WEBPACK_IMPORTED_MODULE_1__["GameApplication"]; });
-
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./constants */ "./src/modules/constants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Constants", function() { return _constants__WEBPACK_IMPORTED_MODULE_2__["Constants"]; });
-
-/* harmony import */ var _managers_Utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../managers/Utils */ "./src/managers/Utils.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Utils", function() { return _managers_Utils__WEBPACK_IMPORTED_MODULE_3__["Utils"]; });
-
-/* harmony import */ var _managers_ActionsManager__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../managers/ActionsManager */ "./src/managers/ActionsManager.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ActionsManager", function() { return _managers_ActionsManager__WEBPACK_IMPORTED_MODULE_4__["ActionsManager"]; });
-
-/* harmony import */ var _managers_AnimationsManager__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../managers/AnimationsManager */ "./src/managers/AnimationsManager.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AnimationsManager", function() { return _managers_AnimationsManager__WEBPACK_IMPORTED_MODULE_5__["AnimationsManager"]; });
-
-/* harmony import */ var _managers_EventsManager__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../managers/EventsManager */ "./src/managers/EventsManager.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "EventsManager", function() { return _managers_EventsManager__WEBPACK_IMPORTED_MODULE_6__["EventsManager"]; });
-
-/* harmony import */ var _managers_PositionManager__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../managers/PositionManager */ "./src/managers/PositionManager.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "PositionManager", function() { return _managers_PositionManager__WEBPACK_IMPORTED_MODULE_7__["PositionManager"]; });
-
-/* harmony import */ var _misc_Graphics__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../misc/Graphics */ "./src/misc/Graphics.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Graphics", function() { return _misc_Graphics__WEBPACK_IMPORTED_MODULE_8__["Graphics"]; });
-
-/* harmony import */ var _misc_Animate__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../misc/Animate */ "./src/misc/Animate.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Animate", function() { return _misc_Animate__WEBPACK_IMPORTED_MODULE_9__["Animate"]; });
-
-/* harmony import */ var _misc_GridElement__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../misc/GridElement */ "./src/misc/GridElement.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridElement", function() { return _misc_GridElement__WEBPACK_IMPORTED_MODULE_10__["GridElement"]; });
-
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridElementType", function() { return _misc_GridElement__WEBPACK_IMPORTED_MODULE_10__["GridElementType"]; });
-
-/* harmony import */ var _baseModule_BaseModule__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./baseModule/BaseModule */ "./src/modules/baseModule/BaseModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseModule", function() { return _baseModule_BaseModule__WEBPACK_IMPORTED_MODULE_11__["BaseModule"]; });
-
-/* harmony import */ var _baseModule_models_BaseModel__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./baseModule/models/BaseModel */ "./src/modules/baseModule/models/BaseModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseModel", function() { return _baseModule_models_BaseModel__WEBPACK_IMPORTED_MODULE_12__["BaseModel"]; });
-
-/* harmony import */ var _baseModule_views_BaseView__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./baseModule/views/BaseView */ "./src/modules/baseModule/views/BaseView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseView", function() { return _baseModule_views_BaseView__WEBPACK_IMPORTED_MODULE_13__["BaseView"]; });
-
-/* harmony import */ var _baseModule_controllers_BaseController__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./baseModule/controllers/BaseController */ "./src/modules/baseModule/controllers/BaseController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseController", function() { return _baseModule_controllers_BaseController__WEBPACK_IMPORTED_MODULE_14__["BaseController"]; });
-
-/* harmony import */ var _baseModule_actions_BaseAction__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./baseModule/actions/BaseAction */ "./src/modules/baseModule/actions/BaseAction.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseAction", function() { return _baseModule_actions_BaseAction__WEBPACK_IMPORTED_MODULE_15__["BaseAction"]; });
-
-/* harmony import */ var _loader_LoaderModule__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./loader/LoaderModule */ "./src/modules/loader/LoaderModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderModule", function() { return _loader_LoaderModule__WEBPACK_IMPORTED_MODULE_16__["LoaderModule"]; });
-
-/* harmony import */ var _loader_models_LoaderModel__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./loader/models/LoaderModel */ "./src/modules/loader/models/LoaderModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderModel", function() { return _loader_models_LoaderModel__WEBPACK_IMPORTED_MODULE_17__["LoaderModel"]; });
-
-/* harmony import */ var _loader_views_LoaderView__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./loader/views/LoaderView */ "./src/modules/loader/views/LoaderView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderView", function() { return _loader_views_LoaderView__WEBPACK_IMPORTED_MODULE_18__["LoaderView"]; });
-
-/* harmony import */ var _loader_controllers_LoaderController__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./loader/controllers/LoaderController */ "./src/modules/loader/controllers/LoaderController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderController", function() { return _loader_controllers_LoaderController__WEBPACK_IMPORTED_MODULE_19__["LoaderController"]; });
-
-/* harmony import */ var _loader_actions_LoadAssetsAction__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./loader/actions/LoadAssetsAction */ "./src/modules/loader/actions/LoadAssetsAction.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoadAssetsAction", function() { return _loader_actions_LoadAssetsAction__WEBPACK_IMPORTED_MODULE_20__["LoadAssetsAction"]; });
-
-/* harmony import */ var _loader_constants_LoaderConstants__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./loader/constants/LoaderConstants */ "./src/modules/loader/constants/LoaderConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderConstants", function() { return _loader_constants_LoaderConstants__WEBPACK_IMPORTED_MODULE_21__["LoaderConstants"]; });
-
-/* harmony import */ var _game_GameModule__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./game/GameModule */ "./src/modules/game/GameModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameModule", function() { return _game_GameModule__WEBPACK_IMPORTED_MODULE_22__["GameModule"]; });
-
-/* harmony import */ var _game_models_GameModel__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./game/models/GameModel */ "./src/modules/game/models/GameModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameModel", function() { return _game_models_GameModel__WEBPACK_IMPORTED_MODULE_23__["GameModel"]; });
-
-/* harmony import */ var _game_views_GameView__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./game/views/GameView */ "./src/modules/game/views/GameView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameView", function() { return _game_views_GameView__WEBPACK_IMPORTED_MODULE_24__["GameView"]; });
-
-/* harmony import */ var _game_controllers_GameController__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ./game/controllers/GameController */ "./src/modules/game/controllers/GameController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameController", function() { return _game_controllers_GameController__WEBPACK_IMPORTED_MODULE_25__["GameController"]; });
-
-/* harmony import */ var _game_actions_CreateGameAction__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ./game/actions/CreateGameAction */ "./src/modules/game/actions/CreateGameAction.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "CreateGameAction", function() { return _game_actions_CreateGameAction__WEBPACK_IMPORTED_MODULE_26__["CreateGameAction"]; });
-
-/* harmony import */ var _game_actions_StartGameAction__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ./game/actions/StartGameAction */ "./src/modules/game/actions/StartGameAction.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "StartGameAction", function() { return _game_actions_StartGameAction__WEBPACK_IMPORTED_MODULE_27__["StartGameAction"]; });
-
-/* harmony import */ var _game_constants_GameConstants__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ./game/constants/GameConstants */ "./src/modules/game/constants/GameConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameConstants", function() { return _game_constants_GameConstants__WEBPACK_IMPORTED_MODULE_28__["GameConstants"]; });
-
-/* harmony import */ var _board_BoardModule__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! ./board/BoardModule */ "./src/modules/board/BoardModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModule", function() { return _board_BoardModule__WEBPACK_IMPORTED_MODULE_29__["BoardModule"]; });
-
-/* harmony import */ var _board_models_BoardModel__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! ./board/models/BoardModel */ "./src/modules/board/models/BoardModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModel", function() { return _board_models_BoardModel__WEBPACK_IMPORTED_MODULE_30__["BoardModel"]; });
-
-/* harmony import */ var _board_views_BoardView__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! ./board/views/BoardView */ "./src/modules/board/views/BoardView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardView", function() { return _board_views_BoardView__WEBPACK_IMPORTED_MODULE_31__["BoardView"]; });
-
-/* harmony import */ var _board_controllers_BoardController__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! ./board/controllers/BoardController */ "./src/modules/board/controllers/BoardController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardController", function() { return _board_controllers_BoardController__WEBPACK_IMPORTED_MODULE_32__["BoardController"]; });
-
-/* harmony import */ var _board_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! ./board/constants/BoardConstants */ "./src/modules/board/constants/BoardConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardConstants", function() { return _board_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_33__["BoardConstants"]; });
-
-/* harmony import */ var _grid_GridModule__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! ./grid/GridModule */ "./src/modules/grid/GridModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridModule", function() { return _grid_GridModule__WEBPACK_IMPORTED_MODULE_34__["GridModule"]; });
-
-/* harmony import */ var _grid_models_GridModel__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! ./grid/models/GridModel */ "./src/modules/grid/models/GridModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridModel", function() { return _grid_models_GridModel__WEBPACK_IMPORTED_MODULE_35__["GridModel"]; });
-
-/* harmony import */ var _grid_views_GridView__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! ./grid/views/GridView */ "./src/modules/grid/views/GridView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridView", function() { return _grid_views_GridView__WEBPACK_IMPORTED_MODULE_36__["GridView"]; });
-
-/* harmony import */ var _grid_controllers_GridController__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! ./grid/controllers/GridController */ "./src/modules/grid/controllers/GridController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridController", function() { return _grid_controllers_GridController__WEBPACK_IMPORTED_MODULE_37__["GridController"]; });
-
-/* harmony import */ var _grid_constants_GridConstants__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! ./grid/constants/GridConstants */ "./src/modules/grid/constants/GridConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridConstants", function() { return _grid_constants_GridConstants__WEBPACK_IMPORTED_MODULE_38__["GridConstants"]; });
-
-/* harmony import */ var _snake_SnakeModule__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! ./snake/SnakeModule */ "./src/modules/snake/SnakeModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModule", function() { return _snake_SnakeModule__WEBPACK_IMPORTED_MODULE_39__["SnakeModule"]; });
-
-/* harmony import */ var _snake_models_SnakeModel__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! ./snake/models/SnakeModel */ "./src/modules/snake/models/SnakeModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModel", function() { return _snake_models_SnakeModel__WEBPACK_IMPORTED_MODULE_40__["SnakeModel"]; });
-
-/* harmony import */ var _snake_views_SnakeView__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! ./snake/views/SnakeView */ "./src/modules/snake/views/SnakeView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeView", function() { return _snake_views_SnakeView__WEBPACK_IMPORTED_MODULE_41__["SnakeView"]; });
-
-/* harmony import */ var _snake_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(/*! ./snake/controllers/SnakeController */ "./src/modules/snake/controllers/SnakeController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeController", function() { return _snake_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_42__["SnakeController"]; });
-
-/* harmony import */ var _snake_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_43__ = __webpack_require__(/*! ./snake/constants/SnakeConstants */ "./src/modules/snake/constants/SnakeConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeConstants", function() { return _snake_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_43__["SnakeConstants"]; });
-
-/* harmony import */ var _snake_constants_SnakeDirection__WEBPACK_IMPORTED_MODULE_44__ = __webpack_require__(/*! ./snake/constants/SnakeDirection */ "./src/modules/snake/constants/SnakeDirection.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeDirection", function() { return _snake_constants_SnakeDirection__WEBPACK_IMPORTED_MODULE_44__["SnakeDirection"]; });
-
-/* harmony import */ var _reward_RewardModule__WEBPACK_IMPORTED_MODULE_45__ = __webpack_require__(/*! ./reward/RewardModule */ "./src/modules/reward/RewardModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModule", function() { return _reward_RewardModule__WEBPACK_IMPORTED_MODULE_45__["RewardModule"]; });
-
-/* harmony import */ var _reward_models_RewardModel__WEBPACK_IMPORTED_MODULE_46__ = __webpack_require__(/*! ./reward/models/RewardModel */ "./src/modules/reward/models/RewardModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModel", function() { return _reward_models_RewardModel__WEBPACK_IMPORTED_MODULE_46__["RewardModel"]; });
-
-/* harmony import */ var _reward_views_RewardView__WEBPACK_IMPORTED_MODULE_47__ = __webpack_require__(/*! ./reward/views/RewardView */ "./src/modules/reward/views/RewardView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardView", function() { return _reward_views_RewardView__WEBPACK_IMPORTED_MODULE_47__["RewardView"]; });
-
-/* harmony import */ var _reward_controllers_RewardController__WEBPACK_IMPORTED_MODULE_48__ = __webpack_require__(/*! ./reward/controllers/RewardController */ "./src/modules/reward/controllers/RewardController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardController", function() { return _reward_controllers_RewardController__WEBPACK_IMPORTED_MODULE_48__["RewardController"]; });
-
-/* harmony import */ var _reward_constants_RewardConstants__WEBPACK_IMPORTED_MODULE_49__ = __webpack_require__(/*! ./reward/constants/RewardConstants */ "./src/modules/reward/constants/RewardConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardConstants", function() { return _reward_constants_RewardConstants__WEBPACK_IMPORTED_MODULE_49__["RewardConstants"]; });
-
-// Attach PIXI to window for accesibility
-
-window.PIXI = pixi_js__WEBPACK_IMPORTED_MODULE_0__;
-/** Internal exports */
-
-
-
-
-
-
-
-
-
-
-// Base
-
-
-
-
-
-// Loader
-
-
-
-
-
-
-// Game
-
-
-
-
-
-
-
-// Board
-
-
-
-
-
-// Grid element
-
-
-
-
-
-// Snake
-
-
-
-
-
-
-// Reward
-
-
-
-
-
-
-
-/***/ }),
-
-/***/ "./src/modules/loader/LoaderModule.ts":
-/*!********************************************!*\
-  !*** ./src/modules/loader/LoaderModule.ts ***!
-  \********************************************/
 /*! exports provided: LoaderModule */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -53769,10 +52992,10 @@ class LoaderModule extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModule"] {
 
 /***/ }),
 
-/***/ "./src/modules/loader/actions/LoadAssetsAction.ts":
-/*!********************************************************!*\
-  !*** ./src/modules/loader/actions/LoadAssetsAction.ts ***!
-  \********************************************************/
+/***/ "./src/modules/_04_loaderModule/actions/LoadAssetsAction.ts":
+/*!******************************************************************!*\
+  !*** ./src/modules/_04_loaderModule/actions/LoadAssetsAction.ts ***!
+  \******************************************************************/
 /*! exports provided: LoadAssetsAction */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -53783,7 +53006,7 @@ __webpack_require__.r(__webpack_exports__);
 
 class LoadAssetsAction extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseAction"] {
     execute() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_RESOLVE, () => this.actionResolve());
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_FINISH, () => this.actionResolve());
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_START);
         return super.execute();
     }
@@ -53792,10 +53015,10 @@ class LoadAssetsAction extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseAction
 
 /***/ }),
 
-/***/ "./src/modules/loader/constants/LoaderConstants.ts":
-/*!*********************************************************!*\
-  !*** ./src/modules/loader/constants/LoaderConstants.ts ***!
-  \*********************************************************/
+/***/ "./src/modules/_04_loaderModule/constants/LoaderConstants.ts":
+/*!*******************************************************************!*\
+  !*** ./src/modules/_04_loaderModule/constants/LoaderConstants.ts ***!
+  \*******************************************************************/
 /*! exports provided: LoaderConstants */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -53807,17 +53030,17 @@ const LoaderConstants = {
         LOADER_START: 'LOADER_START',
         LOADER_IN_PROGRESS: 'LOADER_IN_PROGRESS',
         LOADER_COMPLETE: 'LOADER_COMPLETE',
-        LOADER_RESOLVE: 'LOADER_RESOLVE'
+        LOADER_FINISH: 'LOADER_FINISH'
     }
 };
 
 
 /***/ }),
 
-/***/ "./src/modules/loader/controllers/LoaderController.ts":
-/*!************************************************************!*\
-  !*** ./src/modules/loader/controllers/LoaderController.ts ***!
-  \************************************************************/
+/***/ "./src/modules/_04_loaderModule/controllers/LoaderController.ts":
+/*!**********************************************************************!*\
+  !*** ./src/modules/_04_loaderModule/controllers/LoaderController.ts ***!
+  \**********************************************************************/
 /*! exports provided: LoaderController */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -53837,7 +53060,7 @@ class LoaderController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseContro
         });
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_COMPLETE, () => {
             setTimeout(() => {
-                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_RESOLVE);
+                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_FINISH);
                 this.view.animateOutro().then(() => this.view.remove());
             }, _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Animations.Duration * 1000);
         });
@@ -53847,10 +53070,10 @@ class LoaderController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseContro
 
 /***/ }),
 
-/***/ "./src/modules/loader/models/LoaderModel.ts":
-/*!**************************************************!*\
-  !*** ./src/modules/loader/models/LoaderModel.ts ***!
-  \**************************************************/
+/***/ "./src/modules/_04_loaderModule/models/LoaderModel.ts":
+/*!************************************************************!*\
+  !*** ./src/modules/_04_loaderModule/models/LoaderModel.ts ***!
+  \************************************************************/
 /*! exports provided: LoaderModel */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -53873,7 +53096,7 @@ class LoaderModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
         }
         this.loader.on('progress', () => {
             progress += progressStep;
-            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_IN_PROGRESS, { 'detail': progress });
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_IN_PROGRESS, progress);
         });
         this.loader.on('complete', () => {
             _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_COMPLETE);
@@ -53885,10 +53108,10 @@ class LoaderModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
 
 /***/ }),
 
-/***/ "./src/modules/loader/views/LoaderView.ts":
-/*!************************************************!*\
-  !*** ./src/modules/loader/views/LoaderView.ts ***!
-  \************************************************/
+/***/ "./src/modules/_04_loaderModule/views/LoaderView.ts":
+/*!**********************************************************!*\
+  !*** ./src/modules/_04_loaderModule/views/LoaderView.ts ***!
+  \**********************************************************/
 /*! exports provided: LoaderView */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -53947,10 +53170,634 @@ class LoaderView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
 
 /***/ }),
 
-/***/ "./src/modules/reward/RewardModule.ts":
-/*!********************************************!*\
-  !*** ./src/modules/reward/RewardModule.ts ***!
-  \********************************************/
+/***/ "./src/modules/_05_gameModule/GameModule.ts":
+/*!**************************************************!*\
+  !*** ./src/modules/_05_gameModule/GameModule.ts ***!
+  \**************************************************/
+/*! exports provided: GameModule */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GameModule", function() { return GameModule; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
+
+class GameModule extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModule"] {
+    addBindings() {
+        this
+            .asModel(_imports__WEBPACK_IMPORTED_MODULE_0__["GameModel"])
+            .asView(_imports__WEBPACK_IMPORTED_MODULE_0__["GameView"])
+            .asController(_imports__WEBPACK_IMPORTED_MODULE_0__["GameController"])
+            .bind();
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_05_gameModule/actions/CreateGameAction.ts":
+/*!****************************************************************!*\
+  !*** ./src/modules/_05_gameModule/actions/CreateGameAction.ts ***!
+  \****************************************************************/
+/*! exports provided: CreateGameAction */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CreateGameAction", function() { return CreateGameAction; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class CreateGameAction extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseAction"] {
+    execute() {
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_CREATE_FINISH, () => this.actionResolve());
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_CREATE);
+        return super.execute();
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_05_gameModule/actions/StartGameAction.ts":
+/*!***************************************************************!*\
+  !*** ./src/modules/_05_gameModule/actions/StartGameAction.ts ***!
+  \***************************************************************/
+/*! exports provided: StartGameAction */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "StartGameAction", function() { return StartGameAction; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class StartGameAction extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseAction"] {
+    execute() {
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_END, () => this.actionResolve());
+        setTimeout(() => { _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_START); }, 2000);
+        return super.execute();
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_05_gameModule/constants/GameConstants.ts":
+/*!***************************************************************!*\
+  !*** ./src/modules/_05_gameModule/constants/GameConstants.ts ***!
+  \***************************************************************/
+/*! exports provided: GameConstants */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GameConstants", function() { return GameConstants; });
+const GameConstants = {
+    EVENTS: {
+        GAME_CREATE: 'GAME_CREATE',
+        GAME_CREATE_FINISH: 'GAME_CREATE_FINISH',
+        GAME_START: 'GAME_START',
+        GAME_END: 'GAME_END',
+        GAME_PAUSE: 'GAME_PAUSE',
+        GAME_RESUME: 'GAME_RESUME'
+    }
+};
+
+
+/***/ }),
+
+/***/ "./src/modules/_05_gameModule/controllers/GameController.ts":
+/*!******************************************************************!*\
+  !*** ./src/modules/_05_gameModule/controllers/GameController.ts ***!
+  \******************************************************************/
+/*! exports provided: GameController */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GameController", function() { return GameController; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class GameController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
+    addListeners() {
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_CREATE, () => {
+            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.stage);
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardConstants"].EVENTS.BOARD_CREATE);
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.REWARD_CREATE);
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.SNAKE_CREATE);
+            setTimeout(() => { _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_CREATE_FINISH); }, 0);
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener('keydown', (event) => {
+            if (event.key === ' ') {
+                if (this.model.paused) {
+                    _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_RESUME);
+                }
+                else {
+                    _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_PAUSE);
+                }
+                this.model.paused = !this.model.paused;
+            }
+        });
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_05_gameModule/models/GameModel.ts":
+/*!********************************************************!*\
+  !*** ./src/modules/_05_gameModule/models/GameModel.ts ***!
+  \********************************************************/
+/*! exports provided: GameModel */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GameModel", function() { return GameModel; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class GameModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_05_gameModule/views/GameView.ts":
+/*!******************************************************!*\
+  !*** ./src/modules/_05_gameModule/views/GameView.ts ***!
+  \******************************************************/
+/*! exports provided: GameView */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GameView", function() { return GameView; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class GameView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
+    addTo(parent) {
+        super.addTo(parent);
+        _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.stage.swapChildren(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderModule"].name].view, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"].name].view);
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_06_boardModule/BoardModule.ts":
+/*!****************************************************!*\
+  !*** ./src/modules/_06_boardModule/BoardModule.ts ***!
+  \****************************************************/
+/*! exports provided: BoardModule */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BoardModule", function() { return BoardModule; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
+
+class BoardModule extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModule"] {
+    addBindings() {
+        this
+            .asModel(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardModel"])
+            .asView(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardView"])
+            .asController(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardController"])
+            .bind();
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_06_boardModule/constants/BoardConstants.ts":
+/*!*****************************************************************!*\
+  !*** ./src/modules/_06_boardModule/constants/BoardConstants.ts ***!
+  \*****************************************************************/
+/*! exports provided: BoardConstants */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BoardConstants", function() { return BoardConstants; });
+const BoardConstants = {
+    EVENTS: {
+        BOARD_CREATE: 'BOARD_CREATE',
+    }
+};
+
+
+/***/ }),
+
+/***/ "./src/modules/_06_boardModule/controllers/BoardController.ts":
+/*!********************************************************************!*\
+  !*** ./src/modules/_06_boardModule/controllers/BoardController.ts ***!
+  \********************************************************************/
+/*! exports provided: BoardController */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BoardController", function() { return BoardController; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class BoardController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
+    addListeners() {
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardConstants"].EVENTS.BOARD_CREATE, () => {
+            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"].name].view);
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GridConstants"].EVENTS.GRID_CREATE);
+        });
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_06_boardModule/models/BoardModel.ts":
+/*!**********************************************************!*\
+  !*** ./src/modules/_06_boardModule/models/BoardModel.ts ***!
+  \**********************************************************/
+/*! exports provided: BoardModel */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BoardModel", function() { return BoardModel; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class BoardModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_06_boardModule/views/BoardView.ts":
+/*!********************************************************!*\
+  !*** ./src/modules/_06_boardModule/views/BoardView.ts ***!
+  \********************************************************/
+/*! exports provided: BoardView */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BoardView", function() { return BoardView; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class BoardView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
+    addTo(parent) {
+        super.addTo(parent);
+        this.addBackground();
+    }
+    addBackground() {
+        const texture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.bg);
+        const tilingSprite = new PIXI.extras.TilingSprite(texture, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.screen.width, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.screen.height);
+        this.addChild(tilingSprite);
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_07_gridModule/GridModule.ts":
+/*!**************************************************!*\
+  !*** ./src/modules/_07_gridModule/GridModule.ts ***!
+  \**************************************************/
+/*! exports provided: GridModule */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridModule", function() { return GridModule; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
+
+class GridModule extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModule"] {
+    addBindings() {
+        this
+            .asModel(_imports__WEBPACK_IMPORTED_MODULE_0__["GridModel"])
+            .asView(_imports__WEBPACK_IMPORTED_MODULE_0__["GridView"])
+            .asController(_imports__WEBPACK_IMPORTED_MODULE_0__["GridController"])
+            .bind();
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_07_gridModule/constants/GridConstants.ts":
+/*!***************************************************************!*\
+  !*** ./src/modules/_07_gridModule/constants/GridConstants.ts ***!
+  \***************************************************************/
+/*! exports provided: GridConstants, GridElementType */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridConstants", function() { return GridConstants; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridElementType", function() { return GridElementType; });
+const GridConstants = {
+    EVENTS: {
+        GRID_CREATE: 'GRID_CREATE'
+    }
+};
+var GridElementType;
+(function (GridElementType) {
+    GridElementType["REWARD"] = "REWARD";
+    GridElementType["SNAKE_HEAD"] = "SNAKE_HEAD";
+    GridElementType["SNAKE_BODY"] = "SNAKE_BODY";
+    GridElementType["SNAKE_TAIL"] = "SNAKE_TAIL";
+})(GridElementType || (GridElementType = {}));
+
+
+/***/ }),
+
+/***/ "./src/modules/_07_gridModule/controllers/GridController.ts":
+/*!******************************************************************!*\
+  !*** ./src/modules/_07_gridModule/controllers/GridController.ts ***!
+  \******************************************************************/
+/*! exports provided: GridController */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridController", function() { return GridController; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class GridController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
+    addListeners() {
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GridConstants"].EVENTS.GRID_CREATE, () => {
+            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["BoardModule"].name].view);
+            this.model.createGridMatrix();
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.REWARD_GET_POSITION, (event) => {
+            this.model.setRandomGridPosition(_imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].REWARD, event.detail);
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.SNAKE_GET_POSITION, (event) => {
+            this.model.setRandomGridPosition(_imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].SNAKE_TAIL, event.detail);
+        });
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_07_gridModule/models/GridModel.ts":
+/*!********************************************************!*\
+  !*** ./src/modules/_07_gridModule/models/GridModel.ts ***!
+  \********************************************************/
+/*! exports provided: GridModel */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridModel", function() { return GridModel; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class GridModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
+    createGridMatrix() {
+        const texture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.grid);
+        const gridSize = texture.width / 2;
+        const xNumOfGridElements = _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GridModule"].name].view.width / gridSize;
+        const yNumOfGridElements = _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GridModule"].name].view.height / gridSize;
+        let xPosition = 0;
+        let yPosition = 0;
+        this.gridMatrix = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].createTwoDImensionalArray(xNumOfGridElements, yNumOfGridElements, _imports__WEBPACK_IMPORTED_MODULE_0__["GridElementView"]);
+        this.gridMatrix.forEach((line, lineIndex) => {
+            xPosition = 0;
+            line.forEach((element, rowIndex) => {
+                element.width = gridSize;
+                element.height = gridSize;
+                element.pivot.x = element.width / 2;
+                element.pivot.y = element.height / 2;
+                element.x = xPosition + element.pivot.x;
+                element.y = yPosition + element.pivot.y;
+                element.initX = element.x;
+                element.initY = element.y;
+                element.matrixXPosition = rowIndex;
+                element.matrixYPosition = lineIndex;
+                element.matrix = this.gridMatrix;
+                xPosition += gridSize;
+            });
+            yPosition += gridSize;
+        });
+    }
+    setRandomGridPosition(type, withSafeMargin) {
+        const gridElementView = this.getRandomGridPosition(withSafeMargin);
+        gridElementView.type = type;
+        if (type === _imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].REWARD) {
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.REWARD_SET_POSITION, gridElementView);
+        }
+        else {
+            gridElementView.setRandomDirection();
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.SNAKE_SET_POSITION, gridElementView);
+        }
+    }
+    getRandomGridPosition(withSafeMargin) {
+        const row = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getRandomInt(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].ElementsSafeMargin, this.gridMatrix.length - _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].ElementsSafeMargin - 1);
+        const line = _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getRandomInt(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].ElementsSafeMargin, this.gridMatrix[row].length - _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].ElementsSafeMargin - 1);
+        let gridElementView = this.gridMatrix[row][line];
+        const getRandomGridPositionWithoutSafeMargin = gridElementView.isAlreadyTaken();
+        const getRandomGridPositionWithSafeMargin = getRandomGridPositionWithoutSafeMargin || gridElementView.hasElementNearby();
+        if ((withSafeMargin && getRandomGridPositionWithSafeMargin) || (!withSafeMargin && getRandomGridPositionWithoutSafeMargin)) {
+            gridElementView = this.getRandomGridPosition(withSafeMargin);
+        }
+        return gridElementView;
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_07_gridModule/views/GridElementView.ts":
+/*!*************************************************************!*\
+  !*** ./src/modules/_07_gridModule/views/GridElementView.ts ***!
+  \*************************************************************/
+/*! exports provided: GridElementView */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridElementView", function() { return GridElementView; });
+/* harmony import */ var gsap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! gsap */ "./node_modules/gsap/index.js");
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+
+class GridElementView extends PIXI.Sprite {
+    move(callback) {
+        switch (this.direction) {
+            case _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].UP:
+                gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].to(this, _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].StartingSpeed, { y: this.y - this.height, ease: gsap__WEBPACK_IMPORTED_MODULE_0__["Linear"].easeNone, onComplete: callback });
+                break;
+            case _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].RIGHT:
+                gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].to(this, _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].StartingSpeed, { x: this.x + this.width, ease: gsap__WEBPACK_IMPORTED_MODULE_0__["Linear"].easeNone, onComplete: callback });
+                break;
+            case _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].BOTTOM:
+                gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].to(this, _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].StartingSpeed, { y: this.y + this.height, ease: gsap__WEBPACK_IMPORTED_MODULE_0__["Linear"].easeNone, onComplete: callback });
+                break;
+            case _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].LEFT:
+                gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].to(this, _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].StartingSpeed, { x: this.x - this.width, ease: gsap__WEBPACK_IMPORTED_MODULE_0__["Linear"].easeNone, onComplete: callback });
+                break;
+        }
+    }
+    reset() {
+        this.direction = null;
+        this.rotation = 0;
+        this.prevDirection = null;
+        this.type = null;
+        this.x = this.initX;
+        this.y = this.initY;
+        this.texture = null;
+        this.parent.removeChild(this);
+    }
+    addTo(parent) {
+        parent.addChild(this);
+        return this;
+    }
+    getNextElementView() {
+        let nextElement;
+        try {
+            switch (this.direction) {
+                case _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].UP:
+                    nextElement = this.matrix[this.matrixYPosition - 1][this.matrixXPosition];
+                    break;
+                case _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].RIGHT:
+                    nextElement = this.matrix[this.matrixYPosition][this.matrixXPosition + 1];
+                    break;
+                case _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].BOTTOM:
+                    nextElement = this.matrix[this.matrixYPosition + 1][this.matrixXPosition];
+                    break;
+                case _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].LEFT:
+                    nextElement = this.matrix[this.matrixYPosition][this.matrixXPosition - 1];
+                    break;
+            }
+        }
+        catch (e) {
+            this.nextElementView = null;
+        }
+        finally {
+            return nextElement;
+        }
+    }
+    getPreviousElementView() {
+        let previousElement;
+        let directionToUse = this.direction;
+        if (this.prevDirection) {
+            directionToUse = this.prevDirection;
+        }
+        switch (directionToUse) {
+            case _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].UP:
+                previousElement = this.matrix[this.matrixYPosition + 1][this.matrixXPosition];
+                break;
+            case _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].RIGHT:
+                previousElement = this.matrix[this.matrixYPosition][this.matrixXPosition - 1];
+                break;
+            case _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].BOTTOM:
+                previousElement = this.matrix[this.matrixYPosition - 1][this.matrixXPosition];
+                break;
+            case _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].LEFT:
+                previousElement = this.matrix[this.matrixYPosition][this.matrixXPosition + 1];
+                break;
+        }
+        return previousElement;
+    }
+    setTexture(texture) {
+        this.texture = texture;
+        return this;
+    }
+    setRotation() {
+        this.rotation = 6.28319 * this.direction;
+        return this;
+    }
+    setType(type) {
+        this.type = type;
+        return this;
+    }
+    setDirection(direction) {
+        this.direction = direction;
+        return this;
+    }
+    setPrevDirection(direction) {
+        this.prevDirection = direction;
+        return this;
+    }
+    setPosition(position) {
+        this.position = position;
+        return this;
+    }
+    setRandomDirection() {
+        const directions = [];
+        for (var direction in _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"]) {
+            if (Number(direction)) {
+                directions.push(Number(direction));
+            }
+        }
+        this.direction = directions[_imports__WEBPACK_IMPORTED_MODULE_1__["Utils"].getRandomInt(0, 3)];
+    }
+    hasElementNearby() {
+        let output = false;
+        let nearbyGridElementView;
+        for (let yPosition = this.matrixYPosition - _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].ElementsSafeMargin; yPosition < this.matrixYPosition + _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].ElementsSafeMargin; ++yPosition) {
+            for (let xPosition = this.matrixXPosition - _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].ElementsSafeMargin; xPosition < this.matrixXPosition + _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].ElementsSafeMargin; ++xPosition) {
+                if (this.matrix[yPosition][xPosition].isAlreadyTaken()) {
+                    output = true;
+                }
+            }
+        }
+        return output;
+    }
+    isAlreadyTaken() {
+        let output = false;
+        if (this.type) {
+            output = true;
+        }
+        return output;
+    }
+    show(callback) {
+        this.alpha = 0;
+        this.scale.x = 2;
+        this.scale.y = 2;
+        gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].to(this, _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].StartingSpeed, { alpha: 1 });
+        gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].to(this.scale, _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].StartingSpeed, { x: 1, y: 1, onComplete: () => {
+                if (callback) {
+                    setTimeout(() => {
+                        callback();
+                    }, 0);
+                }
+            } });
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_07_gridModule/views/GridView.ts":
+/*!******************************************************!*\
+  !*** ./src/modules/_07_gridModule/views/GridView.ts ***!
+  \******************************************************/
+/*! exports provided: GridView */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridView", function() { return GridView; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class GridView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
+    addTo(parent) {
+        super.addTo(parent);
+        this.createTilingSpriteBackground();
+    }
+    createTilingSpriteBackground() {
+        const texture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.grid);
+        const tilingSprite = new PIXI.extras.TilingSprite(texture, this.parent.width, this.parent.height);
+        this.addChild(tilingSprite);
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_08_rewardModule/RewardModule.ts":
+/*!******************************************************!*\
+  !*** ./src/modules/_08_rewardModule/RewardModule.ts ***!
+  \******************************************************/
 /*! exports provided: RewardModule */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -53972,10 +53819,10 @@ class RewardModule extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModule"] {
 
 /***/ }),
 
-/***/ "./src/modules/reward/constants/RewardConstants.ts":
-/*!*********************************************************!*\
-  !*** ./src/modules/reward/constants/RewardConstants.ts ***!
-  \*********************************************************/
+/***/ "./src/modules/_08_rewardModule/constants/RewardConstants.ts":
+/*!*******************************************************************!*\
+  !*** ./src/modules/_08_rewardModule/constants/RewardConstants.ts ***!
+  \*******************************************************************/
 /*! exports provided: RewardConstants */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -53984,19 +53831,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RewardConstants", function() { return RewardConstants; });
 const RewardConstants = {
     EVENTS: {
-        GET_REWARD_POSITION: 'GET_REWARD_POSITION',
-        CREATE_REWARDS_VIEW: 'CREATE_REWARDS_VIEW',
-        CREATE_REWARD: 'CREATE_REWARD'
+        REWARD_CREATE: 'REWARD_CREATE',
+        REWARD_GET_POSITION: 'REWARD_GET_POSITION',
+        REWARD_SET_POSITION: 'REWARD_SET_POSITION'
     }
 };
 
 
 /***/ }),
 
-/***/ "./src/modules/reward/controllers/RewardController.ts":
-/*!************************************************************!*\
-  !*** ./src/modules/reward/controllers/RewardController.ts ***!
-  \************************************************************/
+/***/ "./src/modules/_08_rewardModule/controllers/RewardController.ts":
+/*!**********************************************************************!*\
+  !*** ./src/modules/_08_rewardModule/controllers/RewardController.ts ***!
+  \**********************************************************************/
 /*! exports provided: RewardController */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -54007,10 +53854,11 @@ __webpack_require__.r(__webpack_exports__);
 
 class RewardController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
     addListeners() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.CREATE_REWARDS_VIEW, () => {
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.REWARD_CREATE, () => {
             this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"].name].view);
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.REWARD_GET_POSITION, 'true');
         });
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.CREATE_REWARD, (event) => {
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.REWARD_SET_POSITION, (event) => {
             this.view.createReward(event.detail);
         });
     }
@@ -54019,10 +53867,10 @@ class RewardController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseContro
 
 /***/ }),
 
-/***/ "./src/modules/reward/models/RewardModel.ts":
-/*!**************************************************!*\
-  !*** ./src/modules/reward/models/RewardModel.ts ***!
-  \**************************************************/
+/***/ "./src/modules/_08_rewardModule/models/RewardModel.ts":
+/*!************************************************************!*\
+  !*** ./src/modules/_08_rewardModule/models/RewardModel.ts ***!
+  \************************************************************/
 /*! exports provided: RewardModel */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -54037,10 +53885,10 @@ class RewardModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
 
 /***/ }),
 
-/***/ "./src/modules/reward/views/RewardView.ts":
-/*!************************************************!*\
-  !*** ./src/modules/reward/views/RewardView.ts ***!
-  \************************************************/
+/***/ "./src/modules/_08_rewardModule/views/RewardView.ts":
+/*!**********************************************************!*\
+  !*** ./src/modules/_08_rewardModule/views/RewardView.ts ***!
+  \**********************************************************/
 /*! exports provided: RewardView */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -54051,20 +53899,19 @@ __webpack_require__.r(__webpack_exports__);
 
 class RewardView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
     createReward(gridElement) {
-        const reward = PIXI.Sprite.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.apple);
-        reward.x = gridElement.x;
-        reward.y = gridElement.y;
-        this.addChild(reward);
+        gridElement.setTexture(PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.apple))
+            .addTo(this)
+            .show();
     }
 }
 
 
 /***/ }),
 
-/***/ "./src/modules/snake/SnakeModule.ts":
-/*!******************************************!*\
-  !*** ./src/modules/snake/SnakeModule.ts ***!
-  \******************************************/
+/***/ "./src/modules/_09_snakeModule/SnakeModule.ts":
+/*!****************************************************!*\
+  !*** ./src/modules/_09_snakeModule/SnakeModule.ts ***!
+  \****************************************************/
 /*! exports provided: SnakeModule */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -54086,10 +53933,10 @@ class SnakeModule extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModule"] {
 
 /***/ }),
 
-/***/ "./src/modules/snake/constants/SnakeConstants.ts":
-/*!*******************************************************!*\
-  !*** ./src/modules/snake/constants/SnakeConstants.ts ***!
-  \*******************************************************/
+/***/ "./src/modules/_09_snakeModule/constants/SnakeConstants.ts":
+/*!*****************************************************************!*\
+  !*** ./src/modules/_09_snakeModule/constants/SnakeConstants.ts ***!
+  \*****************************************************************/
 /*! exports provided: SnakeConstants */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -54098,20 +53945,24 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SnakeConstants", function() { return SnakeConstants; });
 const SnakeConstants = {
     EVENTS: {
-        GET_SNAKE_POSITION: 'GET_SNAKE_POSITION',
-        GET_SNAKE_DIRECTION: 'GET_SNAKE_DIRECTION',
-        CREATE_SNAKE_VIEW: 'CREATE_SNAKE_VIEW',
-        CREATE_SNAKE: 'CREATE_SNAKE',
+        SNAKE_CREATE: 'SNAKE_CREATE',
+        SNAKE_GET_POSITION: 'SNAKE_GET_POSITION',
+        SNAKE_SET_POSITION: 'SNAKE_SET_POSITION',
+        SNAKE_SET_NEW_DIRECTION: 'SNAKE_SET_NEW_DIRECTION',
+        SNAKE_MOVE: 'SNAKE_MOVE',
+        SNAKE_SELF_HIT: 'SNAKE_SELF_HIT',
+        SNAKE_WALL_HIT: 'SNAKE_WALL_HIT',
+        SNAKE_EAT_FRUIT: 'SNAKE_EAT_FRUIT'
     }
 };
 
 
 /***/ }),
 
-/***/ "./src/modules/snake/constants/SnakeDirection.ts":
-/*!*******************************************************!*\
-  !*** ./src/modules/snake/constants/SnakeDirection.ts ***!
-  \*******************************************************/
+/***/ "./src/modules/_09_snakeModule/constants/SnakeDirection.ts":
+/*!*****************************************************************!*\
+  !*** ./src/modules/_09_snakeModule/constants/SnakeDirection.ts ***!
+  \*****************************************************************/
 /*! exports provided: SnakeDirection */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -54129,31 +53980,79 @@ var SnakeDirection;
 
 /***/ }),
 
-/***/ "./src/modules/snake/controllers/SnakeController.ts":
-/*!**********************************************************!*\
-  !*** ./src/modules/snake/controllers/SnakeController.ts ***!
-  \**********************************************************/
+/***/ "./src/modules/_09_snakeModule/controllers/SnakeController.ts":
+/*!********************************************************************!*\
+  !*** ./src/modules/_09_snakeModule/controllers/SnakeController.ts ***!
+  \********************************************************************/
 /*! exports provided: SnakeController */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SnakeController", function() { return SnakeController; });
-/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+/* harmony import */ var gsap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! gsap */ "./node_modules/gsap/index.js");
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
 
-class SnakeController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
+
+class SnakeController extends _imports__WEBPACK_IMPORTED_MODULE_1__["BaseController"] {
     addListeners() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.CREATE_SNAKE_VIEW, () => {
-            this.model.setRandomDirection();
-            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"].name].view);
+        _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_CREATE, () => {
+            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_1__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_1__["GameModule"].name].view);
+            _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_GET_POSITION, 'true');
         });
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.CREATE_SNAKE, (event) => {
-            this.view.createSnake(event.detail, this.model.direction);
+        _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_SET_POSITION, (event) => {
+            const snakeTail = event.detail;
+            this.view.createSnakePart(snakeTail);
         });
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.START_GAME, () => {
-            _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.ticker.add((deltaTime) => {
-                this.view.move(deltaTime);
-            });
+        _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["GameConstants"].EVENTS.GAME_START, () => {
+            _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_MOVE, this.view.snakeHeadElementView);
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_MOVE, () => {
+            this.view.move(() => _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_MOVE, this.view.snakeHeadElementView), () => _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_SELF_HIT, this.view.snakeHeadElementView), () => _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_WALL_HIT, this.view.snakeHeadElementView), () => _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_EAT_FRUIT, this.view.snakeHeadElementView));
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["GameConstants"].EVENTS.GAME_PAUSE, () => {
+            this.model.paused = true;
+            gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].pauseAll();
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["GameConstants"].EVENTS.GAME_RESUME, () => {
+            this.model.paused = false;
+            gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].resumeAll();
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_WALL_HIT, () => {
+            _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["GameConstants"].EVENTS.GAME_END);
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_EAT_FRUIT, () => {
+            this.view.expandSnake(() => _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_MOVE, this.view.snakeHeadElementView));
+            _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["RewardConstants"].EVENTS.REWARD_GET_POSITION, 'false');
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_SELF_HIT, () => {
+            _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["GameConstants"].EVENTS.GAME_END);
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_SET_NEW_DIRECTION, (event) => {
+            this.view.changeDirection(event.detail);
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener('keydown', (event) => {
+            let direction;
+            switch (event.key) {
+                case "ArrowLeft":
+                    direction = _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].LEFT;
+                    break;
+                case "ArrowRight":
+                    direction = _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].RIGHT;
+                    break;
+                case "ArrowUp":
+                    direction = _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].UP;
+                    break;
+                case "ArrowDown":
+                    direction = _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].BOTTOM;
+                    break;
+            }
+            const arrowKey = event.key === 'ArrowLeft' || event.key === 'ArrowRight' || event.key === 'ArrowUp' || event.key === 'ArrowDown';
+            const notSameDirection = direction !== this.view.snakeHeadElementView.direction;
+            const notOppositeDirection = (direction + 0.5 !== this.view.snakeHeadElementView.direction) && (direction - 0.5 !== this.view.snakeHeadElementView.direction);
+            if (arrowKey && notOppositeDirection && notSameDirection && !this.model.paused) {
+                _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_SET_NEW_DIRECTION, direction);
+            }
         });
     }
 }
@@ -54161,10 +54060,10 @@ class SnakeController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseControl
 
 /***/ }),
 
-/***/ "./src/modules/snake/models/SnakeModel.ts":
-/*!************************************************!*\
-  !*** ./src/modules/snake/models/SnakeModel.ts ***!
-  \************************************************/
+/***/ "./src/modules/_09_snakeModule/models/SnakeModel.ts":
+/*!**********************************************************!*\
+  !*** ./src/modules/_09_snakeModule/models/SnakeModel.ts ***!
+  \**********************************************************/
 /*! exports provided: SnakeModel */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -54179,23 +54078,22 @@ class SnakeModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
     }
     setRandomDirection() {
         const directions = [];
-        for (var direction in _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"]) {
+        for (let direction in _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"]) {
             if (Number(direction)) {
                 directions.push(Number(direction));
             }
         }
         this._direction = directions[_imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getRandomInt(0, 3)];
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.GET_SNAKE_DIRECTION, { detail: this.direction });
     }
 }
 
 
 /***/ }),
 
-/***/ "./src/modules/snake/views/SnakeView.ts":
-/*!**********************************************!*\
-  !*** ./src/modules/snake/views/SnakeView.ts ***!
-  \**********************************************/
+/***/ "./src/modules/_09_snakeModule/views/SnakeView.ts":
+/*!********************************************************!*\
+  !*** ./src/modules/_09_snakeModule/views/SnakeView.ts ***!
+  \********************************************************/
 /*! exports provided: SnakeView */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -54205,50 +54103,387 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
 
 class SnakeView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
-    createSnake(gridElements, direction) {
-        this.head = PIXI.Sprite.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_head);
-        this.body = PIXI.Sprite.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_body);
-        this.tail = PIXI.Sprite.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_tail);
-        this.direction = direction;
-        this.positionSnakePart(this.head, gridElements[0]);
-        this.positionSnakePart(this.body, gridElements[1]);
-        this.positionSnakePart(this.tail, gridElements[2]);
-    }
-    positionSnakePart(snakePart, gridElement) {
-        snakePart.x = gridElement.x;
-        snakePart.y = gridElement.y;
-        const fullRotationInRadians = 6.28319;
-        snakePart.rotation = fullRotationInRadians * this.direction;
-        this.addChild(snakePart);
-    }
-    move(deltaTime) {
-        switch (this.direction) {
-            case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].UP:
-                this.head.y -= _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
-                this.body.y -= _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
-                this.tail.y -= _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
-                break;
-            case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].RIGHT:
-                this.head.x += _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
-                this.body.x += _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
-                this.tail.x += _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
-                break;
-            case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].BOTTOM:
-                this.head.y += _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
-                this.body.y += _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
-                this.tail.y += _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
-                break;
-            case _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].LEFT:
-                this.head.x -= _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
-                this.body.x -= _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
-                this.tail.x -= _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Starting_speed * deltaTime;
-                break;
-            default:
-                // code...
-                break;
+    move(onComplete, onSelfHit, onWallHit, onEatFruit) {
+        this.snakeHeadElementView.nextElementView = this.snakeHeadElementView.getNextElementView();
+        if (this.snakeHeadElementView.nextElementView) {
+            if (this.snakeHeadElementView.nextElementView.type) {
+                if (this.snakeHeadElementView.nextElementView.type === _imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].REWARD) {
+                    onEatFruit();
+                }
+                else {
+                    onSelfHit();
+                    return;
+                }
+            }
+            this.moveSnakeHead();
+            if (!this.expanded) {
+                this.moveSnakeTail(onComplete);
+            }
+        }
+        else {
+            onWallHit();
         }
     }
+    expandSnake(onComplete) {
+        this.expanded = true;
+        const oldSnakeTail = this.snakeTailElementView;
+        const newSnakeTail = this.snakeTailElementView.getPreviousElementView();
+        this.snakeTailElementView = newSnakeTail;
+        newSnakeTail
+            .setType(_imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].SNAKE_TAIL)
+            .setTexture(PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_tail))
+            .setDirection(oldSnakeTail.prevDirection || oldSnakeTail.direction)
+            .setRotation()
+            .addTo(this)
+            .show(() => {
+            this.expanded = false;
+            onComplete();
+        });
+        oldSnakeTail
+            .setType(_imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].SNAKE_BODY)
+            .setTexture(PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_body));
+        this.swapChildren(newSnakeTail, oldSnakeTail);
+    }
+    moveSnakeHead() {
+        let oldSnakeHead = this.snakeHeadElementView;
+        let newSnakeHead = this.snakeHeadElementView.nextElementView;
+        this.snakeHeadElementView = newSnakeHead;
+        newSnakeHead
+            .setType(_imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].SNAKE_HEAD)
+            .setTexture(PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_head))
+            .setDirection(oldSnakeHead.direction)
+            .setPosition(oldSnakeHead.position)
+            .setRotation()
+            .addTo(this)
+            .move();
+        if (oldSnakeHead.prevDirection) {
+            oldSnakeHead.setTexture(PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_corner));
+        }
+        else {
+            oldSnakeHead.setTexture(PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_body));
+        }
+        oldSnakeHead
+            .setType(_imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].SNAKE_BODY)
+            .setDirection(newSnakeHead.direction)
+            .setRotation();
+    }
+    moveSnakeTail(onComplete) {
+        const oldSnakeTail = this.snakeTailElementView;
+        this.snakeTailElementView = this.snakeTailElementView.getNextElementView();
+        this.swapChildren(oldSnakeTail, this.snakeTailElementView);
+        oldSnakeTail.move(() => {
+            this.snakeTailElementView.setTexture(PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_tail));
+            oldSnakeTail.reset();
+            onComplete();
+        });
+    }
+    changeDirection(direction) {
+        this.snakeHeadElementView.setPrevDirection(this.snakeHeadElementView.direction);
+        this.snakeHeadElementView.setDirection(direction);
+    }
+    createSnakePart(previousSnakePartView, snakeLengthCounter = 1) {
+        if (snakeLengthCounter > _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].StartSnakeLength) {
+            return;
+        }
+        let newSnakePartView;
+        let snakeTexture;
+        let snakeType;
+        if (snakeLengthCounter === 1) {
+            newSnakePartView = previousSnakePartView;
+            snakeTexture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_tail);
+            snakeType = _imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].SNAKE_TAIL;
+            this.snakeTailElementView = newSnakePartView;
+        }
+        else {
+            newSnakePartView = previousSnakePartView.getNextElementView();
+            if (snakeLengthCounter === _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].StartSnakeLength) {
+                snakeTexture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_head);
+                snakeType = _imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].SNAKE_HEAD;
+                this.snakeHeadElementView = newSnakePartView;
+            }
+            else {
+                snakeTexture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_body);
+                snakeType = _imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].SNAKE_BODY;
+            }
+        }
+        newSnakePartView
+            .setTexture(snakeTexture)
+            .setType(snakeType)
+            .setDirection(previousSnakePartView.direction)
+            .setRotation();
+        this.addChild(newSnakePartView);
+        this.createSnakePart(newSnakePartView, ++snakeLengthCounter);
+    }
 }
+
+
+/***/ }),
+
+/***/ "./src/modules/constants.ts":
+/*!**********************************!*\
+  !*** ./src/modules/constants.ts ***!
+  \**********************************/
+/*! exports provided: Constants */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Constants", function() { return Constants; });
+const Constants = {
+    AppName: 'gameApplication',
+    DebugMode: true,
+    ElementsSafeMargin: 3,
+    StartSnakeLength: 3,
+    StartingSpeed: 0.3,
+    AppSettings: {
+        width: window.innerWidth,
+        height: window.innerHeight
+    },
+    Animations: {
+        Duration: 1
+    },
+    Assets: {
+        Images: {
+            Url: 'img/',
+            Names: {
+                'bg': 'bg.jpg',
+                'grid': 'grid.png',
+                'apple': 'apple.png',
+                'snake_head': 'snake_head.png',
+                'snake_body': 'snake_body.png',
+                'snake_tail': 'snake_tail.png',
+                'snake_corner': 'snake_corner.png'
+            }
+        },
+        Loader: {
+            PrimaryColor: 0X78AB46,
+            SecondaryColor: 0x000000
+        }
+    }
+};
+
+
+/***/ }),
+
+/***/ "./src/modules/imports.ts":
+/*!********************************!*\
+  !*** ./src/modules/imports.ts ***!
+  \********************************/
+/*! exports provided: GameApplication, Constants, Animate, Graphics, Utils, ActionsManager, AnimationsManager, EventsManager, BaseModule, BaseModel, BaseView, BaseController, BaseAction, LoaderModule, LoaderModel, LoaderView, LoaderController, LoadAssetsAction, LoaderConstants, GameModule, GameModel, GameView, GameController, CreateGameAction, StartGameAction, GameConstants, BoardModule, BoardModel, BoardView, BoardController, BoardConstants, GridModule, GridModel, GridView, GridElementView, GridController, GridConstants, GridElementType, RewardModule, RewardModel, RewardView, RewardController, RewardConstants, SnakeModule, SnakeModel, SnakeView, SnakeController, SnakeConstants, SnakeDirection */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var pixi_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! pixi.js */ "./node_modules/pixi.js/lib/index.js");
+/* harmony import */ var pixi_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(pixi_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _GameApplication__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./GameApplication */ "./src/modules/GameApplication.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameApplication", function() { return _GameApplication__WEBPACK_IMPORTED_MODULE_1__["GameApplication"]; });
+
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./constants */ "./src/modules/constants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Constants", function() { return _constants__WEBPACK_IMPORTED_MODULE_2__["Constants"]; });
+
+/* harmony import */ var _00_misc_Animate__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./_00_misc/Animate */ "./src/modules/_00_misc/Animate.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Animate", function() { return _00_misc_Animate__WEBPACK_IMPORTED_MODULE_3__["Animate"]; });
+
+/* harmony import */ var _00_misc_Graphics__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./_00_misc/Graphics */ "./src/modules/_00_misc/Graphics.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Graphics", function() { return _00_misc_Graphics__WEBPACK_IMPORTED_MODULE_4__["Graphics"]; });
+
+/* harmony import */ var _00_misc_Utils__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./_00_misc/Utils */ "./src/modules/_00_misc/Utils.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Utils", function() { return _00_misc_Utils__WEBPACK_IMPORTED_MODULE_5__["Utils"]; });
+
+/* harmony import */ var _01_managers_ActionsManager__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./_01_managers/ActionsManager */ "./src/modules/_01_managers/ActionsManager.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ActionsManager", function() { return _01_managers_ActionsManager__WEBPACK_IMPORTED_MODULE_6__["ActionsManager"]; });
+
+/* harmony import */ var _01_managers_AnimationsManager__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./_01_managers/AnimationsManager */ "./src/modules/_01_managers/AnimationsManager.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AnimationsManager", function() { return _01_managers_AnimationsManager__WEBPACK_IMPORTED_MODULE_7__["AnimationsManager"]; });
+
+/* harmony import */ var _01_managers_EventsManager__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./_01_managers/EventsManager */ "./src/modules/_01_managers/EventsManager.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "EventsManager", function() { return _01_managers_EventsManager__WEBPACK_IMPORTED_MODULE_8__["EventsManager"]; });
+
+/* harmony import */ var _03_baseModule_BaseModule__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./_03_baseModule/BaseModule */ "./src/modules/_03_baseModule/BaseModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseModule", function() { return _03_baseModule_BaseModule__WEBPACK_IMPORTED_MODULE_9__["BaseModule"]; });
+
+/* harmony import */ var _03_baseModule_models_BaseModel__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./_03_baseModule/models/BaseModel */ "./src/modules/_03_baseModule/models/BaseModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseModel", function() { return _03_baseModule_models_BaseModel__WEBPACK_IMPORTED_MODULE_10__["BaseModel"]; });
+
+/* harmony import */ var _03_baseModule_views_BaseView__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./_03_baseModule/views/BaseView */ "./src/modules/_03_baseModule/views/BaseView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseView", function() { return _03_baseModule_views_BaseView__WEBPACK_IMPORTED_MODULE_11__["BaseView"]; });
+
+/* harmony import */ var _03_baseModule_controllers_BaseController__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./_03_baseModule/controllers/BaseController */ "./src/modules/_03_baseModule/controllers/BaseController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseController", function() { return _03_baseModule_controllers_BaseController__WEBPACK_IMPORTED_MODULE_12__["BaseController"]; });
+
+/* harmony import */ var _03_baseModule_actions_BaseAction__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./_03_baseModule/actions/BaseAction */ "./src/modules/_03_baseModule/actions/BaseAction.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseAction", function() { return _03_baseModule_actions_BaseAction__WEBPACK_IMPORTED_MODULE_13__["BaseAction"]; });
+
+/* harmony import */ var _04_loaderModule_LoaderModule__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./_04_loaderModule/LoaderModule */ "./src/modules/_04_loaderModule/LoaderModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderModule", function() { return _04_loaderModule_LoaderModule__WEBPACK_IMPORTED_MODULE_14__["LoaderModule"]; });
+
+/* harmony import */ var _04_loaderModule_models_LoaderModel__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./_04_loaderModule/models/LoaderModel */ "./src/modules/_04_loaderModule/models/LoaderModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderModel", function() { return _04_loaderModule_models_LoaderModel__WEBPACK_IMPORTED_MODULE_15__["LoaderModel"]; });
+
+/* harmony import */ var _04_loaderModule_views_LoaderView__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./_04_loaderModule/views/LoaderView */ "./src/modules/_04_loaderModule/views/LoaderView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderView", function() { return _04_loaderModule_views_LoaderView__WEBPACK_IMPORTED_MODULE_16__["LoaderView"]; });
+
+/* harmony import */ var _04_loaderModule_controllers_LoaderController__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./_04_loaderModule/controllers/LoaderController */ "./src/modules/_04_loaderModule/controllers/LoaderController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderController", function() { return _04_loaderModule_controllers_LoaderController__WEBPACK_IMPORTED_MODULE_17__["LoaderController"]; });
+
+/* harmony import */ var _04_loaderModule_actions_LoadAssetsAction__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./_04_loaderModule/actions/LoadAssetsAction */ "./src/modules/_04_loaderModule/actions/LoadAssetsAction.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoadAssetsAction", function() { return _04_loaderModule_actions_LoadAssetsAction__WEBPACK_IMPORTED_MODULE_18__["LoadAssetsAction"]; });
+
+/* harmony import */ var _04_loaderModule_constants_LoaderConstants__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./_04_loaderModule/constants/LoaderConstants */ "./src/modules/_04_loaderModule/constants/LoaderConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderConstants", function() { return _04_loaderModule_constants_LoaderConstants__WEBPACK_IMPORTED_MODULE_19__["LoaderConstants"]; });
+
+/* harmony import */ var _05_gameModule_GameModule__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./_05_gameModule/GameModule */ "./src/modules/_05_gameModule/GameModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameModule", function() { return _05_gameModule_GameModule__WEBPACK_IMPORTED_MODULE_20__["GameModule"]; });
+
+/* harmony import */ var _05_gameModule_models_GameModel__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./_05_gameModule/models/GameModel */ "./src/modules/_05_gameModule/models/GameModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameModel", function() { return _05_gameModule_models_GameModel__WEBPACK_IMPORTED_MODULE_21__["GameModel"]; });
+
+/* harmony import */ var _05_gameModule_views_GameView__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./_05_gameModule/views/GameView */ "./src/modules/_05_gameModule/views/GameView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameView", function() { return _05_gameModule_views_GameView__WEBPACK_IMPORTED_MODULE_22__["GameView"]; });
+
+/* harmony import */ var _05_gameModule_controllers_GameController__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./_05_gameModule/controllers/GameController */ "./src/modules/_05_gameModule/controllers/GameController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameController", function() { return _05_gameModule_controllers_GameController__WEBPACK_IMPORTED_MODULE_23__["GameController"]; });
+
+/* harmony import */ var _05_gameModule_actions_CreateGameAction__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./_05_gameModule/actions/CreateGameAction */ "./src/modules/_05_gameModule/actions/CreateGameAction.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "CreateGameAction", function() { return _05_gameModule_actions_CreateGameAction__WEBPACK_IMPORTED_MODULE_24__["CreateGameAction"]; });
+
+/* harmony import */ var _05_gameModule_actions_StartGameAction__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ./_05_gameModule/actions/StartGameAction */ "./src/modules/_05_gameModule/actions/StartGameAction.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "StartGameAction", function() { return _05_gameModule_actions_StartGameAction__WEBPACK_IMPORTED_MODULE_25__["StartGameAction"]; });
+
+/* harmony import */ var _05_gameModule_constants_GameConstants__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ./_05_gameModule/constants/GameConstants */ "./src/modules/_05_gameModule/constants/GameConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameConstants", function() { return _05_gameModule_constants_GameConstants__WEBPACK_IMPORTED_MODULE_26__["GameConstants"]; });
+
+/* harmony import */ var _06_boardModule_BoardModule__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ./_06_boardModule/BoardModule */ "./src/modules/_06_boardModule/BoardModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModule", function() { return _06_boardModule_BoardModule__WEBPACK_IMPORTED_MODULE_27__["BoardModule"]; });
+
+/* harmony import */ var _06_boardModule_models_BoardModel__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ./_06_boardModule/models/BoardModel */ "./src/modules/_06_boardModule/models/BoardModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModel", function() { return _06_boardModule_models_BoardModel__WEBPACK_IMPORTED_MODULE_28__["BoardModel"]; });
+
+/* harmony import */ var _06_boardModule_views_BoardView__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! ./_06_boardModule/views/BoardView */ "./src/modules/_06_boardModule/views/BoardView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardView", function() { return _06_boardModule_views_BoardView__WEBPACK_IMPORTED_MODULE_29__["BoardView"]; });
+
+/* harmony import */ var _06_boardModule_controllers_BoardController__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! ./_06_boardModule/controllers/BoardController */ "./src/modules/_06_boardModule/controllers/BoardController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardController", function() { return _06_boardModule_controllers_BoardController__WEBPACK_IMPORTED_MODULE_30__["BoardController"]; });
+
+/* harmony import */ var _06_boardModule_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! ./_06_boardModule/constants/BoardConstants */ "./src/modules/_06_boardModule/constants/BoardConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardConstants", function() { return _06_boardModule_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_31__["BoardConstants"]; });
+
+/* harmony import */ var _07_gridModule_GridModule__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! ./_07_gridModule/GridModule */ "./src/modules/_07_gridModule/GridModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridModule", function() { return _07_gridModule_GridModule__WEBPACK_IMPORTED_MODULE_32__["GridModule"]; });
+
+/* harmony import */ var _07_gridModule_models_GridModel__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! ./_07_gridModule/models/GridModel */ "./src/modules/_07_gridModule/models/GridModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridModel", function() { return _07_gridModule_models_GridModel__WEBPACK_IMPORTED_MODULE_33__["GridModel"]; });
+
+/* harmony import */ var _07_gridModule_views_GridView__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! ./_07_gridModule/views/GridView */ "./src/modules/_07_gridModule/views/GridView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridView", function() { return _07_gridModule_views_GridView__WEBPACK_IMPORTED_MODULE_34__["GridView"]; });
+
+/* harmony import */ var _07_gridModule_views_GridElementView__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! ./_07_gridModule/views/GridElementView */ "./src/modules/_07_gridModule/views/GridElementView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridElementView", function() { return _07_gridModule_views_GridElementView__WEBPACK_IMPORTED_MODULE_35__["GridElementView"]; });
+
+/* harmony import */ var _07_gridModule_controllers_GridController__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! ./_07_gridModule/controllers/GridController */ "./src/modules/_07_gridModule/controllers/GridController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridController", function() { return _07_gridModule_controllers_GridController__WEBPACK_IMPORTED_MODULE_36__["GridController"]; });
+
+/* harmony import */ var _07_gridModule_constants_GridConstants__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! ./_07_gridModule/constants/GridConstants */ "./src/modules/_07_gridModule/constants/GridConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridConstants", function() { return _07_gridModule_constants_GridConstants__WEBPACK_IMPORTED_MODULE_37__["GridConstants"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridElementType", function() { return _07_gridModule_constants_GridConstants__WEBPACK_IMPORTED_MODULE_37__["GridElementType"]; });
+
+/* harmony import */ var _08_rewardModule_RewardModule__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! ./_08_rewardModule/RewardModule */ "./src/modules/_08_rewardModule/RewardModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModule", function() { return _08_rewardModule_RewardModule__WEBPACK_IMPORTED_MODULE_38__["RewardModule"]; });
+
+/* harmony import */ var _08_rewardModule_models_RewardModel__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! ./_08_rewardModule/models/RewardModel */ "./src/modules/_08_rewardModule/models/RewardModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModel", function() { return _08_rewardModule_models_RewardModel__WEBPACK_IMPORTED_MODULE_39__["RewardModel"]; });
+
+/* harmony import */ var _08_rewardModule_views_RewardView__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! ./_08_rewardModule/views/RewardView */ "./src/modules/_08_rewardModule/views/RewardView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardView", function() { return _08_rewardModule_views_RewardView__WEBPACK_IMPORTED_MODULE_40__["RewardView"]; });
+
+/* harmony import */ var _08_rewardModule_controllers_RewardController__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! ./_08_rewardModule/controllers/RewardController */ "./src/modules/_08_rewardModule/controllers/RewardController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardController", function() { return _08_rewardModule_controllers_RewardController__WEBPACK_IMPORTED_MODULE_41__["RewardController"]; });
+
+/* harmony import */ var _08_rewardModule_constants_RewardConstants__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(/*! ./_08_rewardModule/constants/RewardConstants */ "./src/modules/_08_rewardModule/constants/RewardConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardConstants", function() { return _08_rewardModule_constants_RewardConstants__WEBPACK_IMPORTED_MODULE_42__["RewardConstants"]; });
+
+/* harmony import */ var _09_snakeModule_SnakeModule__WEBPACK_IMPORTED_MODULE_43__ = __webpack_require__(/*! ./_09_snakeModule/SnakeModule */ "./src/modules/_09_snakeModule/SnakeModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModule", function() { return _09_snakeModule_SnakeModule__WEBPACK_IMPORTED_MODULE_43__["SnakeModule"]; });
+
+/* harmony import */ var _09_snakeModule_models_SnakeModel__WEBPACK_IMPORTED_MODULE_44__ = __webpack_require__(/*! ./_09_snakeModule/models/SnakeModel */ "./src/modules/_09_snakeModule/models/SnakeModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModel", function() { return _09_snakeModule_models_SnakeModel__WEBPACK_IMPORTED_MODULE_44__["SnakeModel"]; });
+
+/* harmony import */ var _09_snakeModule_views_SnakeView__WEBPACK_IMPORTED_MODULE_45__ = __webpack_require__(/*! ./_09_snakeModule/views/SnakeView */ "./src/modules/_09_snakeModule/views/SnakeView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeView", function() { return _09_snakeModule_views_SnakeView__WEBPACK_IMPORTED_MODULE_45__["SnakeView"]; });
+
+/* harmony import */ var _09_snakeModule_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_46__ = __webpack_require__(/*! ./_09_snakeModule/controllers/SnakeController */ "./src/modules/_09_snakeModule/controllers/SnakeController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeController", function() { return _09_snakeModule_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_46__["SnakeController"]; });
+
+/* harmony import */ var _09_snakeModule_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_47__ = __webpack_require__(/*! ./_09_snakeModule/constants/SnakeConstants */ "./src/modules/_09_snakeModule/constants/SnakeConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeConstants", function() { return _09_snakeModule_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_47__["SnakeConstants"]; });
+
+/* harmony import */ var _09_snakeModule_constants_SnakeDirection__WEBPACK_IMPORTED_MODULE_48__ = __webpack_require__(/*! ./_09_snakeModule/constants/SnakeDirection */ "./src/modules/_09_snakeModule/constants/SnakeDirection.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeDirection", function() { return _09_snakeModule_constants_SnakeDirection__WEBPACK_IMPORTED_MODULE_48__["SnakeDirection"]; });
+
+// Attach PIXI to window for accesibility
+
+window.PIXI = pixi_js__WEBPACK_IMPORTED_MODULE_0__;
+pixi_js__WEBPACK_IMPORTED_MODULE_0__["utils"].skipHello();
+/** Internal exports */
+
+
+// Misc
+
+
+
+// Managers
+
+
+
+// Base
+
+
+
+
+
+// Loader
+
+
+
+
+
+
+// Game
+
+
+
+
+
+
+
+// Board
+
+
+
+
+
+// Grid element
+
+
+
+
+
+
+// Reward
+
+
+
+
+
+// Snake
+
+
+
+
+
+
 
 
 /***/ })
