@@ -50,7 +50,8 @@ export class GameApplication extends PIXI.Application {
         ActionsManager.execute([
             LoadAssetsAction,
             CreateGameAction,
-            StartGameAction
+            StartGameAction,
+            //EndGameAction
         ]);
     }
 }

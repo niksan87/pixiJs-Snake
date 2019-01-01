@@ -61,10 +61,18 @@ export class GridModel extends BaseModel {
         let gridElementView: GridElementView = this.gridMatrix[row][line];
         const getRandomGridPositionWithoutSafeMargin: boolean = gridElementView.isAlreadyTaken();
         const getRandomGridPositionWithSafeMargin: boolean = getRandomGridPositionWithoutSafeMargin || gridElementView.hasElementNearby();
+        
         if ((withSafeMargin && getRandomGridPositionWithSafeMargin) || (!withSafeMargin && getRandomGridPositionWithoutSafeMargin)) {
             gridElementView = this.getRandomGridPosition(withSafeMargin);
         }
         return gridElementView;
     }
 
+    public reset(): void {
+        this.gridMatrix.forEach((line: GridElementView[]) => {
+            line.forEach((element: GridElementView) => {
+                element.reset();
+            })
+        })
+    }
 }

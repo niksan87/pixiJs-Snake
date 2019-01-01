@@ -1,6 +1,7 @@
 export const GridConstants = {
     EVENTS: {
-        GRID_CREATE: 'GRID_CREATE'
+        GRID_CREATE: 'GRID_CREATE',
+        RESET_GRID: 'RESET_GRID'
     }
 }
 

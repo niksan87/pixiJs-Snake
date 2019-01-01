@@ -8,6 +8,7 @@ export class GridView extends BaseView {
     public addTo(parent: BaseView): void {
         super.addTo(parent);
         this.createTilingSpriteBackground();
+        this.createSnowOverlay();
     }
 
     private createTilingSpriteBackground(): void {
@@ -18,5 +19,13 @@ export class GridView extends BaseView {
             this.parent.height
         );
         this.addChild(tilingSprite);
+    }
+
+    private createSnowOverlay(): void {
+        const frameTexture: PIXI.Texture = PIXI.Texture.fromImage(Constants.Assets.Images.Url + Constants.Assets.Images.Names.snow_frame);
+        const sprite: PIXI.Sprite = new PIXI.Sprite(frameTexture);
+        sprite.width = this.width;
+        sprite.height = this.height;
+        this.addChild(sprite);
     }
 }

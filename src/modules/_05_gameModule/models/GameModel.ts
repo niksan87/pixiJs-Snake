@@ -4,4 +4,5 @@ import {
 
 export class GameModel extends BaseModel {
     public paused: boolean;
+    public started: boolean;
 }

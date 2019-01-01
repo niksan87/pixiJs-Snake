@@ -14,7 +14,9 @@ export class RewardController extends BaseController {
 
     protected addListeners(): void {
         EventsManager.addListener(RewardConstants.EVENTS.REWARD_CREATE, () => {
-            this.view.addTo(GameApplication.app.modules[GameModule.name].view);
+            if (!this.view.parent) {
+                this.view.addTo(GameApplication.app.modules[GameModule.name].view);
+            }
             EventsManager.dispatch(RewardConstants.EVENTS.REWARD_GET_POSITION, 'true');
         });
 

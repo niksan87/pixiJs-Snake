@@ -8,6 +8,8 @@ import {
 export class SnakeModel extends BaseModel {
     private _direction: SnakeDirection;
     public paused: boolean;
+    public started: boolean;
+    public length: number;
     
     get direction() {
         return this._direction;

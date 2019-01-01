@@ -32,6 +32,10 @@ export class EventsManager {
                 }                
             } else if (eventName === RewardConstants.EVENTS.REWARD_GET_POSITION || eventName === SnakeConstants.EVENTS.SNAKE_GET_POSITION) {
                 extraText = `(${value === 'true' ? 'WITH' : 'WITHOUT'} SAFE MARGIN)`;
+            } else if (eventName === SnakeConstants.EVENTS.SNAKE_GET_LENGTH){
+                extraText = '';
+            } else if (eventName === SnakeConstants.EVENTS.SNAKE_SEND_LENGTH){
+                extraText = `(${value.length})`;
             } else if (value as GridElementView) {
                 extraText = `(${(value as GridElementView).matrixXPosition}x${(value as GridElementView).matrixYPosition})`;
             }

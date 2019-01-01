@@ -10,6 +10,7 @@ export * from './constants';
 // Misc
 export * from './_00_misc/Animate';
 export * from './_00_misc/Graphics';
+export * from './_00_misc/Button';
 export * from './_00_misc/Interfaces';
 export * from './_00_misc/Utils';
 
@@ -37,6 +38,9 @@ export * from './_04_loaderModule/constants/LoaderConstants';
 export * from './_05_gameModule/GameModule';
 export * from './_05_gameModule/models/GameModel';
 export * from './_05_gameModule/views/GameView';
+export * from './_05_gameModule/views/InitialScreenView';
+export * from './_05_gameModule/views/PauseGameView';
+export * from './_05_gameModule/views/GameOverView';
 export * from './_05_gameModule/controllers/GameController';
 export * from './_05_gameModule/actions/CreateGameAction';
 export * from './_05_gameModule/actions/StartGameAction';
@@ -46,6 +50,8 @@ export * from './_05_gameModule/constants/GameConstants';
 export * from './_06_boardModule/BoardModule';
 export * from './_06_boardModule/models/BoardModel';
 export * from './_06_boardModule/views/BoardView';
+export * from './_06_boardModule/views/BackgroundView';
+export * from './_06_boardModule/views/SnowView';
 export * from './_06_boardModule/controllers/BoardController';
 export * from './_06_boardModule/constants/BoardConstants';
 

@@ -25,27 +25,28 @@ export class GridElementView extends PIXI.Sprite {
     public matrix: GridElementView[][];
     public nextElementView: GridElementView;
 
-    public move(callback?: any): void {
+    public move(speed: number, callback?: any): void {
         switch (this.direction) {
             case SnakeDirection.UP: 
-            TweenMax.to(this, Constants.StartingSpeed, {y: this.y - this.height, ease: Linear.easeNone, onComplete: callback});
+            TweenMax.to(this, speed, {y: this.y - this.height, ease: Linear.easeNone, onComplete: callback});
             break;
 
             case SnakeDirection.RIGHT: 
-            TweenMax.to(this, Constants.StartingSpeed, {x: this.x + this.width, ease: Linear.easeNone, onComplete: callback});
+            TweenMax.to(this, speed, {x: this.x + this.width, ease: Linear.easeNone, onComplete: callback});
             break;
 
             case SnakeDirection.BOTTOM:
-            TweenMax.to(this, Constants.StartingSpeed, {y: this.y + this.height, ease: Linear.easeNone, onComplete: callback});
+            TweenMax.to(this, speed, {y: this.y + this.height, ease: Linear.easeNone, onComplete: callback});
             break;
 
             case SnakeDirection.LEFT:
-            TweenMax.to(this, Constants.StartingSpeed, {x: this.x - this.width, ease: Linear.easeNone, onComplete: callback});
+            TweenMax.to(this, speed, {x: this.x - this.width, ease: Linear.easeNone, onComplete: callback});
             break;
         }
     }
 
     public reset(): void {
+        this.alpha = 1;
         this.direction = null;
         this.rotation = 0;
         this.prevDirection = null;
@@ -53,7 +54,9 @@ export class GridElementView extends PIXI.Sprite {
         this.x = this.initX;
         this.y = this.initY;
         this.texture = null;
-        this.parent.removeChild(this);
+        if (this.parent) {
+            this.parent.removeChild(this);
+        }
     }
 
     public addTo(parent: PIXI.Container | BaseView): GridElementView {
@@ -101,8 +104,8 @@ export class GridElementView extends PIXI.Sprite {
         return this;
     }
 
-    public setRotation(): GridElementView {
-        this.rotation = 6.28319 * this.direction;
+    public setRotation(value?: number): GridElementView {
+        this.rotation = 6.28319 * (value !== undefined ? value : this.direction);
         return this;
     }
 
@@ -157,12 +160,12 @@ export class GridElementView extends PIXI.Sprite {
         return output;
     }
 
-    public show(callback?: any): void {
+    public show(speed: number, callback?: any): void {
         this.alpha = 0;
         this.scale.x = 2;
         this.scale.y = 2;
-        TweenMax.to(this, Constants.StartingSpeed, {alpha: 1});
-        TweenMax.to(this.scale, Constants.StartingSpeed, {x: 1, y: 1, onComplete: () => {
+        TweenMax.to(this, speed, {alpha: 1});
+        TweenMax.to(this.scale, speed, {x: 1, y: 1, onComplete: () => {
             if (callback) {
                 setTimeout(() => {
                     callback();

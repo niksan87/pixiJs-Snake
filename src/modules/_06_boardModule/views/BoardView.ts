@@ -1,22 +1,30 @@
 import {
     GameApplication,
+    BackgroundView,
     BaseView,
     GridView,
+    SnowView,
     Constants
 } from '../../imports';
 
 export class BoardView extends BaseView {
     protected grid: GridView;
+    protected background: BackgroundView;
+    public snow: SnowView;
 
     public addTo(parent: BaseView): void {
         super.addTo(parent);
-        this.addBackground();
+        if (!this.background) {
+            this.background = new BackgroundView();
+            this.background.addTo(this);
+        }
+        if (Constants.Snow.Active) {
+            this.createSnow();
+        }
     }
 
-    private addBackground(): void {
-        const texture: PIXI.Texture = PIXI.Texture.fromImage(Constants.Assets.Images.Url + Constants.Assets.Images.Names.bg);
-        const tilingSprite = new PIXI.extras.TilingSprite(texture, GameApplication.app.screen.width, GameApplication.app.screen.height);
-        this.addChild(tilingSprite);
+    private createSnow(): void {
+        this.snow = new SnowView();
+        this.snow.addTo(GameApplication.app.stage)
     }
-
 }

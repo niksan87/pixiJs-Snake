@@ -5,9 +5,9 @@ import {
 } from '../../imports';
 
 export class CreateGameAction extends BaseAction {
-    public execute(): Promise<any> {
-        EventsManager.addListener(GameConstants.EVENTS.GAME_CREATE_FINISH, () => this.actionResolve());
-        EventsManager.dispatch(GameConstants.EVENTS.GAME_CREATE);
-        return super.execute();
+    constructor() {
+        super();
+        this.startEvent = GameConstants.EVENTS.GAME_CREATE;
+        this.finishEvent = GameConstants.EVENTS.GAME_CREATE_FINISH;
     }
 }

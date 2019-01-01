@@ -5,6 +5,7 @@ import {
     LoaderModel,
     LoaderView,
     LoaderConstants,
+    GameConstants,
     Constants,
 } from '../../imports';
 
@@ -14,8 +15,16 @@ export class LoaderController extends BaseController {
 
     protected addListeners(): void {
 
-        EventsManager.addListener(LoaderConstants.EVENTS.LOADER_START, () => {
+        EventsManager.addListener(LoaderConstants.EVENTS.LOAD_ASSETS_ACTION_START, () => {
+            EventsManager.dispatch(LoaderConstants.EVENTS.LOADER_ADD);
+            EventsManager.dispatch(LoaderConstants.EVENTS.LOADER_START);
+        });
+
+        EventsManager.addListener(LoaderConstants.EVENTS.LOADER_ADD, () => {
             this.view.addTo(GameApplication.app.stage);
+        });
+
+        EventsManager.addListener(LoaderConstants.EVENTS.LOADER_START, () => {
             this.model.loadAssets();
         });
 
@@ -24,10 +33,20 @@ export class LoaderController extends BaseController {
         });
 
         EventsManager.addListener(LoaderConstants.EVENTS.LOADER_COMPLETE, () => {
-            setTimeout(() => {
-                EventsManager.dispatch(LoaderConstants.EVENTS.LOADER_FINISH);
-                this.view.animateOutro().then(() => this.view.remove());
-            }, Constants.Animations.Duration * 1000);
+            EventsManager.dispatch(LoaderConstants.EVENTS.LOADER_PLAY_OUTRO);
+            EventsManager.dispatch('START_NEXT_ACTION');
+        });
+
+        EventsManager.addListener(LoaderConstants.EVENTS.LOADER_PLAY_OUTRO, () => {
+            this.view.animateOutro().then(() => {
+                EventsManager.dispatch(LoaderConstants.EVENTS.LOADER_REMOVE);
+                EventsManager.dispatch(LoaderConstants.EVENTS.LOAD_ASSETS_ACTION_FINISH);
+                EventsManager.dispatch(GameConstants.EVENTS.GAME_ENABLE_FUNCTIONALITY);
+            });
+        });
+
+        EventsManager.addListener(LoaderConstants.EVENTS.LOADER_REMOVE, () => {
+            this.view.remove();
         });
     }
 }

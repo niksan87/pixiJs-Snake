@@ -4,6 +4,7 @@ import {
     BoardModule,
     GameApplication,
     GridView,
+    GridElementView,
     GridElementType,
     GridModel,
     GridConstants,
@@ -17,8 +18,13 @@ export class GridController extends BaseController {
 
     public addListeners(): void {
         EventsManager.addListener(GridConstants.EVENTS.GRID_CREATE, () => {
-            this.view.addTo(GameApplication.app.modules[BoardModule.name].view);
-            this.model.createGridMatrix();
+            if (!this.view.parent) {
+                this.view.addTo(GameApplication.app.modules[BoardModule.name].view);
+            }
+            if (!this.model.gridMatrix) {
+                this.model.createGridMatrix();
+            }
+            
         });
         
         EventsManager.addListener(RewardConstants.EVENTS.REWARD_GET_POSITION, (event: CustomEvent) => {
@@ -27,6 +33,10 @@ export class GridController extends BaseController {
 
         EventsManager.addListener(SnakeConstants.EVENTS.SNAKE_GET_POSITION, (event: CustomEvent) => {
             this.model.setRandomGridPosition(GridElementType.SNAKE_TAIL, event.detail);    
+        });
+
+        EventsManager.addListener(GridConstants.EVENTS.RESET_GRID, () => {
+            this.model.reset();
         });
     }
 }

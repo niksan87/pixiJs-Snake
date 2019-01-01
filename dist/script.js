@@ -52504,7 +52504,7 @@ class GameApplication extends PIXI.Application {
         _imports__WEBPACK_IMPORTED_MODULE_0__["ActionsManager"].execute([
             _imports__WEBPACK_IMPORTED_MODULE_0__["LoadAssetsAction"],
             _imports__WEBPACK_IMPORTED_MODULE_0__["CreateGameAction"],
-            _imports__WEBPACK_IMPORTED_MODULE_0__["StartGameAction"]
+            _imports__WEBPACK_IMPORTED_MODULE_0__["StartGameAction"],
         ]);
     }
 }
@@ -52540,6 +52540,53 @@ class Animate {
         return new Promise((resolve) => {
             this.animations.push(gsap__WEBPACK_IMPORTED_MODULE_0__["TweenLite"].to(this.element, duration, { height: heightToAnimateTo, onComplete: resolve }));
         });
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_00_misc/Button.ts":
+/*!****************************************!*\
+  !*** ./src/modules/_00_misc/Button.ts ***!
+  \****************************************/
+/*! exports provided: Button */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Button", function() { return Button; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../imports */ "./src/modules/imports.ts");
+
+class Button extends _imports__WEBPACK_IMPORTED_MODULE_0__["Graphics"] {
+    constructor(text) {
+        super();
+        this.normalTexture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.btn_bg);
+        this.hoverTexture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.btn_bg_hover);
+        this.createButtonBg();
+        this.createButtonText(text);
+    }
+    createButtonBg() {
+        this.bg = new PIXI.Sprite(this.normalTexture);
+        this.buttonMode = true;
+        this.interactive = true;
+        this.addChild(this.bg);
+    }
+    createButtonText(text) {
+        this.text = new _imports__WEBPACK_IMPORTED_MODULE_0__["Graphics"]();
+        const style = { fontFamily: 'Verdana, Arial, Sans-serif', fontWeight: 'bold', fill: 0x10794c, fontSize: this.width / (text.length + 4) };
+        const value = new PIXI.Text(text, style);
+        this.text.addChild(value);
+        this.text.alignTo(this, { x: 'center', y: 'center' });
+        this.addChild(this.text);
+    }
+    onMouseOver() {
+        this.bg.texture = this.hoverTexture;
+        this.text.children[0].style.fill = 0xffffff;
+    }
+    onMouseOut() {
+        this.bg.texture = this.normalTexture;
+        this.text.children[0].style.fill = 0x10794c;
     }
 }
 
@@ -52683,18 +52730,43 @@ class ActionsManager {
     static execute(actions) {
         this.actions = [];
         actions.forEach((Action) => this.actions.push(new Action()));
-        this.executeAction(0);
+        this.trytoExecuteAction(0);
     }
-    static executeAction(index) {
-        if (!this.actions[index]) {
-            ActionsManager.actions = null;
+    static trytoExecuteAction(index) {
+        const action = this.actions[index];
+        if (!action) {
             return;
         }
-        const actionName = this.actions[index].constructor.name;
+        this.setNextAction(action, index);
+        this.setPrevAction(action, index);
+        if (action.executing) {
+            return;
+        }
+        else {
+            this.executeAction(action, ++index);
+        }
+    }
+    static setNextAction(action, index) {
+        if (this.actions[index + 1]) {
+            action.nextAction = this.actions[index + 1];
+        }
+    }
+    static setPrevAction(action, index) {
+        if (this.actions[index - 1]) {
+            action.prevAction = this.actions[index - 1];
+        }
+    }
+    static executeAction(action, index) {
+        if (action.executed) {
+            return;
+        }
+        const actionName = action.constructor.name;
         _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].warn(`---${actionName} start---`);
-        this.actions[index].execute().then(() => {
-            _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].warn(`---${actionName} end---\n\n`);
-            this.executeAction(++index);
+        action.execute().then(() => {
+            _imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].warn(`---${actionName} end---`);
+            if (index) {
+                this.trytoExecuteAction(index);
+            }
         });
     }
 }
@@ -52818,6 +52890,12 @@ class EventsManager {
             else if (eventName === _imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.REWARD_GET_POSITION || eventName === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.SNAKE_GET_POSITION) {
                 extraText = `(${value === 'true' ? 'WITH' : 'WITHOUT'} SAFE MARGIN)`;
             }
+            else if (eventName === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.SNAKE_GET_LENGTH) {
+                extraText = '';
+            }
+            else if (eventName === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.SNAKE_SEND_LENGTH) {
+                extraText = `(${value.length})`;
+            }
             else if (value) {
                 extraText = `(${value.matrixXPosition}x${value.matrixYPosition})`;
             }
@@ -52887,10 +52965,21 @@ class BaseModule {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BaseAction", function() { return BaseAction; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
 class BaseAction {
     execute() {
         return new Promise((resolve) => {
-            this.actionResolve = resolve;
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener('START_NEXT_ACTION', () => {
+                setTimeout(() => { _imports__WEBPACK_IMPORTED_MODULE_0__["ActionsManager"].executeAction(this.nextAction); }, 0);
+            });
+            this.executing = true;
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(this.finishEvent, () => {
+                this.executing = false;
+                this.executed = true;
+                resolve();
+            });
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(this.startEvent);
         });
     }
 }
@@ -53005,10 +53094,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
 
 class LoadAssetsAction extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseAction"] {
-    execute() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_FINISH, () => this.actionResolve());
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_START);
-        return super.execute();
+    constructor() {
+        super();
+        this.startEvent = _imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOAD_ASSETS_ACTION_START;
+        this.finishEvent = _imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOAD_ASSETS_ACTION_FINISH;
     }
 }
 
@@ -53027,10 +53116,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "LoaderConstants", function() { return LoaderConstants; });
 const LoaderConstants = {
     EVENTS: {
+        LOAD_ASSETS_ACTION_START: 'LOAD_ASSETS_ACTION_START',
+        LOAD_ASSETS_ACTION_FINISH: 'LOAD_ASSETS_ACTION_FINISH',
+        LOADER_ADD: 'LOADER_ADD',
         LOADER_START: 'LOADER_START',
         LOADER_IN_PROGRESS: 'LOADER_IN_PROGRESS',
         LOADER_COMPLETE: 'LOADER_COMPLETE',
-        LOADER_FINISH: 'LOADER_FINISH'
+        LOADER_PLAY_OUTRO: 'LOADER_PLAY_OUTRO',
+        LOADER_REMOVE: 'LOADER_REMOVE'
     }
 };
 
@@ -53051,18 +53144,32 @@ __webpack_require__.r(__webpack_exports__);
 
 class LoaderController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
     addListeners() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_START, () => {
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOAD_ASSETS_ACTION_START, () => {
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_ADD);
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_START);
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_ADD, () => {
             this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.stage);
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_START, () => {
             this.model.loadAssets();
         });
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_IN_PROGRESS, (event) => {
             this.view.animateLoading(event.detail);
         });
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_COMPLETE, () => {
-            setTimeout(() => {
-                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_FINISH);
-                this.view.animateOutro().then(() => this.view.remove());
-            }, _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Animations.Duration * 1000);
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_PLAY_OUTRO);
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch('START_NEXT_ACTION');
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_PLAY_OUTRO, () => {
+            this.view.animateOutro().then(() => {
+                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_REMOVE);
+                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOAD_ASSETS_ACTION_FINISH);
+                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_ENABLE_FUNCTIONALITY);
+            });
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_REMOVE, () => {
+            this.view.remove();
         });
     }
 }
@@ -53099,7 +53206,9 @@ class LoaderModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
             _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_IN_PROGRESS, progress);
         });
         this.loader.on('complete', () => {
-            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_COMPLETE);
+            setTimeout(() => {
+                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderConstants"].EVENTS.LOADER_COMPLETE);
+            }, _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Animations.Duration * 1000);
         });
         this.loader.load();
     }
@@ -53208,10 +53317,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
 
 class CreateGameAction extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseAction"] {
-    execute() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_CREATE_FINISH, () => this.actionResolve());
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_CREATE);
-        return super.execute();
+    constructor() {
+        super();
+        this.startEvent = _imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_CREATE;
+        this.finishEvent = _imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_CREATE_FINISH;
     }
 }
 
@@ -53231,10 +53340,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
 
 class StartGameAction extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseAction"] {
-    execute() {
-        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_END, () => this.actionResolve());
-        setTimeout(() => { _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_START); }, 2000);
-        return super.execute();
+    constructor() {
+        super();
+        this.startEvent = _imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_START;
+        this.finishEvent = _imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_END;
     }
 }
 
@@ -53258,7 +53367,9 @@ const GameConstants = {
         GAME_START: 'GAME_START',
         GAME_END: 'GAME_END',
         GAME_PAUSE: 'GAME_PAUSE',
-        GAME_RESUME: 'GAME_RESUME'
+        GAME_RESUME: 'GAME_RESUME',
+        GAME_INITIAL_SCREEN: 'GAME_INITIAL_SCREEN',
+        GAME_ENABLE_FUNCTIONALITY: 'GAME_ENABLE_FUNCTIONALITY'
     }
 };
 
@@ -53282,12 +53393,26 @@ class GameController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseControll
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_CREATE, () => {
             this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.stage);
             _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardConstants"].EVENTS.BOARD_CREATE);
-            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.REWARD_CREATE);
-            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.SNAKE_CREATE);
-            setTimeout(() => { _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_CREATE_FINISH); }, 0);
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_INITIAL_SCREEN);
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_INITIAL_SCREEN, () => {
+            this.view.createInitialScreenView();
+            const playButton = this.view.initialScreenView.playButton.children[0];
+            playButton.on('mouseover', () => playButton.onMouseOver());
+            playButton.on('mouseout', () => playButton.onMouseOut());
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_ENABLE_FUNCTIONALITY, () => {
+            const playButton = this.view.initialScreenView.playButton.children[0];
+            playButton.on('mousedown', () => {
+                this.view.initialScreenView.remove();
+                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.REWARD_CREATE);
+                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.SNAKE_CREATE);
+                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_CREATE_FINISH);
+                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch('START_NEXT_ACTION');
+            });
         });
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener('keydown', (event) => {
-            if (event.key === ' ') {
+            if (event.key === ' ' && this.model.started) {
                 if (this.model.paused) {
                     _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_RESUME);
                 }
@@ -53296,6 +53421,44 @@ class GameController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseControll
                 }
                 this.model.paused = !this.model.paused;
             }
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_PAUSE, () => {
+            this.view.createPauseScreenView();
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.SNAKE_GET_LENGTH, this.view.pauseGameView.constructor.name);
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.SNAKE_SEND_LENGTH, (event) => {
+            const type = event.detail.type;
+            if (this.view.pauseGameView && type === this.view.pauseGameView.constructor.name) {
+                this.view.pauseGameView.setCurrentSnakeLengthInfo(event.detail.length);
+            }
+            else if (this.view.gameOverView) {
+                this.view.gameOverView.setCurrentSnakeLengthInfo(event.detail.length);
+            }
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_RESUME, () => {
+            this.view.pauseGameView.remove();
+            this.view.removeChild(this.view.overlay);
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_START, () => {
+            setTimeout(() => {
+                this.model.started = true;
+            }, _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].TimeToStartAfterPlayClick * 1000);
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_END, (event) => {
+            this.model.started = false;
+            this.view.createGameOverScreenView();
+            _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.SNAKE_GET_LENGTH);
+            const playAgainButton = this.view.gameOverView.playAgainButton.children[0];
+            playAgainButton.on('mouseover', () => playAgainButton.onMouseOver());
+            playAgainButton.on('mouseout', () => playAgainButton.onMouseOut());
+            playAgainButton.on('mousedown', () => {
+                this.view.removeChildren();
+                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["GridConstants"].EVENTS.RESET_GRID);
+                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["BoardConstants"].EVENTS.BOARD_CREATE);
+                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.REWARD_CREATE);
+                _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.SNAKE_CREATE);
+                _imports__WEBPACK_IMPORTED_MODULE_0__["ActionsManager"].executeAction(new _imports__WEBPACK_IMPORTED_MODULE_0__["StartGameAction"]());
+            });
         });
     }
 }
@@ -53321,6 +53484,57 @@ class GameModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
 
 /***/ }),
 
+/***/ "./src/modules/_05_gameModule/views/GameOverView.ts":
+/*!**********************************************************!*\
+  !*** ./src/modules/_05_gameModule/views/GameOverView.ts ***!
+  \**********************************************************/
+/*! exports provided: GameOverView */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GameOverView", function() { return GameOverView; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class GameOverView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
+    addTo(parent) {
+        super.addTo(parent);
+        this.createGameOverText();
+        this.createPlayAgainButton();
+    }
+    createGameOverText() {
+        this.gameOverText = new _imports__WEBPACK_IMPORTED_MODULE_0__["Graphics"]();
+        const style = {
+            fontFamily: 'Verdana, Arial, Sans-serif',
+            fontWeight: 'bold',
+            fill: 0xffffff,
+            fontSize: 26,
+            align: 'center',
+            dropShadow: true,
+            dropShadowAlpha: 0.8,
+            dropShadowDistance: 2,
+            lineHeight: 40
+        };
+        this.gameOverText.addChild(new PIXI.Text(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Texts.GameOver.toUpperCase(), style));
+        this.addChild(this.gameOverText);
+    }
+    createPlayAgainButton() {
+        this.playAgainButton = new _imports__WEBPACK_IMPORTED_MODULE_0__["Graphics"]();
+        this.playAgainButton.addChild(new _imports__WEBPACK_IMPORTED_MODULE_0__["Button"](_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Texts.PlayAgainButton.toUpperCase()));
+        this.playAgainButton.alignTo(this.parent, { x: 'center', y: 'center' });
+        this.addChild(this.playAgainButton);
+        this.playAgainButton.y += this.playAgainButton.height / 2;
+    }
+    setCurrentSnakeLengthInfo(snakeLengthInfo) {
+        this.gameOverText.children[0].text += snakeLengthInfo + '.\n' + 'CURRENT SPEED X' + Math.ceil(Number(snakeLengthInfo) / _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].SpeedIncreaseOnEvery);
+        this.gameOverText.alignTo(this.parent, { x: 'center', y: 'center' });
+        this.gameOverText.y -= this.gameOverText.height / 2;
+    }
+}
+
+
+/***/ }),
+
 /***/ "./src/modules/_05_gameModule/views/GameView.ts":
 /*!******************************************************!*\
   !*** ./src/modules/_05_gameModule/views/GameView.ts ***!
@@ -53334,9 +53548,153 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
 
 class GameView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
+    constructor() {
+        super();
+    }
     addTo(parent) {
         super.addTo(parent);
-        _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.stage.swapChildren(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderModule"].name].view, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"].name].view);
+        if (_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.stage.children.some((child) => child === _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderModule"].name].view)) {
+            _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.stage.swapChildren(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["LoaderModule"].name].view, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"].name].view);
+        }
+    }
+    createInitialScreenView() {
+        //this.createOverlay();
+        this.initialScreenView = new _imports__WEBPACK_IMPORTED_MODULE_0__["InitialScreenView"]();
+        this.initialScreenView.addTo(this);
+    }
+    createPauseScreenView() {
+        this.createOverlay();
+        this.pauseGameView = new _imports__WEBPACK_IMPORTED_MODULE_0__["PauseGameView"]();
+        this.pauseGameView.addTo(this);
+    }
+    createGameOverScreenView() {
+        this.createOverlay();
+        this.gameOverView = new _imports__WEBPACK_IMPORTED_MODULE_0__["GameOverView"]();
+        this.gameOverView.addTo(this);
+    }
+    createInfoText(text) {
+        if (!this.infoText) {
+            this.infoText = new _imports__WEBPACK_IMPORTED_MODULE_0__["Graphics"]();
+            this.addChild(this.infoText);
+        }
+        const style = { fontFamily: 'Verdana, Arial, Sans-serif', fontWeight: 'bold', fill: 0xffffff, fontSize: 14 };
+        const value = new PIXI.Text(text, style);
+        this.infoText.addChild(value);
+        this.infoText.alignTo(this, { x: 'center', y: 'center' });
+        this.infoText.y += 200;
+    }
+    createOverlay() {
+        this.overlay = new _imports__WEBPACK_IMPORTED_MODULE_0__["Graphics"]();
+        this.overlay.beginFill(0x000000, _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].DarkOverlayOpacity);
+        this.overlay.drawRect(0, 0, this.width, this.height);
+        this.overlay.endFill();
+        this.addChild(this.overlay);
+    }
+    createPausedText(text) {
+        this.pausedText = new _imports__WEBPACK_IMPORTED_MODULE_0__["Graphics"]();
+        this.addChild(this.pausedText);
+        const style = { fontFamily: 'Verdana, Arial, Sans-serif', fontWeight: 'bold', fill: 0xffffff, fontSize: 14 };
+        const value = new PIXI.Text(text, style);
+        this.pausedText.addChild(value);
+        this.pausedText.alignTo(this, { x: 'center', y: 'center' });
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_05_gameModule/views/InitialScreenView.ts":
+/*!***************************************************************!*\
+  !*** ./src/modules/_05_gameModule/views/InitialScreenView.ts ***!
+  \***************************************************************/
+/*! exports provided: InitialScreenView */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "InitialScreenView", function() { return InitialScreenView; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class InitialScreenView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
+    addTo(parent) {
+        super.addTo(parent);
+        this.createLogo();
+        this.createPlayButton();
+        this.createInfoText();
+    }
+    createLogo() {
+        this.logo = new _imports__WEBPACK_IMPORTED_MODULE_0__["Graphics"]();
+        this.logo.addChild(PIXI.Sprite.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.logo));
+        this.logo.alignTo(this.parent, { x: 'center', y: 'center' });
+        this.logo.y -= this.logo.height / 2;
+        this.addChild(this.logo);
+    }
+    createPlayButton() {
+        this.playButton = new _imports__WEBPACK_IMPORTED_MODULE_0__["Graphics"]();
+        this.playButton.addChild(new _imports__WEBPACK_IMPORTED_MODULE_0__["Button"](_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Texts.PlayButton.toUpperCase()));
+        this.playButton.alignTo(this.parent, { x: 'center', y: 'center' });
+        this.addChild(this.playButton);
+        this.playButton.y += this.playButton.height / 2;
+    }
+    createInfoText() {
+        this.infoText = new _imports__WEBPACK_IMPORTED_MODULE_0__["Graphics"]();
+        const style = {
+            fontFamily: 'Verdana, Arial, Sans-serif',
+            fontWeight: 'bold',
+            fill: 0xffffff,
+            fontSize: 14,
+            align: 'center',
+            dropShadow: true,
+            dropShadowAlpha: 0.8,
+            dropShadowDistance: 2
+        };
+        this.infoText.addChild(new PIXI.Text(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Texts.InfoText, style));
+        this.infoText.alignTo(this.parent, { x: 'center', y: 'center' });
+        this.addChild(this.infoText);
+        this.infoText.y += this.playButton.height * 1.5 - this.infoText.height / 2;
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_05_gameModule/views/PauseGameView.ts":
+/*!***********************************************************!*\
+  !*** ./src/modules/_05_gameModule/views/PauseGameView.ts ***!
+  \***********************************************************/
+/*! exports provided: PauseGameView */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PauseGameView", function() { return PauseGameView; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class PauseGameView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
+    addTo(parent) {
+        super.addTo(parent);
+        this.createInfoText();
+    }
+    ;
+    createInfoText() {
+        this.infoText = new _imports__WEBPACK_IMPORTED_MODULE_0__["Graphics"]();
+        const style = {
+            fontFamily: 'Verdana, Arial, Sans-serif',
+            fontWeight: 'bold',
+            fill: 0xffffff,
+            fontSize: 18,
+            align: 'center',
+            dropShadow: true,
+            dropShadowAlpha: 0.8,
+            dropShadowDistance: 2,
+            lineHeight: 40
+        };
+        this.infoText.addChild(new PIXI.Text(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Texts.GamePaused.toUpperCase(), style));
+    }
+    setCurrentSnakeLengthInfo(snakeLengthInfo) {
+        this.infoText.children[0].text += snakeLengthInfo + '.\n' + 'CURRENT SPEED X' + Math.ceil(Number(snakeLengthInfo) / _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].SpeedIncreaseOnEvery);
+        this.infoText.alignTo(this.parent, { x: 'center', y: 'center' });
+        this.addChild(this.infoText);
     }
 }
 
@@ -53429,6 +53787,33 @@ class BoardModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
 
 /***/ }),
 
+/***/ "./src/modules/_06_boardModule/views/BackgroundView.ts":
+/*!*************************************************************!*\
+  !*** ./src/modules/_06_boardModule/views/BackgroundView.ts ***!
+  \*************************************************************/
+/*! exports provided: BackgroundView */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BackgroundView", function() { return BackgroundView; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class BackgroundView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
+    constructor() {
+        super();
+        this.addBackground();
+    }
+    addBackground() {
+        const bgTexture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.bg);
+        const tilingSprite = new PIXI.extras.TilingSprite(bgTexture, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.screen.width, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.screen.height);
+        this.addChild(tilingSprite);
+    }
+}
+
+
+/***/ }),
+
 /***/ "./src/modules/_06_boardModule/views/BoardView.ts":
 /*!********************************************************!*\
   !*** ./src/modules/_06_boardModule/views/BoardView.ts ***!
@@ -53444,13 +53829,129 @@ __webpack_require__.r(__webpack_exports__);
 class BoardView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
     addTo(parent) {
         super.addTo(parent);
-        this.addBackground();
+        if (!this.background) {
+            this.background = new _imports__WEBPACK_IMPORTED_MODULE_0__["BackgroundView"]();
+            this.background.addTo(this);
+        }
+        if (_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Snow.Active) {
+            this.createSnow();
+        }
     }
-    addBackground() {
-        const texture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.bg);
-        const tilingSprite = new PIXI.extras.TilingSprite(texture, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.screen.width, _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.screen.height);
-        this.addChild(tilingSprite);
+    createSnow() {
+        this.snow = new _imports__WEBPACK_IMPORTED_MODULE_0__["SnowView"]();
+        this.snow.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.stage);
     }
+}
+
+
+/***/ }),
+
+/***/ "./src/modules/_06_boardModule/views/SnowView.ts":
+/*!*******************************************************!*\
+  !*** ./src/modules/_06_boardModule/views/SnowView.ts ***!
+  \*******************************************************/
+/*! exports provided: SnowView, Particle */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SnowView", function() { return SnowView; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Particle", function() { return Particle; });
+/* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
+
+class SnowView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
+    addTo(parent) {
+        super.addTo(parent);
+        this.createParticlesContainer();
+        this.createParticleTexture();
+        this.generateParticles();
+        // Todo not here
+        this.addListeners();
+    }
+    render() {
+        if (_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.renderer.height !== innerHeight || _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.renderer.width !== innerWidth) {
+            _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.renderer.resize(innerWidth, innerHeight);
+            this.particleContainer.removeChildren();
+            this.generateParticles();
+        }
+        for (let particle of this.particles) {
+            if (particle.y > 0) {
+                particle.x += particle.vx;
+            }
+            particle.y += particle.vy;
+            if (Math.random() > 0.9) {
+                particle.vx = this.update(particle.vx);
+            }
+            if (particle.x > _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.renderer.width || particle.x < 0 || particle.y > _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.renderer.height) {
+                this.reset(particle);
+            }
+        }
+        _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.renderer.render(this.particleContainer);
+    }
+    createParticlesContainer() {
+        this.particleContainer = new PIXI.particles.ParticleContainer(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Snow.Amount, {
+            scale: true,
+            position: true,
+            rotation: true,
+            alpha: true,
+        });
+        this.addChild(this.particleContainer);
+    }
+    floored(value) {
+        return Math.floor(Math.random() * value);
+    }
+    update(value) {
+        return Math.random() > 0.5
+            ? Math.max(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Snow.LowerLimitX, value - 1)
+            : Math.min(value + 1, _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Snow.UpperLimitX);
+    }
+    reset(particle) {
+        particle.x = this.floored(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.renderer.width);
+        particle.y = -(particle.size + this.floored(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.renderer.height));
+        particle.vy = this.floored(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Snow.UpperLimitY) + 2;
+    }
+    createSingleParticle() {
+        let particle = new _imports__WEBPACK_IMPORTED_MODULE_0__["Graphics"];
+        particle.beginFill(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Snow.Color);
+        particle.drawCircle(0, 0, 100);
+        particle.endFill();
+        return particle;
+    }
+    createParticleTexture() {
+        this.baseParticleTexture = _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.renderer.generateTexture(this.createSingleParticle());
+    }
+    generateParticles() {
+        this.particles = [];
+        for (let i = 0; i < _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Snow.Amount; i++) {
+            const SIZE = this.floored(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Snow.MaxSize) + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Snow.MinSize;
+            const particle = new Particle(this.baseParticleTexture);
+            particle.size = SIZE;
+            particle.vx = this.floored(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Snow.UpperLimitX) - _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Snow.UpperLimitX;
+            particle.vy = this.floored(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Snow.UpperLimitY) + 2;
+            particle.alpha = Math.random();
+            particle.x = particle.startX = this.floored(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.renderer.width);
+            particle.y = particle.startY = -(SIZE + this.floored(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.renderer.height));
+            particle.width = particle.height = SIZE;
+            this.particleContainer.addChild(particle);
+            this.particles.push(particle);
+        }
+    }
+    stopSnow() {
+        this.particleContainer.alpha = 0;
+        _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.ticker.remove(this.render, this);
+    }
+    startSnow() {
+        this.particleContainer.alpha = 1;
+        _imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.ticker.add(this.render, this);
+    }
+    addListeners() {
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_START, () => this.startSnow());
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_RESUME, () => this.startSnow());
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_PAUSE, () => this.stopSnow());
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GameConstants"].EVENTS.GAME_END, () => this.stopSnow());
+    }
+}
+class Particle extends PIXI.Sprite {
 }
 
 
@@ -53494,7 +53995,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GridElementType", function() { return GridElementType; });
 const GridConstants = {
     EVENTS: {
-        GRID_CREATE: 'GRID_CREATE'
+        GRID_CREATE: 'GRID_CREATE',
+        RESET_GRID: 'RESET_GRID'
     }
 };
 var GridElementType;
@@ -53523,14 +54025,21 @@ __webpack_require__.r(__webpack_exports__);
 class GridController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
     addListeners() {
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GridConstants"].EVENTS.GRID_CREATE, () => {
-            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["BoardModule"].name].view);
-            this.model.createGridMatrix();
+            if (!this.view.parent) {
+                this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["BoardModule"].name].view);
+            }
+            if (!this.model.gridMatrix) {
+                this.model.createGridMatrix();
+            }
         });
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.REWARD_GET_POSITION, (event) => {
             this.model.setRandomGridPosition(_imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].REWARD, event.detail);
         });
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["SnakeConstants"].EVENTS.SNAKE_GET_POSITION, (event) => {
             this.model.setRandomGridPosition(_imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].SNAKE_TAIL, event.detail);
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["GridConstants"].EVENTS.RESET_GRID, () => {
+            this.model.reset();
         });
     }
 }
@@ -53600,6 +54109,13 @@ class GridModel extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseModel"] {
         }
         return gridElementView;
     }
+    reset() {
+        this.gridMatrix.forEach((line) => {
+            line.forEach((element) => {
+                element.reset();
+            });
+        });
+    }
 }
 
 
@@ -53620,23 +54136,24 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class GridElementView extends PIXI.Sprite {
-    move(callback) {
+    move(speed, callback) {
         switch (this.direction) {
             case _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].UP:
-                gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].to(this, _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].StartingSpeed, { y: this.y - this.height, ease: gsap__WEBPACK_IMPORTED_MODULE_0__["Linear"].easeNone, onComplete: callback });
+                gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].to(this, speed, { y: this.y - this.height, ease: gsap__WEBPACK_IMPORTED_MODULE_0__["Linear"].easeNone, onComplete: callback });
                 break;
             case _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].RIGHT:
-                gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].to(this, _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].StartingSpeed, { x: this.x + this.width, ease: gsap__WEBPACK_IMPORTED_MODULE_0__["Linear"].easeNone, onComplete: callback });
+                gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].to(this, speed, { x: this.x + this.width, ease: gsap__WEBPACK_IMPORTED_MODULE_0__["Linear"].easeNone, onComplete: callback });
                 break;
             case _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].BOTTOM:
-                gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].to(this, _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].StartingSpeed, { y: this.y + this.height, ease: gsap__WEBPACK_IMPORTED_MODULE_0__["Linear"].easeNone, onComplete: callback });
+                gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].to(this, speed, { y: this.y + this.height, ease: gsap__WEBPACK_IMPORTED_MODULE_0__["Linear"].easeNone, onComplete: callback });
                 break;
             case _imports__WEBPACK_IMPORTED_MODULE_1__["SnakeDirection"].LEFT:
-                gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].to(this, _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].StartingSpeed, { x: this.x - this.width, ease: gsap__WEBPACK_IMPORTED_MODULE_0__["Linear"].easeNone, onComplete: callback });
+                gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].to(this, speed, { x: this.x - this.width, ease: gsap__WEBPACK_IMPORTED_MODULE_0__["Linear"].easeNone, onComplete: callback });
                 break;
         }
     }
     reset() {
+        this.alpha = 1;
         this.direction = null;
         this.rotation = 0;
         this.prevDirection = null;
@@ -53644,7 +54161,9 @@ class GridElementView extends PIXI.Sprite {
         this.x = this.initX;
         this.y = this.initY;
         this.texture = null;
-        this.parent.removeChild(this);
+        if (this.parent) {
+            this.parent.removeChild(this);
+        }
     }
     addTo(parent) {
         parent.addChild(this);
@@ -53701,8 +54220,8 @@ class GridElementView extends PIXI.Sprite {
         this.texture = texture;
         return this;
     }
-    setRotation() {
-        this.rotation = 6.28319 * this.direction;
+    setRotation(value) {
+        this.rotation = 6.28319 * (value !== undefined ? value : this.direction);
         return this;
     }
     setType(type) {
@@ -53749,12 +54268,12 @@ class GridElementView extends PIXI.Sprite {
         }
         return output;
     }
-    show(callback) {
+    show(speed, callback) {
         this.alpha = 0;
         this.scale.x = 2;
         this.scale.y = 2;
-        gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].to(this, _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].StartingSpeed, { alpha: 1 });
-        gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].to(this.scale, _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].StartingSpeed, { x: 1, y: 1, onComplete: () => {
+        gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].to(this, speed, { alpha: 1 });
+        gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].to(this.scale, speed, { x: 1, y: 1, onComplete: () => {
                 if (callback) {
                     setTimeout(() => {
                         callback();
@@ -53783,11 +54302,19 @@ class GridView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
     addTo(parent) {
         super.addTo(parent);
         this.createTilingSpriteBackground();
+        this.createSnowOverlay();
     }
     createTilingSpriteBackground() {
         const texture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.grid);
         const tilingSprite = new PIXI.extras.TilingSprite(texture, this.parent.width, this.parent.height);
         this.addChild(tilingSprite);
+    }
+    createSnowOverlay() {
+        const frameTexture = PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snow_frame);
+        const sprite = new PIXI.Sprite(frameTexture);
+        sprite.width = this.width;
+        sprite.height = this.height;
+        this.addChild(sprite);
     }
 }
 
@@ -53855,7 +54382,9 @@ __webpack_require__.r(__webpack_exports__);
 class RewardController extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseController"] {
     addListeners() {
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.REWARD_CREATE, () => {
-            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"].name].view);
+            if (!this.view.parent) {
+                this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_0__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_0__["GameModule"].name].view);
+            }
             _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.REWARD_GET_POSITION, 'true');
         });
         _imports__WEBPACK_IMPORTED_MODULE_0__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_0__["RewardConstants"].EVENTS.REWARD_SET_POSITION, (event) => {
@@ -53898,10 +54427,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
 
 class RewardView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
+    constructor() {
+        super(...arguments);
+        this.rewardTextures = [
+            PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.apple),
+            PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.pineapple),
+            PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.berry),
+            PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.nut),
+            PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.banana)
+        ];
+    }
     createReward(gridElement) {
-        gridElement.setTexture(PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.apple))
+        gridElement.setTexture(this.rewardTextures[_imports__WEBPACK_IMPORTED_MODULE_0__["Utils"].getRandomInt(0, this.rewardTextures.length - 1)])
             .addTo(this)
-            .show();
+            .show(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].StartingSpeed);
     }
 }
 
@@ -53952,7 +54491,9 @@ const SnakeConstants = {
         SNAKE_MOVE: 'SNAKE_MOVE',
         SNAKE_SELF_HIT: 'SNAKE_SELF_HIT',
         SNAKE_WALL_HIT: 'SNAKE_WALL_HIT',
-        SNAKE_EAT_FRUIT: 'SNAKE_EAT_FRUIT'
+        SNAKE_EAT_FRUIT: 'SNAKE_EAT_FRUIT',
+        SNAKE_GET_LENGTH: 'SNAKE_GET_LENGTH',
+        SNAKE_SEND_LENGTH: 'SNAKE_SEND_LENGTH'
     }
 };
 
@@ -53997,15 +54538,22 @@ __webpack_require__.r(__webpack_exports__);
 class SnakeController extends _imports__WEBPACK_IMPORTED_MODULE_1__["BaseController"] {
     addListeners() {
         _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_CREATE, () => {
-            this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_1__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_1__["GameModule"].name].view);
+            if (!this.view.parent) {
+                this.view.addTo(_imports__WEBPACK_IMPORTED_MODULE_1__["GameApplication"].app.modules[_imports__WEBPACK_IMPORTED_MODULE_1__["GameModule"].name].view);
+            }
             _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_GET_POSITION, 'true');
         });
         _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_SET_POSITION, (event) => {
             const snakeTail = event.detail;
+            this.model.length = _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].StartSnakeLength;
             this.view.createSnakePart(snakeTail);
         });
         _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["GameConstants"].EVENTS.GAME_START, () => {
-            _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_MOVE, this.view.snakeHeadElementView);
+            this.view.speed = _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].StartingSpeed;
+            setTimeout(() => {
+                this.model.started = true;
+                _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_MOVE, this.view.snakeHeadElementView);
+            }, _imports__WEBPACK_IMPORTED_MODULE_1__["Constants"].TimeToStartAfterPlayClick * 1000);
         });
         _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_MOVE, () => {
             this.view.move(() => _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_MOVE, this.view.snakeHeadElementView), () => _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_SELF_HIT, this.view.snakeHeadElementView), () => _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_WALL_HIT, this.view.snakeHeadElementView), () => _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_EAT_FRUIT, this.view.snakeHeadElementView));
@@ -54018,10 +54566,14 @@ class SnakeController extends _imports__WEBPACK_IMPORTED_MODULE_1__["BaseControl
             this.model.paused = false;
             gsap__WEBPACK_IMPORTED_MODULE_0__["TweenMax"].resumeAll();
         });
+        _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["GameConstants"].EVENTS.GAME_END, () => {
+            this.model.started = false;
+        });
         _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_WALL_HIT, () => {
             _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["GameConstants"].EVENTS.GAME_END);
         });
         _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_EAT_FRUIT, () => {
+            this.model.length++;
             this.view.expandSnake(() => _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_MOVE, this.view.snakeHeadElementView));
             _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["RewardConstants"].EVENTS.REWARD_GET_POSITION, 'false');
         });
@@ -54030,6 +54582,9 @@ class SnakeController extends _imports__WEBPACK_IMPORTED_MODULE_1__["BaseControl
         });
         _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_SET_NEW_DIRECTION, (event) => {
             this.view.changeDirection(event.detail);
+        });
+        _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_GET_LENGTH, (event) => {
+            _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_SEND_LENGTH, { type: event.detail, length: this.model.length });
         });
         _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].addListener('keydown', (event) => {
             let direction;
@@ -54048,9 +54603,12 @@ class SnakeController extends _imports__WEBPACK_IMPORTED_MODULE_1__["BaseControl
                     break;
             }
             const arrowKey = event.key === 'ArrowLeft' || event.key === 'ArrowRight' || event.key === 'ArrowUp' || event.key === 'ArrowDown';
+            if (!arrowKey || !this.model.started || this.model.paused) {
+                return;
+            }
             const notSameDirection = direction !== this.view.snakeHeadElementView.direction;
             const notOppositeDirection = (direction + 0.5 !== this.view.snakeHeadElementView.direction) && (direction - 0.5 !== this.view.snakeHeadElementView.direction);
-            if (arrowKey && notOppositeDirection && notSameDirection && !this.model.paused) {
+            if (notOppositeDirection && notSameDirection && !this.model.paused) {
                 _imports__WEBPACK_IMPORTED_MODULE_1__["EventsManager"].dispatch(_imports__WEBPACK_IMPORTED_MODULE_1__["SnakeConstants"].EVENTS.SNAKE_SET_NEW_DIRECTION, direction);
             }
         });
@@ -54103,6 +54661,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _imports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../imports */ "./src/modules/imports.ts");
 
 class SnakeView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
+    constructor() {
+        super(...arguments);
+        this.snakeIncrease = 0;
+    }
     move(onComplete, onSelfHit, onWallHit, onEatFruit) {
         this.snakeHeadElementView.nextElementView = this.snakeHeadElementView.getNextElementView();
         if (this.snakeHeadElementView.nextElementView) {
@@ -54126,23 +54688,19 @@ class SnakeView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
     }
     expandSnake(onComplete) {
         this.expanded = true;
-        const oldSnakeTail = this.snakeTailElementView;
-        const newSnakeTail = this.snakeTailElementView.getPreviousElementView();
-        this.snakeTailElementView = newSnakeTail;
-        newSnakeTail
-            .setType(_imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].SNAKE_TAIL)
-            .setTexture(PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_tail))
-            .setDirection(oldSnakeTail.prevDirection || oldSnakeTail.direction)
-            .setRotation()
-            .addTo(this)
-            .show(() => {
+        this.snakeTailElementView
+            .show(this.speed, () => {
             this.expanded = false;
+            this.shouldIncreaseSpeed();
             onComplete();
         });
-        oldSnakeTail
-            .setType(_imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].SNAKE_BODY)
-            .setTexture(PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_body));
-        this.swapChildren(newSnakeTail, oldSnakeTail);
+    }
+    shouldIncreaseSpeed() {
+        this.snakeIncrease++;
+        if (this.snakeIncrease === _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].SpeedIncreaseOnEvery) {
+            this.speed -= this.speed * (_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].SpeedIncreasePercentage / 100);
+            this.snakeIncrease = 0;
+        }
     }
     moveSnakeHead() {
         let oldSnakeHead = this.snakeHeadElementView;
@@ -54155,31 +54713,58 @@ class SnakeView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
             .setPosition(oldSnakeHead.position)
             .setRotation()
             .addTo(this)
-            .move();
-        if (oldSnakeHead.prevDirection) {
-            oldSnakeHead.setTexture(PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_corner));
-        }
-        else {
-            oldSnakeHead.setTexture(PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_body));
-        }
+            .move(this.speed);
         oldSnakeHead
             .setType(_imports__WEBPACK_IMPORTED_MODULE_0__["GridElementType"].SNAKE_BODY)
-            .setDirection(newSnakeHead.direction)
-            .setRotation();
+            .setDirection(newSnakeHead.direction);
+        if (oldSnakeHead.prevDirection) {
+            oldSnakeHead.setRotation(0);
+            this.setCornerTexture(oldSnakeHead);
+        }
+        else {
+            oldSnakeHead
+                .setTexture(PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_body))
+                .setRotation();
+        }
+    }
+    setCornerTexture(element) {
+        let textureName;
+        if ((element.prevDirection === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].RIGHT && element.direction === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].UP) ||
+            (element.prevDirection === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].BOTTOM && element.direction === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].LEFT)) {
+            textureName = _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_corner_lu;
+        }
+        else if ((element.prevDirection === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].RIGHT && element.direction === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].BOTTOM) ||
+            (element.prevDirection === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].UP && element.direction === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].LEFT)) {
+            textureName = _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_corner_ld;
+        }
+        else if ((element.prevDirection === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].LEFT && element.direction === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].UP) ||
+            (element.prevDirection === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].BOTTOM && element.direction === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].RIGHT)) {
+            textureName = _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_corner_ru;
+        }
+        else if ((element.prevDirection === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].LEFT && element.direction === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].BOTTOM) ||
+            (element.prevDirection === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].UP && element.direction === _imports__WEBPACK_IMPORTED_MODULE_0__["SnakeDirection"].RIGHT)) {
+            textureName = _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_corner_rd;
+        }
+        element.setTexture(PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + textureName));
     }
     moveSnakeTail(onComplete) {
         const oldSnakeTail = this.snakeTailElementView;
-        this.snakeTailElementView = this.snakeTailElementView.getNextElementView();
+        const newSnakeTail = this.snakeTailElementView.getNextElementView();
+        this.snakeTailElementView = newSnakeTail;
         this.swapChildren(oldSnakeTail, this.snakeTailElementView);
-        oldSnakeTail.move(() => {
+        oldSnakeTail.move(this.speed, () => {
+            newSnakeTail.setRotation();
             this.snakeTailElementView.setTexture(PIXI.Texture.fromImage(_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Url + _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].Assets.Images.Names.snake_tail));
             oldSnakeTail.reset();
             onComplete();
         });
     }
     changeDirection(direction) {
-        this.snakeHeadElementView.setPrevDirection(this.snakeHeadElementView.direction);
-        this.snakeHeadElementView.setDirection(direction);
+        const notOppositeDirection = (direction + 0.5 !== this.snakeHeadElementView.prevDirection) && (direction - 0.5 !== this.snakeHeadElementView.prevDirection);
+        if (notOppositeDirection) {
+            this.snakeHeadElementView.setPrevDirection(this.snakeHeadElementView.direction);
+            this.snakeHeadElementView.setDirection(direction);
+        }
     }
     createSnakePart(previousSnakePartView, snakeLengthCounter = 1) {
         if (snakeLengthCounter > _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].StartSnakeLength) {
@@ -54232,12 +54817,27 @@ __webpack_require__.r(__webpack_exports__);
 const Constants = {
     AppName: 'gameApplication',
     DebugMode: true,
-    ElementsSafeMargin: 3,
+    ElementsSafeMargin: 4,
     StartSnakeLength: 3,
-    StartingSpeed: 0.3,
+    StartingSpeed: 0.4,
+    SpeedIncreaseOnEvery: 5,
+    SpeedIncreasePercentage: 5,
+    TimeToStartAfterPlayClick: 2,
+    DarkOverlayOpacity: 0.6,
+    Snow: {
+        Active: true,
+        UpperLimitY: 10,
+        UpperLimitX: 2,
+        LowerLimitX: -2,
+        MaxSize: 6,
+        MinSize: 2,
+        Amount: 200,
+        Color: 0xffffff
+    },
     AppSettings: {
         width: window.innerWidth,
-        height: window.innerHeight
+        height: window.innerHeight,
+        antialias: true
     },
     Animations: {
         Duration: 1
@@ -54249,16 +54849,34 @@ const Constants = {
                 'bg': 'bg.jpg',
                 'grid': 'grid.png',
                 'apple': 'apple.png',
+                'banana': 'banana.png',
+                'berry': 'berry.png',
+                'snow_frame': 'snow_frame.png',
+                'nut': 'nut.png',
+                'pineapple': 'pineapple.png',
                 'snake_head': 'snake_head.png',
                 'snake_body': 'snake_body.png',
                 'snake_tail': 'snake_tail.png',
-                'snake_corner': 'snake_corner.png'
+                'snake_corner_lu': 'snake_corner_lu.png',
+                'snake_corner_ru': 'snake_corner_ru.png',
+                'snake_corner_rd': 'snake_corner_rd.png',
+                'snake_corner_ld': 'snake_corner_ld.png',
+                'btn_bg': 'btn_bg.png',
+                'btn_bg_hover': 'btn_bg_hover.png',
+                'logo': 'logo.png'
             }
         },
         Loader: {
             PrimaryColor: 0X78AB46,
             SecondaryColor: 0x000000
         }
+    },
+    Texts: {
+        PlayButton: 'Play',
+        PlayAgainButton: 'Play again',
+        GameOver: 'Game over.\n Snake length is ',
+        InfoText: 'Use ARROW keys to navigate and\nSPACE BAR to pause game.',
+        GamePaused: 'Game paused.\nUse SPACE key to resume.\nCurrent snake length is '
     }
 };
 
@@ -54269,7 +54887,7 @@ const Constants = {
 /*!********************************!*\
   !*** ./src/modules/imports.ts ***!
   \********************************/
-/*! exports provided: GameApplication, Constants, Animate, Graphics, Utils, ActionsManager, AnimationsManager, EventsManager, BaseModule, BaseModel, BaseView, BaseController, BaseAction, LoaderModule, LoaderModel, LoaderView, LoaderController, LoadAssetsAction, LoaderConstants, GameModule, GameModel, GameView, GameController, CreateGameAction, StartGameAction, GameConstants, BoardModule, BoardModel, BoardView, BoardController, BoardConstants, GridModule, GridModel, GridView, GridElementView, GridController, GridConstants, GridElementType, RewardModule, RewardModel, RewardView, RewardController, RewardConstants, SnakeModule, SnakeModel, SnakeView, SnakeController, SnakeConstants, SnakeDirection */
+/*! exports provided: GameApplication, Constants, Animate, Graphics, Button, Utils, ActionsManager, AnimationsManager, EventsManager, BaseModule, BaseModel, BaseView, BaseController, BaseAction, LoaderModule, LoaderModel, LoaderView, LoaderController, LoadAssetsAction, LoaderConstants, GameModule, GameModel, GameView, InitialScreenView, PauseGameView, GameOverView, GameController, CreateGameAction, StartGameAction, GameConstants, BoardModule, BoardModel, BoardView, BackgroundView, SnowView, Particle, BoardController, BoardConstants, GridModule, GridModel, GridView, GridElementView, GridController, GridConstants, GridElementType, RewardModule, RewardModel, RewardView, RewardController, RewardConstants, SnakeModule, SnakeModel, SnakeView, SnakeController, SnakeConstants, SnakeDirection */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -54288,139 +54906,159 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _00_misc_Graphics__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./_00_misc/Graphics */ "./src/modules/_00_misc/Graphics.ts");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Graphics", function() { return _00_misc_Graphics__WEBPACK_IMPORTED_MODULE_4__["Graphics"]; });
 
-/* harmony import */ var _00_misc_Utils__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./_00_misc/Utils */ "./src/modules/_00_misc/Utils.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Utils", function() { return _00_misc_Utils__WEBPACK_IMPORTED_MODULE_5__["Utils"]; });
+/* harmony import */ var _00_misc_Button__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./_00_misc/Button */ "./src/modules/_00_misc/Button.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Button", function() { return _00_misc_Button__WEBPACK_IMPORTED_MODULE_5__["Button"]; });
 
-/* harmony import */ var _01_managers_ActionsManager__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./_01_managers/ActionsManager */ "./src/modules/_01_managers/ActionsManager.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ActionsManager", function() { return _01_managers_ActionsManager__WEBPACK_IMPORTED_MODULE_6__["ActionsManager"]; });
+/* harmony import */ var _00_misc_Utils__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./_00_misc/Utils */ "./src/modules/_00_misc/Utils.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Utils", function() { return _00_misc_Utils__WEBPACK_IMPORTED_MODULE_6__["Utils"]; });
 
-/* harmony import */ var _01_managers_AnimationsManager__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./_01_managers/AnimationsManager */ "./src/modules/_01_managers/AnimationsManager.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AnimationsManager", function() { return _01_managers_AnimationsManager__WEBPACK_IMPORTED_MODULE_7__["AnimationsManager"]; });
+/* harmony import */ var _01_managers_ActionsManager__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./_01_managers/ActionsManager */ "./src/modules/_01_managers/ActionsManager.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ActionsManager", function() { return _01_managers_ActionsManager__WEBPACK_IMPORTED_MODULE_7__["ActionsManager"]; });
 
-/* harmony import */ var _01_managers_EventsManager__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./_01_managers/EventsManager */ "./src/modules/_01_managers/EventsManager.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "EventsManager", function() { return _01_managers_EventsManager__WEBPACK_IMPORTED_MODULE_8__["EventsManager"]; });
+/* harmony import */ var _01_managers_AnimationsManager__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./_01_managers/AnimationsManager */ "./src/modules/_01_managers/AnimationsManager.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AnimationsManager", function() { return _01_managers_AnimationsManager__WEBPACK_IMPORTED_MODULE_8__["AnimationsManager"]; });
 
-/* harmony import */ var _03_baseModule_BaseModule__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./_03_baseModule/BaseModule */ "./src/modules/_03_baseModule/BaseModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseModule", function() { return _03_baseModule_BaseModule__WEBPACK_IMPORTED_MODULE_9__["BaseModule"]; });
+/* harmony import */ var _01_managers_EventsManager__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./_01_managers/EventsManager */ "./src/modules/_01_managers/EventsManager.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "EventsManager", function() { return _01_managers_EventsManager__WEBPACK_IMPORTED_MODULE_9__["EventsManager"]; });
 
-/* harmony import */ var _03_baseModule_models_BaseModel__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./_03_baseModule/models/BaseModel */ "./src/modules/_03_baseModule/models/BaseModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseModel", function() { return _03_baseModule_models_BaseModel__WEBPACK_IMPORTED_MODULE_10__["BaseModel"]; });
+/* harmony import */ var _03_baseModule_BaseModule__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./_03_baseModule/BaseModule */ "./src/modules/_03_baseModule/BaseModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseModule", function() { return _03_baseModule_BaseModule__WEBPACK_IMPORTED_MODULE_10__["BaseModule"]; });
 
-/* harmony import */ var _03_baseModule_views_BaseView__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./_03_baseModule/views/BaseView */ "./src/modules/_03_baseModule/views/BaseView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseView", function() { return _03_baseModule_views_BaseView__WEBPACK_IMPORTED_MODULE_11__["BaseView"]; });
+/* harmony import */ var _03_baseModule_models_BaseModel__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./_03_baseModule/models/BaseModel */ "./src/modules/_03_baseModule/models/BaseModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseModel", function() { return _03_baseModule_models_BaseModel__WEBPACK_IMPORTED_MODULE_11__["BaseModel"]; });
 
-/* harmony import */ var _03_baseModule_controllers_BaseController__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./_03_baseModule/controllers/BaseController */ "./src/modules/_03_baseModule/controllers/BaseController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseController", function() { return _03_baseModule_controllers_BaseController__WEBPACK_IMPORTED_MODULE_12__["BaseController"]; });
+/* harmony import */ var _03_baseModule_views_BaseView__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./_03_baseModule/views/BaseView */ "./src/modules/_03_baseModule/views/BaseView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseView", function() { return _03_baseModule_views_BaseView__WEBPACK_IMPORTED_MODULE_12__["BaseView"]; });
 
-/* harmony import */ var _03_baseModule_actions_BaseAction__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./_03_baseModule/actions/BaseAction */ "./src/modules/_03_baseModule/actions/BaseAction.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseAction", function() { return _03_baseModule_actions_BaseAction__WEBPACK_IMPORTED_MODULE_13__["BaseAction"]; });
+/* harmony import */ var _03_baseModule_controllers_BaseController__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./_03_baseModule/controllers/BaseController */ "./src/modules/_03_baseModule/controllers/BaseController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseController", function() { return _03_baseModule_controllers_BaseController__WEBPACK_IMPORTED_MODULE_13__["BaseController"]; });
 
-/* harmony import */ var _04_loaderModule_LoaderModule__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./_04_loaderModule/LoaderModule */ "./src/modules/_04_loaderModule/LoaderModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderModule", function() { return _04_loaderModule_LoaderModule__WEBPACK_IMPORTED_MODULE_14__["LoaderModule"]; });
+/* harmony import */ var _03_baseModule_actions_BaseAction__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./_03_baseModule/actions/BaseAction */ "./src/modules/_03_baseModule/actions/BaseAction.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BaseAction", function() { return _03_baseModule_actions_BaseAction__WEBPACK_IMPORTED_MODULE_14__["BaseAction"]; });
 
-/* harmony import */ var _04_loaderModule_models_LoaderModel__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./_04_loaderModule/models/LoaderModel */ "./src/modules/_04_loaderModule/models/LoaderModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderModel", function() { return _04_loaderModule_models_LoaderModel__WEBPACK_IMPORTED_MODULE_15__["LoaderModel"]; });
+/* harmony import */ var _04_loaderModule_LoaderModule__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./_04_loaderModule/LoaderModule */ "./src/modules/_04_loaderModule/LoaderModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderModule", function() { return _04_loaderModule_LoaderModule__WEBPACK_IMPORTED_MODULE_15__["LoaderModule"]; });
 
-/* harmony import */ var _04_loaderModule_views_LoaderView__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./_04_loaderModule/views/LoaderView */ "./src/modules/_04_loaderModule/views/LoaderView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderView", function() { return _04_loaderModule_views_LoaderView__WEBPACK_IMPORTED_MODULE_16__["LoaderView"]; });
+/* harmony import */ var _04_loaderModule_models_LoaderModel__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./_04_loaderModule/models/LoaderModel */ "./src/modules/_04_loaderModule/models/LoaderModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderModel", function() { return _04_loaderModule_models_LoaderModel__WEBPACK_IMPORTED_MODULE_16__["LoaderModel"]; });
 
-/* harmony import */ var _04_loaderModule_controllers_LoaderController__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./_04_loaderModule/controllers/LoaderController */ "./src/modules/_04_loaderModule/controllers/LoaderController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderController", function() { return _04_loaderModule_controllers_LoaderController__WEBPACK_IMPORTED_MODULE_17__["LoaderController"]; });
+/* harmony import */ var _04_loaderModule_views_LoaderView__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./_04_loaderModule/views/LoaderView */ "./src/modules/_04_loaderModule/views/LoaderView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderView", function() { return _04_loaderModule_views_LoaderView__WEBPACK_IMPORTED_MODULE_17__["LoaderView"]; });
 
-/* harmony import */ var _04_loaderModule_actions_LoadAssetsAction__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./_04_loaderModule/actions/LoadAssetsAction */ "./src/modules/_04_loaderModule/actions/LoadAssetsAction.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoadAssetsAction", function() { return _04_loaderModule_actions_LoadAssetsAction__WEBPACK_IMPORTED_MODULE_18__["LoadAssetsAction"]; });
+/* harmony import */ var _04_loaderModule_controllers_LoaderController__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./_04_loaderModule/controllers/LoaderController */ "./src/modules/_04_loaderModule/controllers/LoaderController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderController", function() { return _04_loaderModule_controllers_LoaderController__WEBPACK_IMPORTED_MODULE_18__["LoaderController"]; });
 
-/* harmony import */ var _04_loaderModule_constants_LoaderConstants__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./_04_loaderModule/constants/LoaderConstants */ "./src/modules/_04_loaderModule/constants/LoaderConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderConstants", function() { return _04_loaderModule_constants_LoaderConstants__WEBPACK_IMPORTED_MODULE_19__["LoaderConstants"]; });
+/* harmony import */ var _04_loaderModule_actions_LoadAssetsAction__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./_04_loaderModule/actions/LoadAssetsAction */ "./src/modules/_04_loaderModule/actions/LoadAssetsAction.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoadAssetsAction", function() { return _04_loaderModule_actions_LoadAssetsAction__WEBPACK_IMPORTED_MODULE_19__["LoadAssetsAction"]; });
 
-/* harmony import */ var _05_gameModule_GameModule__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./_05_gameModule/GameModule */ "./src/modules/_05_gameModule/GameModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameModule", function() { return _05_gameModule_GameModule__WEBPACK_IMPORTED_MODULE_20__["GameModule"]; });
+/* harmony import */ var _04_loaderModule_constants_LoaderConstants__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./_04_loaderModule/constants/LoaderConstants */ "./src/modules/_04_loaderModule/constants/LoaderConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LoaderConstants", function() { return _04_loaderModule_constants_LoaderConstants__WEBPACK_IMPORTED_MODULE_20__["LoaderConstants"]; });
 
-/* harmony import */ var _05_gameModule_models_GameModel__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./_05_gameModule/models/GameModel */ "./src/modules/_05_gameModule/models/GameModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameModel", function() { return _05_gameModule_models_GameModel__WEBPACK_IMPORTED_MODULE_21__["GameModel"]; });
+/* harmony import */ var _05_gameModule_GameModule__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./_05_gameModule/GameModule */ "./src/modules/_05_gameModule/GameModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameModule", function() { return _05_gameModule_GameModule__WEBPACK_IMPORTED_MODULE_21__["GameModule"]; });
 
-/* harmony import */ var _05_gameModule_views_GameView__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./_05_gameModule/views/GameView */ "./src/modules/_05_gameModule/views/GameView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameView", function() { return _05_gameModule_views_GameView__WEBPACK_IMPORTED_MODULE_22__["GameView"]; });
+/* harmony import */ var _05_gameModule_models_GameModel__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./_05_gameModule/models/GameModel */ "./src/modules/_05_gameModule/models/GameModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameModel", function() { return _05_gameModule_models_GameModel__WEBPACK_IMPORTED_MODULE_22__["GameModel"]; });
 
-/* harmony import */ var _05_gameModule_controllers_GameController__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./_05_gameModule/controllers/GameController */ "./src/modules/_05_gameModule/controllers/GameController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameController", function() { return _05_gameModule_controllers_GameController__WEBPACK_IMPORTED_MODULE_23__["GameController"]; });
+/* harmony import */ var _05_gameModule_views_GameView__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./_05_gameModule/views/GameView */ "./src/modules/_05_gameModule/views/GameView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameView", function() { return _05_gameModule_views_GameView__WEBPACK_IMPORTED_MODULE_23__["GameView"]; });
 
-/* harmony import */ var _05_gameModule_actions_CreateGameAction__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./_05_gameModule/actions/CreateGameAction */ "./src/modules/_05_gameModule/actions/CreateGameAction.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "CreateGameAction", function() { return _05_gameModule_actions_CreateGameAction__WEBPACK_IMPORTED_MODULE_24__["CreateGameAction"]; });
+/* harmony import */ var _05_gameModule_views_InitialScreenView__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./_05_gameModule/views/InitialScreenView */ "./src/modules/_05_gameModule/views/InitialScreenView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "InitialScreenView", function() { return _05_gameModule_views_InitialScreenView__WEBPACK_IMPORTED_MODULE_24__["InitialScreenView"]; });
 
-/* harmony import */ var _05_gameModule_actions_StartGameAction__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ./_05_gameModule/actions/StartGameAction */ "./src/modules/_05_gameModule/actions/StartGameAction.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "StartGameAction", function() { return _05_gameModule_actions_StartGameAction__WEBPACK_IMPORTED_MODULE_25__["StartGameAction"]; });
+/* harmony import */ var _05_gameModule_views_PauseGameView__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ./_05_gameModule/views/PauseGameView */ "./src/modules/_05_gameModule/views/PauseGameView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "PauseGameView", function() { return _05_gameModule_views_PauseGameView__WEBPACK_IMPORTED_MODULE_25__["PauseGameView"]; });
 
-/* harmony import */ var _05_gameModule_constants_GameConstants__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ./_05_gameModule/constants/GameConstants */ "./src/modules/_05_gameModule/constants/GameConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameConstants", function() { return _05_gameModule_constants_GameConstants__WEBPACK_IMPORTED_MODULE_26__["GameConstants"]; });
+/* harmony import */ var _05_gameModule_views_GameOverView__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ./_05_gameModule/views/GameOverView */ "./src/modules/_05_gameModule/views/GameOverView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameOverView", function() { return _05_gameModule_views_GameOverView__WEBPACK_IMPORTED_MODULE_26__["GameOverView"]; });
 
-/* harmony import */ var _06_boardModule_BoardModule__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ./_06_boardModule/BoardModule */ "./src/modules/_06_boardModule/BoardModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModule", function() { return _06_boardModule_BoardModule__WEBPACK_IMPORTED_MODULE_27__["BoardModule"]; });
+/* harmony import */ var _05_gameModule_controllers_GameController__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ./_05_gameModule/controllers/GameController */ "./src/modules/_05_gameModule/controllers/GameController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameController", function() { return _05_gameModule_controllers_GameController__WEBPACK_IMPORTED_MODULE_27__["GameController"]; });
 
-/* harmony import */ var _06_boardModule_models_BoardModel__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ./_06_boardModule/models/BoardModel */ "./src/modules/_06_boardModule/models/BoardModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModel", function() { return _06_boardModule_models_BoardModel__WEBPACK_IMPORTED_MODULE_28__["BoardModel"]; });
+/* harmony import */ var _05_gameModule_actions_CreateGameAction__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ./_05_gameModule/actions/CreateGameAction */ "./src/modules/_05_gameModule/actions/CreateGameAction.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "CreateGameAction", function() { return _05_gameModule_actions_CreateGameAction__WEBPACK_IMPORTED_MODULE_28__["CreateGameAction"]; });
 
-/* harmony import */ var _06_boardModule_views_BoardView__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! ./_06_boardModule/views/BoardView */ "./src/modules/_06_boardModule/views/BoardView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardView", function() { return _06_boardModule_views_BoardView__WEBPACK_IMPORTED_MODULE_29__["BoardView"]; });
+/* harmony import */ var _05_gameModule_actions_StartGameAction__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! ./_05_gameModule/actions/StartGameAction */ "./src/modules/_05_gameModule/actions/StartGameAction.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "StartGameAction", function() { return _05_gameModule_actions_StartGameAction__WEBPACK_IMPORTED_MODULE_29__["StartGameAction"]; });
 
-/* harmony import */ var _06_boardModule_controllers_BoardController__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! ./_06_boardModule/controllers/BoardController */ "./src/modules/_06_boardModule/controllers/BoardController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardController", function() { return _06_boardModule_controllers_BoardController__WEBPACK_IMPORTED_MODULE_30__["BoardController"]; });
+/* harmony import */ var _05_gameModule_constants_GameConstants__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! ./_05_gameModule/constants/GameConstants */ "./src/modules/_05_gameModule/constants/GameConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GameConstants", function() { return _05_gameModule_constants_GameConstants__WEBPACK_IMPORTED_MODULE_30__["GameConstants"]; });
 
-/* harmony import */ var _06_boardModule_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! ./_06_boardModule/constants/BoardConstants */ "./src/modules/_06_boardModule/constants/BoardConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardConstants", function() { return _06_boardModule_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_31__["BoardConstants"]; });
+/* harmony import */ var _06_boardModule_BoardModule__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! ./_06_boardModule/BoardModule */ "./src/modules/_06_boardModule/BoardModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModule", function() { return _06_boardModule_BoardModule__WEBPACK_IMPORTED_MODULE_31__["BoardModule"]; });
 
-/* harmony import */ var _07_gridModule_GridModule__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! ./_07_gridModule/GridModule */ "./src/modules/_07_gridModule/GridModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridModule", function() { return _07_gridModule_GridModule__WEBPACK_IMPORTED_MODULE_32__["GridModule"]; });
+/* harmony import */ var _06_boardModule_models_BoardModel__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! ./_06_boardModule/models/BoardModel */ "./src/modules/_06_boardModule/models/BoardModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardModel", function() { return _06_boardModule_models_BoardModel__WEBPACK_IMPORTED_MODULE_32__["BoardModel"]; });
 
-/* harmony import */ var _07_gridModule_models_GridModel__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! ./_07_gridModule/models/GridModel */ "./src/modules/_07_gridModule/models/GridModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridModel", function() { return _07_gridModule_models_GridModel__WEBPACK_IMPORTED_MODULE_33__["GridModel"]; });
+/* harmony import */ var _06_boardModule_views_BoardView__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! ./_06_boardModule/views/BoardView */ "./src/modules/_06_boardModule/views/BoardView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardView", function() { return _06_boardModule_views_BoardView__WEBPACK_IMPORTED_MODULE_33__["BoardView"]; });
 
-/* harmony import */ var _07_gridModule_views_GridView__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! ./_07_gridModule/views/GridView */ "./src/modules/_07_gridModule/views/GridView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridView", function() { return _07_gridModule_views_GridView__WEBPACK_IMPORTED_MODULE_34__["GridView"]; });
+/* harmony import */ var _06_boardModule_views_BackgroundView__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! ./_06_boardModule/views/BackgroundView */ "./src/modules/_06_boardModule/views/BackgroundView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BackgroundView", function() { return _06_boardModule_views_BackgroundView__WEBPACK_IMPORTED_MODULE_34__["BackgroundView"]; });
 
-/* harmony import */ var _07_gridModule_views_GridElementView__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! ./_07_gridModule/views/GridElementView */ "./src/modules/_07_gridModule/views/GridElementView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridElementView", function() { return _07_gridModule_views_GridElementView__WEBPACK_IMPORTED_MODULE_35__["GridElementView"]; });
+/* harmony import */ var _06_boardModule_views_SnowView__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! ./_06_boardModule/views/SnowView */ "./src/modules/_06_boardModule/views/SnowView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnowView", function() { return _06_boardModule_views_SnowView__WEBPACK_IMPORTED_MODULE_35__["SnowView"]; });
 
-/* harmony import */ var _07_gridModule_controllers_GridController__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! ./_07_gridModule/controllers/GridController */ "./src/modules/_07_gridModule/controllers/GridController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridController", function() { return _07_gridModule_controllers_GridController__WEBPACK_IMPORTED_MODULE_36__["GridController"]; });
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Particle", function() { return _06_boardModule_views_SnowView__WEBPACK_IMPORTED_MODULE_35__["Particle"]; });
 
-/* harmony import */ var _07_gridModule_constants_GridConstants__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! ./_07_gridModule/constants/GridConstants */ "./src/modules/_07_gridModule/constants/GridConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridConstants", function() { return _07_gridModule_constants_GridConstants__WEBPACK_IMPORTED_MODULE_37__["GridConstants"]; });
+/* harmony import */ var _06_boardModule_controllers_BoardController__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! ./_06_boardModule/controllers/BoardController */ "./src/modules/_06_boardModule/controllers/BoardController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardController", function() { return _06_boardModule_controllers_BoardController__WEBPACK_IMPORTED_MODULE_36__["BoardController"]; });
 
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridElementType", function() { return _07_gridModule_constants_GridConstants__WEBPACK_IMPORTED_MODULE_37__["GridElementType"]; });
+/* harmony import */ var _06_boardModule_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! ./_06_boardModule/constants/BoardConstants */ "./src/modules/_06_boardModule/constants/BoardConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BoardConstants", function() { return _06_boardModule_constants_BoardConstants__WEBPACK_IMPORTED_MODULE_37__["BoardConstants"]; });
 
-/* harmony import */ var _08_rewardModule_RewardModule__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! ./_08_rewardModule/RewardModule */ "./src/modules/_08_rewardModule/RewardModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModule", function() { return _08_rewardModule_RewardModule__WEBPACK_IMPORTED_MODULE_38__["RewardModule"]; });
+/* harmony import */ var _07_gridModule_GridModule__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! ./_07_gridModule/GridModule */ "./src/modules/_07_gridModule/GridModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridModule", function() { return _07_gridModule_GridModule__WEBPACK_IMPORTED_MODULE_38__["GridModule"]; });
 
-/* harmony import */ var _08_rewardModule_models_RewardModel__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! ./_08_rewardModule/models/RewardModel */ "./src/modules/_08_rewardModule/models/RewardModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModel", function() { return _08_rewardModule_models_RewardModel__WEBPACK_IMPORTED_MODULE_39__["RewardModel"]; });
+/* harmony import */ var _07_gridModule_models_GridModel__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! ./_07_gridModule/models/GridModel */ "./src/modules/_07_gridModule/models/GridModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridModel", function() { return _07_gridModule_models_GridModel__WEBPACK_IMPORTED_MODULE_39__["GridModel"]; });
 
-/* harmony import */ var _08_rewardModule_views_RewardView__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! ./_08_rewardModule/views/RewardView */ "./src/modules/_08_rewardModule/views/RewardView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardView", function() { return _08_rewardModule_views_RewardView__WEBPACK_IMPORTED_MODULE_40__["RewardView"]; });
+/* harmony import */ var _07_gridModule_views_GridView__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! ./_07_gridModule/views/GridView */ "./src/modules/_07_gridModule/views/GridView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridView", function() { return _07_gridModule_views_GridView__WEBPACK_IMPORTED_MODULE_40__["GridView"]; });
 
-/* harmony import */ var _08_rewardModule_controllers_RewardController__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! ./_08_rewardModule/controllers/RewardController */ "./src/modules/_08_rewardModule/controllers/RewardController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardController", function() { return _08_rewardModule_controllers_RewardController__WEBPACK_IMPORTED_MODULE_41__["RewardController"]; });
+/* harmony import */ var _07_gridModule_views_GridElementView__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! ./_07_gridModule/views/GridElementView */ "./src/modules/_07_gridModule/views/GridElementView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridElementView", function() { return _07_gridModule_views_GridElementView__WEBPACK_IMPORTED_MODULE_41__["GridElementView"]; });
 
-/* harmony import */ var _08_rewardModule_constants_RewardConstants__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(/*! ./_08_rewardModule/constants/RewardConstants */ "./src/modules/_08_rewardModule/constants/RewardConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardConstants", function() { return _08_rewardModule_constants_RewardConstants__WEBPACK_IMPORTED_MODULE_42__["RewardConstants"]; });
+/* harmony import */ var _07_gridModule_controllers_GridController__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(/*! ./_07_gridModule/controllers/GridController */ "./src/modules/_07_gridModule/controllers/GridController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridController", function() { return _07_gridModule_controllers_GridController__WEBPACK_IMPORTED_MODULE_42__["GridController"]; });
 
-/* harmony import */ var _09_snakeModule_SnakeModule__WEBPACK_IMPORTED_MODULE_43__ = __webpack_require__(/*! ./_09_snakeModule/SnakeModule */ "./src/modules/_09_snakeModule/SnakeModule.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModule", function() { return _09_snakeModule_SnakeModule__WEBPACK_IMPORTED_MODULE_43__["SnakeModule"]; });
+/* harmony import */ var _07_gridModule_constants_GridConstants__WEBPACK_IMPORTED_MODULE_43__ = __webpack_require__(/*! ./_07_gridModule/constants/GridConstants */ "./src/modules/_07_gridModule/constants/GridConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridConstants", function() { return _07_gridModule_constants_GridConstants__WEBPACK_IMPORTED_MODULE_43__["GridConstants"]; });
 
-/* harmony import */ var _09_snakeModule_models_SnakeModel__WEBPACK_IMPORTED_MODULE_44__ = __webpack_require__(/*! ./_09_snakeModule/models/SnakeModel */ "./src/modules/_09_snakeModule/models/SnakeModel.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModel", function() { return _09_snakeModule_models_SnakeModel__WEBPACK_IMPORTED_MODULE_44__["SnakeModel"]; });
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GridElementType", function() { return _07_gridModule_constants_GridConstants__WEBPACK_IMPORTED_MODULE_43__["GridElementType"]; });
 
-/* harmony import */ var _09_snakeModule_views_SnakeView__WEBPACK_IMPORTED_MODULE_45__ = __webpack_require__(/*! ./_09_snakeModule/views/SnakeView */ "./src/modules/_09_snakeModule/views/SnakeView.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeView", function() { return _09_snakeModule_views_SnakeView__WEBPACK_IMPORTED_MODULE_45__["SnakeView"]; });
+/* harmony import */ var _08_rewardModule_RewardModule__WEBPACK_IMPORTED_MODULE_44__ = __webpack_require__(/*! ./_08_rewardModule/RewardModule */ "./src/modules/_08_rewardModule/RewardModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModule", function() { return _08_rewardModule_RewardModule__WEBPACK_IMPORTED_MODULE_44__["RewardModule"]; });
 
-/* harmony import */ var _09_snakeModule_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_46__ = __webpack_require__(/*! ./_09_snakeModule/controllers/SnakeController */ "./src/modules/_09_snakeModule/controllers/SnakeController.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeController", function() { return _09_snakeModule_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_46__["SnakeController"]; });
+/* harmony import */ var _08_rewardModule_models_RewardModel__WEBPACK_IMPORTED_MODULE_45__ = __webpack_require__(/*! ./_08_rewardModule/models/RewardModel */ "./src/modules/_08_rewardModule/models/RewardModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardModel", function() { return _08_rewardModule_models_RewardModel__WEBPACK_IMPORTED_MODULE_45__["RewardModel"]; });
 
-/* harmony import */ var _09_snakeModule_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_47__ = __webpack_require__(/*! ./_09_snakeModule/constants/SnakeConstants */ "./src/modules/_09_snakeModule/constants/SnakeConstants.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeConstants", function() { return _09_snakeModule_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_47__["SnakeConstants"]; });
+/* harmony import */ var _08_rewardModule_views_RewardView__WEBPACK_IMPORTED_MODULE_46__ = __webpack_require__(/*! ./_08_rewardModule/views/RewardView */ "./src/modules/_08_rewardModule/views/RewardView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardView", function() { return _08_rewardModule_views_RewardView__WEBPACK_IMPORTED_MODULE_46__["RewardView"]; });
 
-/* harmony import */ var _09_snakeModule_constants_SnakeDirection__WEBPACK_IMPORTED_MODULE_48__ = __webpack_require__(/*! ./_09_snakeModule/constants/SnakeDirection */ "./src/modules/_09_snakeModule/constants/SnakeDirection.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeDirection", function() { return _09_snakeModule_constants_SnakeDirection__WEBPACK_IMPORTED_MODULE_48__["SnakeDirection"]; });
+/* harmony import */ var _08_rewardModule_controllers_RewardController__WEBPACK_IMPORTED_MODULE_47__ = __webpack_require__(/*! ./_08_rewardModule/controllers/RewardController */ "./src/modules/_08_rewardModule/controllers/RewardController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardController", function() { return _08_rewardModule_controllers_RewardController__WEBPACK_IMPORTED_MODULE_47__["RewardController"]; });
+
+/* harmony import */ var _08_rewardModule_constants_RewardConstants__WEBPACK_IMPORTED_MODULE_48__ = __webpack_require__(/*! ./_08_rewardModule/constants/RewardConstants */ "./src/modules/_08_rewardModule/constants/RewardConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RewardConstants", function() { return _08_rewardModule_constants_RewardConstants__WEBPACK_IMPORTED_MODULE_48__["RewardConstants"]; });
+
+/* harmony import */ var _09_snakeModule_SnakeModule__WEBPACK_IMPORTED_MODULE_49__ = __webpack_require__(/*! ./_09_snakeModule/SnakeModule */ "./src/modules/_09_snakeModule/SnakeModule.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModule", function() { return _09_snakeModule_SnakeModule__WEBPACK_IMPORTED_MODULE_49__["SnakeModule"]; });
+
+/* harmony import */ var _09_snakeModule_models_SnakeModel__WEBPACK_IMPORTED_MODULE_50__ = __webpack_require__(/*! ./_09_snakeModule/models/SnakeModel */ "./src/modules/_09_snakeModule/models/SnakeModel.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeModel", function() { return _09_snakeModule_models_SnakeModel__WEBPACK_IMPORTED_MODULE_50__["SnakeModel"]; });
+
+/* harmony import */ var _09_snakeModule_views_SnakeView__WEBPACK_IMPORTED_MODULE_51__ = __webpack_require__(/*! ./_09_snakeModule/views/SnakeView */ "./src/modules/_09_snakeModule/views/SnakeView.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeView", function() { return _09_snakeModule_views_SnakeView__WEBPACK_IMPORTED_MODULE_51__["SnakeView"]; });
+
+/* harmony import */ var _09_snakeModule_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_52__ = __webpack_require__(/*! ./_09_snakeModule/controllers/SnakeController */ "./src/modules/_09_snakeModule/controllers/SnakeController.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeController", function() { return _09_snakeModule_controllers_SnakeController__WEBPACK_IMPORTED_MODULE_52__["SnakeController"]; });
+
+/* harmony import */ var _09_snakeModule_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_53__ = __webpack_require__(/*! ./_09_snakeModule/constants/SnakeConstants */ "./src/modules/_09_snakeModule/constants/SnakeConstants.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeConstants", function() { return _09_snakeModule_constants_SnakeConstants__WEBPACK_IMPORTED_MODULE_53__["SnakeConstants"]; });
+
+/* harmony import */ var _09_snakeModule_constants_SnakeDirection__WEBPACK_IMPORTED_MODULE_54__ = __webpack_require__(/*! ./_09_snakeModule/constants/SnakeDirection */ "./src/modules/_09_snakeModule/constants/SnakeDirection.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SnakeDirection", function() { return _09_snakeModule_constants_SnakeDirection__WEBPACK_IMPORTED_MODULE_54__["SnakeDirection"]; });
 
 // Attach PIXI to window for accesibility
 
@@ -54430,6 +55068,7 @@ pixi_js__WEBPACK_IMPORTED_MODULE_0__["utils"].skipHello();
 
 
 // Misc
+
 
 
 
@@ -54458,7 +55097,12 @@ pixi_js__WEBPACK_IMPORTED_MODULE_0__["utils"].skipHello();
 
 
 
+
+
+
 // Board
+
+
 
 
 

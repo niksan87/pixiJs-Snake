@@ -28,7 +28,9 @@ export class LoaderModel extends BaseModel {
             EventsManager.dispatch(LoaderConstants.EVENTS.LOADER_IN_PROGRESS, progress);            
         });
         this.loader.on('complete', () => {
-            EventsManager.dispatch(LoaderConstants.EVENTS.LOADER_COMPLETE);
+            setTimeout(() => {
+                EventsManager.dispatch(LoaderConstants.EVENTS.LOADER_COMPLETE);
+            }, Constants.Animations.Duration * 1000);
         });
         this.loader.load();
     }

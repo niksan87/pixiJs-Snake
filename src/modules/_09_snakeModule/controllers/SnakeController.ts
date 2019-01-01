@@ -14,7 +14,8 @@ import {
     SnakeDirection,
     GameConstants,
     SnakeConstants,
-    RewardConstants
+    RewardConstants,
+    Constants
 } from '../../imports';
 
 export class SnakeController extends BaseController {
@@ -23,17 +24,24 @@ export class SnakeController extends BaseController {
 
     protected addListeners(): void {
         EventsManager.addListener(SnakeConstants.EVENTS.SNAKE_CREATE, () => {
-            this.view.addTo(GameApplication.app.modules[GameModule.name].view);
+            if (!this.view.parent) {
+                this.view.addTo(GameApplication.app.modules[GameModule.name].view);
+            }
             EventsManager.dispatch(SnakeConstants.EVENTS.SNAKE_GET_POSITION, 'true');
         });
 
         EventsManager.addListener(SnakeConstants.EVENTS.SNAKE_SET_POSITION, (event: CustomEvent) => {
             const snakeTail: GridElementView = event.detail;
+            this.model.length = Constants.StartSnakeLength;
             this.view.createSnakePart(snakeTail);    
         });
 
         EventsManager.addListener(GameConstants.EVENTS.GAME_START, () => {
-            EventsManager.dispatch(SnakeConstants.EVENTS.SNAKE_MOVE, this.view.snakeHeadElementView);
+            this.view.speed = Constants.StartingSpeed;
+            setTimeout(() => {
+                this.model.started = true;
+                EventsManager.dispatch(SnakeConstants.EVENTS.SNAKE_MOVE, this.view.snakeHeadElementView);
+            }, Constants.TimeToStartAfterPlayClick * 1000);
         });
 
         EventsManager.addListener(SnakeConstants.EVENTS.SNAKE_MOVE, () => {
@@ -55,11 +63,16 @@ export class SnakeController extends BaseController {
             TweenMax.resumeAll();
         });
 
+        EventsManager.addListener(GameConstants.EVENTS.GAME_END, () => {
+            this.model.started = false;
+        });
+
         EventsManager.addListener(SnakeConstants.EVENTS.SNAKE_WALL_HIT, () => {
             EventsManager.dispatch(GameConstants.EVENTS.GAME_END);
         });
 
         EventsManager.addListener(SnakeConstants.EVENTS.SNAKE_EAT_FRUIT, () => {
+            this.model.length++;
             this.view.expandSnake(() => EventsManager.dispatch(SnakeConstants.EVENTS.SNAKE_MOVE, this.view.snakeHeadElementView));
             EventsManager.dispatch(RewardConstants.EVENTS.REWARD_GET_POSITION, 'false');
         });
@@ -72,6 +85,10 @@ export class SnakeController extends BaseController {
             this.view.changeDirection(event.detail);
         });
 
+        EventsManager.addListener(SnakeConstants.EVENTS.SNAKE_GET_LENGTH, (event: CustomEvent) => {
+            EventsManager.dispatch(SnakeConstants.EVENTS.SNAKE_SEND_LENGTH, {type: event.detail, length: this.model.length });
+        });
+
         EventsManager.addListener('keydown', (event: KeyboardEvent) => {
             let direction: SnakeDirection;
             switch (event.key) {
@@ -82,10 +99,15 @@ export class SnakeController extends BaseController {
             }
 
             const arrowKey: boolean = event.key === 'ArrowLeft' || event.key === 'ArrowRight' || event.key === 'ArrowUp' || event.key === 'ArrowDown';
+
+            if (!arrowKey || !this.model.started || this.model.paused) {
+                return;
+            }
+
             const notSameDirection: boolean = direction !== this.view.snakeHeadElementView.direction;
             const notOppositeDirection: boolean = (direction + 0.5 !== this.view.snakeHeadElementView.direction) && (direction - 0.5 !== this.view.snakeHeadElementView.direction);
             
-            if (arrowKey && notOppositeDirection && notSameDirection && !this.model.paused) {
+            if (notOppositeDirection && notSameDirection && !this.model.paused) {
                 EventsManager.dispatch(SnakeConstants.EVENTS.SNAKE_SET_NEW_DIRECTION, direction)
             }
         });
