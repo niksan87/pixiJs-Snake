@@ -54699,6 +54699,8 @@ class SnakeView extends _imports__WEBPACK_IMPORTED_MODULE_0__["BaseView"] {
         this.snakeIncrease++;
         if (this.snakeIncrease === _imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].SpeedIncreaseOnEvery) {
             this.speed -= this.speed * (_imports__WEBPACK_IMPORTED_MODULE_0__["Constants"].SpeedIncreasePercentage / 100);
+            this.speed = Number(this.speed.toFixed(4));
+            console.log(this.speed);
             this.snakeIncrease = 0;
         }
     }
@@ -54819,8 +54821,8 @@ const Constants = {
     DebugMode: true,
     ElementsSafeMargin: 4,
     StartSnakeLength: 3,
-    StartingSpeed: 0.4,
-    SpeedIncreaseOnEvery: 5,
+    StartingSpeed: 0.2,
+    SpeedIncreaseOnEvery: 2,
     SpeedIncreasePercentage: 5,
     TimeToStartAfterPlayClick: 2,
     DarkOverlayOpacity: 0.6,

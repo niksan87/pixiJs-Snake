@@ -50,6 +50,8 @@ export class SnakeView extends BaseView {
         this.snakeIncrease++; 
         if (this.snakeIncrease === Constants.SpeedIncreaseOnEvery) {
             this.speed -= this.speed * (Constants.SpeedIncreasePercentage / 100);
+            this.speed = Number(this.speed.toFixed(4));
+            console.log(this.speed);
             this.snakeIncrease = 0;
         }
     }
